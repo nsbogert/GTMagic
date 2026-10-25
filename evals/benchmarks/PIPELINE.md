@@ -78,3 +78,15 @@ The rule chosen on val is frozen before the test split runs. The test split runs
 | Simulation step | Not built on `main` | v1/v2 use the benchmark's own implementation (`icp-infer-v1`, `sim-agent-v1`, `src/upworthy/sim.ts`) |
 | `gtm-ad-wording` skill + 12 learned principles | Built here; branch `sean/ad-wording-principles` | **v2:** S4 screen |
 | Benchmarks, scorers, run log (`evals/`) | Built here; branch `sean/evals-known-answer` (not yet pushed) | Measurement only |
+
+## pipeline-v3: Opus decides, the simulated panel informs (2026-10-25)
+
+What the benchmarks showed: the simulated panel is good at concept-level, group-level preference (Mega-Study: group mean ratings card r 0.89 vs plain Opus 0.79) and at chance on wording differences between near-identical options (Upworthy pairs: 51–53% vs plain Opus 68%). Opus reading raw panel votes followed them and dropped to 55%.
+
+| Stage | Who | Output |
+|---|---|---|
+| S2–S3 research → ICP | Opus + web | Segments, sourced demographics (survey / census / counted, else `inferred`), needs, barriers, verbatim quotes |
+| S5 simulated panel | N Sonnet (high) customers drawn by code (quota on gender/age, 1–2 personal pains, 3–5 quotes) | Per-group concept rankings, would-tap rates, one-line reasons |
+| S6 decide | Opus (high) | Final ranking. The panel is an input with its measured reliability stated in the prompt: weigh it for different concepts, angles or audiences; ignore it for wording differences on the same idea |
+
+Prompts: `upworthy-pairs/prompts/opus-final-v3.md`, `refactor-ads/final/refactor-{1,2}-prompt.md` (panel files `refactor-ads/final/*-panel.json`).

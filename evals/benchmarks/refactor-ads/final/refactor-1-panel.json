@@ -1,0 +1,216 @@
+{
+ "groups": [
+  {
+   "name": "Muscle-conscious active GLP-1 users",
+   "share": 0.3,
+   "description": "People on Mounjaro/Zepbound/Wegovy who already work out (gym, Peloton, running) and are alarmed that their lifts, stamina and lean mass are dropping along with the fat."
+  },
+  {
+   "name": "New starters figuring out GLP-1 nutrition",
+   "share": 0.3,
+   "description": "People in their first months on Zepbound or semaglutide who suddenly need to eat enough protein, fiber and water rather than eat less, and feel left alone to work it out."
+  },
+  {
+   "name": "Data-driven self-trackers",
+   "share": 0.2,
+   "description": "Organized, numbers-minded GLP-1 users who log doses, side effects, weight and macros, often out of pocket, and want one place to see patterns and show their doctor."
+  },
+  {
+   "name": "Maintainers and tapering users",
+   "share": 0.2,
+   "description": "People who have reached or are near goal and are tapering or stopping the medication, and fear returning hunger and weight regain."
+  }
+ ],
+ "overallRanking": [
+  "image-2",
+  "image-6",
+  "image-3",
+  "image-5",
+  "image-4",
+  "image-1"
+ ],
+ "firstPlaceVotes": {
+  "image-2": 4,
+  "image-3": 1,
+  "image-1": 1,
+  "image-5": 2,
+  "image-6": 1,
+  "image-4": 1
+ },
+ "rankingByGroup": {
+  "Muscle-conscious active GLP-1 users": [
+   "image-2",
+   "image-4",
+   "image-6",
+   "image-3",
+   "image-5",
+   "image-1"
+  ],
+  "New starters figuring out GLP-1 nutrition": [
+   "image-5",
+   "image-1",
+   "image-6",
+   "image-3",
+   "image-2",
+   "image-4"
+  ],
+  "Data-driven self-trackers": [
+   "image-6",
+   "image-2",
+   "image-5",
+   "image-4",
+   "image-3",
+   "image-1"
+  ],
+  "Maintainers and tapering users": [
+   "image-2",
+   "image-4",
+   "image-3",
+   "image-6",
+   "image-1",
+   "image-5"
+  ]
+ },
+ "panelists": [
+  {
+   "group": "Muscle-conscious active GLP-1 users",
+   "person": "57-year-old woman",
+   "ranking": [
+    "image-2",
+    "image-5",
+    "image-4",
+    "image-6",
+    "image-1",
+    "image-3"
+   ],
+   "wouldTapTop": false,
+   "why": "\"Weight down, strength intact\" with PRs and a strength trend is exactly what I'm trying to track, but I already have my own routine and would probably just keep scrolling."
+  },
+  {
+   "group": "Muscle-conscious active GLP-1 users",
+   "person": "78-year-old woman",
+   "ranking": [
+    "image-2",
+    "image-6",
+    "image-3",
+    "image-4",
+    "image-5",
+    "image-1"
+   ],
+   "wouldTapTop": false,
+   "why": "\"Weight down, strength intact\" is exactly my worry and the free trial is nice, but I've got my own gym routine so I'd probably just keep scrolling."
+  },
+  {
+   "group": "Muscle-conscious active GLP-1 users",
+   "person": "32-year-old man",
+   "ranking": [
+    "image-3",
+    "image-4",
+    "image-2",
+    "image-6",
+    "image-5",
+    "image-1"
+   ],
+   "wouldTapTop": false,
+   "why": "\"Keep your gains, lose the weight\" is exactly what I'm worried about on this shot, but I already have a scale and a lifting log, so I'd probably keep scrolling."
+  },
+  {
+   "group": "New starters figuring out GLP-1 nutrition",
+   "person": "51-year-old man",
+   "ranking": [
+    "image-1",
+    "image-3",
+    "image-2",
+    "image-5",
+    "image-6",
+    "image-4"
+   ],
+   "wouldTapTop": false,
+   "why": "The one that says GLP-1 and talks about not losing muscle caught my eye, since saggy skin and muscle loss worry me, but it looks like a gym-bro app and I'd just keep scrolling."
+  },
+  {
+   "group": "New starters figuring out GLP-1 nutrition",
+   "person": "69-year-old woman",
+   "ranking": [
+    "image-5",
+    "image-6",
+    "image-1",
+    "image-3",
+    "image-2",
+    "image-4"
+   ],
+   "wouldTapTop": false,
+   "why": "I see food, protein and 'free unlimited logging' so it's not another paywall, but it's all lifting and gym talk, not me, so I'd probably keep scrolling."
+  },
+  {
+   "group": "New starters figuring out GLP-1 nutrition",
+   "person": "47-year-old woman",
+   "ranking": [
+    "image-5",
+    "image-6",
+    "image-1",
+    "image-2",
+    "image-3",
+    "image-4"
+   ],
+   "wouldTapTop": false,
+   "why": "I see protein, water, barcode scan and 'free unlimited logging' so no paywall, but it's all lifting and gym talk and not about my GLP-1, so I'd probably scroll past."
+  },
+  {
+   "group": "Data-driven self-trackers",
+   "person": "32-year-old woman",
+   "ranking": [
+    "image-6",
+    "image-5",
+    "image-2",
+    "image-1",
+    "image-3",
+    "image-4"
+   ],
+   "wouldTapTop": false,
+   "why": "Trends and everything in one place plus free unlimited logging is what I want, but I'm loyal to my current tracker and it's still a gym app, so I'd probably keep scrolling."
+  },
+  {
+   "group": "Data-driven self-trackers",
+   "person": "54-year-old man",
+   "ranking": [
+    "image-2",
+    "image-4",
+    "image-6",
+    "image-3",
+    "image-5",
+    "image-1"
+   ],
+   "wouldTapTop": false,
+   "why": "I like seeing real trend charts and a free trial with no card, but it's a lifting app and I already log my doses and weight elsewhere, so I'd probably keep scrolling."
+  },
+  {
+   "group": "Maintainers and tapering users",
+   "person": "55-year-old man",
+   "ranking": [
+    "image-2",
+    "image-3",
+    "image-4",
+    "image-6",
+    "image-1",
+    "image-5"
+   ],
+   "wouldTapTop": false,
+   "why": "Keeping my strength while the weight comes off and a free trial with no card is the closest thing here to my worry, but it's still a gym app and I'm tired of paying for things."
+  },
+  {
+   "group": "Maintainers and tapering users",
+   "person": "34-year-old woman",
+   "ranking": [
+    "image-4",
+    "image-2",
+    "image-3",
+    "image-6",
+    "image-5",
+    "image-1"
+   ],
+   "wouldTapTop": false,
+   "why": "\"Watch your strength, not just the scale\" is exactly what I need to stop obsessing over the number, but it's still a fitness app ad and I'd probably keep scrolling."
+  }
+ ]
+}

@@ -147,7 +147,7 @@ def score() -> None:
     truth = json.load(open(os.path.join(HERE, "truth.json")))
     ids = sorted(truth)
     arms: dict[str, dict[str, str]] = {}
-    for arm in ("vanilla-opus", "vanilla-opus-icp", "opus-synthesis"):
+    for arm in ("vanilla-opus", "vanilla-opus-icp", "opus-synthesis", "opus-final-v3"):
         d: dict[str, str] = {}
         for f in glob.glob(os.path.join(HERE, "predictions", arm, "pairs-*.json")):
             d.update({k: str(v).strip().upper()[:1] for k, v in json.load(open(f)).items()})
