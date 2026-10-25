@@ -4,6 +4,7 @@ import { SavedRun } from "@/components/run/SavedRun";
 import { Rail } from "@/components/shell/Rail";
 import { Legend } from "@/components/shell/Legend";
 import { Notice } from "@/components/turns/Notice";
+import { DemoReplay } from "@/components/run/DemoReplay";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,7 @@ export default async function RunPage({ params, searchParams }: Props) {
     );
   }
   const hideLinks = sp.nolinks !== undefined;
+  if (business === "demo" && sp.replay !== undefined) return <DemoReplay brief={r.brief} hideLinks={hideLinks} />;
   return (
     <div className="app">
       <Rail badge={r.brief.mode === "demo" ? "Example · fictional data" : undefined}><Legend segments={r.brief.segments} /></Rail>
