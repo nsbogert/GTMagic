@@ -4,7 +4,8 @@ import { listBusinesses } from "@/app/_intake/workspace";
 import { listSessions } from "@/app/_session/store";
 import { Rail } from "@/components/shell/Rail";
 import { BotTurn } from "@/components/turns/BotTurn";
-import { Figure, Icon } from "@/components/figures";
+import { SessionList } from "@/components/home/SessionList";
+import { Tag } from "@/components/evidence/Tag";
 
 export const dynamic = "force-dynamic";
 
@@ -21,23 +22,16 @@ export default async function Home() {
         </BotTurn>
         <section className="plate" aria-label="Sessions">
           <h3>Sessions</h3>
-          {sessions.length === 0 ? <p className="meta">No sessions yet. Start one from Claude Code.</p> : (
-            <ul className="lines">{sessions.map((s) => (
-              <li key={s.id}><b>{s.done ? <Icon name="i-check" /> : <Figure />}</b><div>
-                <Link className="strong" href={`/session/${s.id}`}>{s.business ?? "New session"}</Link>
-                <span className="sub">{s.done ? "Finished" : "Live"}{s.lastEventAt ? ` · last update ${new Date(s.lastEventAt).toLocaleString("en-US")}` : ""}</span>
-              </div></li>
-            ))}</ul>
-          )}
+          <SessionList sessions={sessions} />
         </section>
         <section className="plate" aria-label="Saved businesses">
           <h3>Saved businesses</h3>
           {saved.length === 0 ? <p className="meta">Nothing in gtm-workspace yet. Your save files appear here after a run.</p> : (
-            <ul className="lines">{saved.map((b) => (
-              <li key={b.slug}><b>{b.name.slice(0, 1).toUpperCase()}</b><div>
+            <ul className="home-list">{saved.map((b) => (
+              <li key={b.slug}>
                 <Link className="strong" href={`/run/${b.slug}`}>{b.name}</Link>
-                <span className="sub">{b.status === "unreadable" ? "Can't read this save file yet" : PLAIN.readiness[b.status]}</span>
-              </div></li>
+                <Tag text={b.status === "unreadable" ? "Can't read yet" : PLAIN.readiness[b.status]} variant={b.status === "ready" ? "v-serviceable" : undefined} />
+              </li>
             ))}</ul>
           )}
           <p className="meta"><Link href="/run/demo">See the example save file (KeepStrong, fictional)</Link></p>

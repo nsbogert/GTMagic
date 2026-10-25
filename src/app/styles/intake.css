@@ -96,3 +96,12 @@ mark { background: #f2d8a0; color: inherit; padding: 0 .125rem; }
 .turn.bot.ask-cancelled { opacity: .6; }
 .lines.creatives li { grid-template-columns: 3rem 1fr; }
 .lines.creatives li > b { font-size: var(--step0); color: var(--ink-2); }
+
+/* Home lists: name and detail on the left, status on the right. */
+.home-list { list-style: none; padding: 0; display: grid; }
+.home-list li { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: .75rem 0; border-bottom: 1px solid var(--rule); }
+.home-list .strong { display: block; font-weight: 500; }
+.home-list .sub { display: block; font-size: .875rem; color: var(--ink-2); }
+
+/* Links styled as buttons. */
+a.btn { text-decoration: none; }
