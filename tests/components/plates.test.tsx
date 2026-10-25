@@ -33,7 +33,13 @@ describe("plates", () => {
 
   it("never shows owner-voice phrases as customer quotes", () => {
     const b = { ...brief, lexicon: brief.lexicon.map((l) => ({ ...l, voice: "owner" as const })) };
-    expect(html("research", b)).not.toContain("<q");
+    expect(html("research", b)).not.toContain("<mark>");
+  });
+
+  it("shows each group's other forum and review quotes, not only the phrase-linked ones", () => {
+    const h = html("research");
+    expect(h).toContain("I just feel exhausted the whole time.");
+    expect(h).toContain("https://www.mumsnet.com/talk/");
   });
 
   it("marks a card that changed after it was shown", () => {

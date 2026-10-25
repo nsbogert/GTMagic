@@ -580,14 +580,13 @@
           "concernIds": [
             "con_appetite"
           ],
-          "observedCount": 2,
-          "weight": 0.1538,
+          "observedCount": 3,
+          "weight": 0.2308,
           "confidence": "medium"
         },
         {
           "concernIds": [
-            "con_energy",
-            "con_muscle"
+            "con_energy"
           ],
           "observedCount": 1,
           "weight": 0.0769,
@@ -630,15 +629,6 @@
         {
           "concernIds": [
             "con_trust"
-          ],
-          "observedCount": 1,
-          "weight": 0.0769,
-          "confidence": "medium"
-        },
-        {
-          "concernIds": [
-            "con_appetite",
-            "con_muscle"
           ],
           "observedCount": 1,
           "weight": 0.0769,
@@ -820,16 +810,8 @@
           "concernIds": [
             "con_intimidation"
           ],
-          "observedCount": 2,
-          "weight": 0.3333,
-          "confidence": "low"
-        },
-        {
-          "concernIds": [
-            "con_trust"
-          ],
-          "observedCount": 2,
-          "weight": 0.3333,
+          "observedCount": 3,
+          "weight": 0.5,
           "confidence": "low"
         },
         {
@@ -843,6 +825,14 @@
         {
           "concernIds": [
             "con_cost"
+          ],
+          "observedCount": 1,
+          "weight": 0.1667,
+          "confidence": "low"
+        },
+        {
+          "concernIds": [
+            "con_trust"
           ],
           "observedCount": 1,
           "weight": 0.1667,
@@ -1052,18 +1042,18 @@
       "id": "ev_3",
       "origin": "web",
       "sourceType": "forum-post",
-      "url": "https://example.com/demo/forum/103",
-      "excerpt": "My doctor said lift weights so I keep muscle, but I have zero energy to work out.",
+      "url": "https://www.mumsnet.com/talk/weight-loss-injections/5176288-mounjaro-exercise-and-movement",
+      "excerpt": "I've been very tired and so have been exercising a lot less, ironically.",
       "segmentIds": [
         "seg_1"
       ],
       "concernIds": [
-        "con_muscle",
         "con_energy"
       ],
       "confidence": "low",
-      "limitations": "Fictional demo data",
-      "retrievedAt": "2026-10-25T13:00:00-07:00"
+      "limitations": "Real public forum post (short excerpt, username removed); the business in this demo is fictional",
+      "retrievedAt": "2026-10-25T17:00:00-07:00",
+      "title": "Mumsnet: Mounjaro - Exercise and Movement (30 Sep 2024)"
     },
     {
       "id": "ev_4",
@@ -1102,8 +1092,8 @@
       "id": "ev_6",
       "origin": "web",
       "sourceType": "forum-post",
-      "url": "https://example.com/demo/forum/106",
-      "excerpt": "Between the medication and the gym membership I'm already spending a lot. Another subscription is a hard sell.",
+      "url": "https://www.mumsnet.com/talk/weight_loss_chat/5083729-i-need-help-from-someone-anyone-but-who",
+      "excerpt": "I can't really afford a full membership if I'm also haemorrhaging £150-200 a month on Mounjaro too.",
       "segmentIds": [
         "seg_1",
         "seg_2"
@@ -1112,8 +1102,9 @@
         "con_cost"
       ],
       "confidence": "low",
-      "limitations": "Fictional demo data",
-      "retrievedAt": "2026-10-25T13:00:00-07:00"
+      "limitations": "Real public forum post (short excerpt, username removed); the business in this demo is fictional; the poster was about to start the medication",
+      "retrievedAt": "2026-10-25T17:00:00-07:00",
+      "title": "Mumsnet: I need help from someone, anyone, but who? (27 May 2024)"
     },
     {
       "id": "ev_7",
@@ -1151,8 +1142,8 @@
       "id": "ev_9",
       "origin": "web",
       "sourceType": "forum-post",
-      "url": "https://example.com/demo/forum/109",
-      "excerpt": "Low energy and low appetite together make every workout feel like a fight.",
+      "url": "https://www.mumsnet.com/talk/weight-loss-injections/5352560-mounjaro-making-me-absolutely-exhausted-anyone-else",
+      "excerpt": "I can’t eat enough to give myself energy, plus I just feel exhausted the whole time.",
       "segmentIds": [
         "seg_1"
       ],
@@ -1161,15 +1152,16 @@
         "con_appetite"
       ],
       "confidence": "low",
-      "limitations": "Fictional demo data",
-      "retrievedAt": "2026-10-25T13:00:00-07:00"
+      "limitations": "Real public forum post (short excerpt, username removed); the business in this demo is fictional",
+      "retrievedAt": "2026-10-25T17:00:00-07:00",
+      "title": "Mumsnet: Mounjaro making me absolutely exhausted. Anyone else? (11 Jun 2025)"
     },
     {
       "id": "ev_10",
       "origin": "web",
       "sourceType": "forum-post",
-      "url": "https://example.com/demo/forum/110",
-      "excerpt": "I'm worried about muscle loss and the rebound when I stop. Nobody has a plan for both.",
+      "url": "https://www.mumsnet.com/talk/weight-loss-injections/5512840-weight-gain-after-mounjaro",
+      "excerpt": "the reduction in muscle mass is generally not regained so you're potentially worsening your overall body composition with each cycle of loss and gain.",
       "segmentIds": [
         "seg_1"
       ],
@@ -1178,8 +1170,9 @@
         "con_rebound"
       ],
       "confidence": "low",
-      "limitations": "Fictional demo data",
-      "retrievedAt": "2026-10-25T13:00:00-07:00"
+      "limitations": "Real public forum post (short excerpt, username removed); the business in this demo is fictional; the reply doesn't say whether the poster takes the medication",
+      "retrievedAt": "2026-10-25T17:00:00-07:00",
+      "title": "Mumsnet: Weight gain after Mounjaro (5 Apr 2026)"
     },
     {
       "id": "ev_11",
@@ -1218,18 +1211,18 @@
       "id": "ev_13",
       "origin": "web",
       "sourceType": "forum-post",
-      "url": "https://example.com/demo/forum/113",
-      "excerpt": "Protein shakes help when I can't face food, but I still feel weak lifting the same weights.",
+      "url": "https://www.mumsnet.com/talk/weight-loss-injections/5311085-6-weeks-into-mounjaro-suddenly-cant-eat",
+      "excerpt": "On really bad days I just drink protein shakes.",
       "segmentIds": [
         "seg_1"
       ],
       "concernIds": [
-        "con_appetite",
-        "con_muscle"
+        "con_appetite"
       ],
       "confidence": "low",
-      "limitations": "Fictional demo data",
-      "retrievedAt": "2026-10-25T13:00:00-07:00"
+      "limitations": "Real public forum post (short excerpt, username removed); the business in this demo is fictional",
+      "retrievedAt": "2026-10-25T17:00:00-07:00",
+      "title": "Mumsnet: 6 weeks into mounjaro, suddenly can’t eat (9 Apr 2025)"
     },
     {
       "id": "ev_14",
@@ -1280,8 +1273,8 @@
       "id": "ev_17",
       "origin": "web",
       "sourceType": "forum-post",
-      "url": "https://example.com/demo/forum/117",
-      "excerpt": "I'm new to all of this. Is there an app that just tells me what to do on GLP-1?",
+      "url": "https://www.mumsnet.com/talk/weight-loss-injections/5520830-recommended-exercises-for-building-muscle-mass-whilst-on-wegovy-for-an-absolute-beginner",
+      "excerpt": "I have limited resources (mainly time) to devote to this so I’d like to make a plan for the best way to approach it.",
       "segmentIds": [
         "seg_2"
       ],
@@ -1289,24 +1282,26 @@
         "con_intimidation"
       ],
       "confidence": "low",
-      "limitations": "Fictional demo data",
-      "retrievedAt": "2026-10-25T13:00:00-07:00"
+      "limitations": "Real public forum post (short excerpt, username removed); the business in this demo is fictional",
+      "retrievedAt": "2026-10-25T17:00:00-07:00",
+      "title": "Mumsnet: Recommended exercises for building muscle mass whilst on WeGovy - for an absolute beginner (23 Apr 2026)"
     },
     {
       "id": "ev_18",
       "origin": "web",
       "sourceType": "forum-post",
-      "url": "https://example.com/demo/forum/118",
-      "excerpt": "Tried three fitness apps, all the same. Cancelled every one within a month.",
+      "url": "https://www.mumsnet.com/talk/weight_loss_chat/5402536-body-coach-app",
+      "excerpt": "To be honest I'm not going to restart, I don't think I'm fit enough time do all the mat work",
       "segmentIds": [
         "seg_2"
       ],
       "concernIds": [
-        "con_trust"
+        "con_intimidation"
       ],
       "confidence": "low",
-      "limitations": "Fictional demo data",
-      "retrievedAt": "2026-10-25T13:00:00-07:00"
+      "limitations": "Real public forum post (short excerpt, username removed); the business in this demo is fictional; the poster let a fitness-app subscription lapse after starting the medication",
+      "retrievedAt": "2026-10-25T17:00:00-07:00",
+      "title": "Mumsnet: Body coach app (1 Sep 2025)"
     },
     {
       "id": "ev_19",
@@ -1399,13 +1394,14 @@
       "id": "ev_25",
       "origin": "web",
       "sourceType": "forum-post",
-      "url": "https://example.com/demo/forum/125",
-      "excerpt": "Honestly I don't care about muscle right now. I just want the scale to keep moving.",
+      "url": "https://community.myfitnesspal.com/en/discussion/10888958/are-those-taking-wegovy-or-ozempic-also-doing-resistance-training-and-increasing-protein",
+      "excerpt": "Your discussion about protein and resistance training is completely foreign to my experience",
       "segmentIds": [],
       "concernIds": [],
       "confidence": "low",
-      "limitations": "Fictional demo data; skeptic counter-case",
-      "retrievedAt": "2026-10-25T13:00:00-07:00"
+      "limitations": "Real public forum post (short excerpt, username removed); the business in this demo is fictional",
+      "retrievedAt": "2026-10-25T17:00:00-07:00",
+      "title": "MyFitnessPal Community: Are those taking Wegovy or Ozempic also doing resistance training and increasing protein? (23 Apr 2023)"
     }
   ],
   "findings": [
@@ -1417,10 +1413,8 @@
       "derivation": "Script count of concern tags across this group's excerpts (see concernBundles).",
       "evidenceIds": [
         "ev_1",
-        "ev_3",
         "ev_8",
         "ev_10",
-        "ev_13",
         "ev_19"
       ],
       "confidence": "medium",
@@ -1578,7 +1572,7 @@
     ]
   },
   "openQuestions": [
-    "DEMO FIXTURE: the business, people, sources and numbers are all fictional.",
+    "DEMO FIXTURE: the business, owner, ads and numbers are fictional. Eight forum quotes (ev_3, ev_6, ev_9, ev_10, ev_13, ev_17, ev_18, ev_25) are real public posts, linked; the rest of the evidence is fictional.",
     "Not asked yet: should ads target women, men or both? The one muscle ad that worked ran to women 35-54 only (ev_16), so men are untested."
   ]
 }

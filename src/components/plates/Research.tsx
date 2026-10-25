@@ -36,6 +36,11 @@ export function ResearchPlate({ brief, updated, hideLinks }: { brief: IntakeBrie
         const sv = s.serviceability;
         const g = groups.get(s.id) ?? "gn";
         const lex = brief.lexicon.filter((l) => l.segmentIds.includes(s.id) && (l.voice ?? "customer") === "customer").slice(0, 2);
+        // Other customer-voice excerpts for this group (forum posts and reviews), shown without a highlight.
+        const quoted = new Set(lex.map((l) => l.evidenceId));
+        const more = brief.evidence.filter((e) => e.segmentIds.includes(s.id) && e.concernIds.length > 0
+          && (e.sourceType === "forum-post" || e.sourceType === "review") && !e.creativeId && !quoted.has(e.id))
+          .sort((a, b) => (b.retrievedAt ?? "").localeCompare(a.retrievedAt ?? "")).slice(0, 4); // most recently researched first
         const inc = sv.incumbents[0];
         return (
           <article key={s.id} className="group">
@@ -44,10 +49,11 @@ export function ResearchPlate({ brief, updated, hideLinks }: { brief: IntakeBrie
             {sv.verdict ? <p className="verdict-line"><Tag text={PLAIN.verdict[sv.verdict]} variant={`v-${sv.verdict}`} /> {sv.confidence ? PLAIN.confidence[sv.confidence] : ""}. {sv.reasoning}</p> : null}
             <h5>What they worry about (times it came up)</h5>
             <Concerns seg={s} brief={brief} group={g} />
-            {lex.length > 0 ? (
+            {lex.length + more.length > 0 ? (
               <>
                 <h5>In their words</h5>
                 {lex.flatMap((l) => { const e = ev.get(l.evidenceId); return e ? [<Quote key={l.id} evidence={e} phrase={l.phrase} hideLinks={hideLinks} />] : []; })}
+                {more.map((e) => <Quote key={e.id} evidence={e} hideLinks={hideLinks} />)}
               </>
             ) : null}
             <dl className="facts-grid">
