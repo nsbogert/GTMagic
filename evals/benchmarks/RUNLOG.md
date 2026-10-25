@@ -137,3 +137,27 @@ Each output file must contain only the JSON object, with every test id from its 
 - **Input:** `upworthy/batches/test-1..10.json` (400 tests)
 - **Output:** `upworthy/predictions/vanilla-opus/test-1..10.json`
 - **Wrapper sent (verbatim):** identical to the val vanilla wrapper above, with `val-X`/`val-Y` replaced by `test-X`/`test-Y`, plus "do not start sub-agents or delegate" added to the first sentence's list of prohibitions.
+- **Agent 29 rerun:** cancelled before finishing (subagent `0b9529b0`). Any partial `agent-29/out-*.json` files are not used; pipeline-v1 results stand on 29 agents.
+
+### Rule choice for pipeline-v2 (on val only, before any test run)
+
+Val Kendall τ: (a) S4 screen only 0.250; (b) crowd only (pipeline-v1) −0.027; (c) mean rank of S4 + crowd 0.152. **Frozen: pipeline-v2 = rule (a), the `gtm-ad-wording` screen ranking.** Against vanilla on val, (a) wins on winner = #1 by +6.5 pts [+0.4, +12.6] and on τ by +0.037 [−0.012, +0.083]. The crowd output is kept for per-segment breakdowns only.
+
+## 2026-10-25 · Upworthy · TEST · pipeline-v2 (final, run once)
+
+- **Model:** `claude-opus-5.5`, 5 subagents (`general-purpose`), 2 batch files each (test-1/2, 3/4, 5/6, 7/8, 9/10)
+- **Prompt:** `sim/pipeline-v2/screen-prompt.rendered.md` (unchanged from val)
+- **Input:** `upworthy/batches/test-1..10.json`
+- **Output:** `upworthy/predictions/pipeline-v2-screen/test-1..10.json`
+- **Wrapper sent (verbatim):** identical to the val pipeline-v2 S4 wrapper above, with `SPLIT` = test.
+
+### Final result: Upworthy TEST (400 tests, each arm run once)
+
+| Arm | Winner = #1 | Top 3 | Gain captured (#1) | Gain captured (top 3) | Kendall τ |
+|---|---|---|---|---|---|
+| chance | 22.5% | 67.4% | 0% | 0% | 0.000 |
+| vanilla-opus | 45.3% | 86.0% | 33.7% | 43.1% | 0.282 |
+| pipeline-v2 (screen) | 47.0% | 86.0% | 34.9% | 41.6% | 0.290 |
+| paired diff (v2 − vanilla) | +1.8 [−3.3, +6.8] | +0.0 [−3.5, +3.8] | +1.2 [−5.1, +7.6] | −1.6 [−9.0, +6.2] | +0.008 [−0.033, +0.047] |
+
+**Conclusion:** pipeline-v2 is not significantly better than vanilla Opus on held-out tests. The val advantage (+6.5 pts on winner = #1) did not replicate: picking the best of three rules on val inflated it, and vanilla scored higher on test (45.3%) than on val (38.1%). Both are far above chance. pipeline-v1 (persona crowd) was at chance on val and was not run on test.
