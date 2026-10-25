@@ -3,8 +3,9 @@
 .env.*
 !.env.example
 
-# Run data (founder inputs + model outputs)
+# Run data (founder inputs + model outputs): stays on the owner's machine
 runs/
+gtm-workspace/
 
 # Dependencies & build output
 node_modules/
