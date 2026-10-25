@@ -87,24 +87,17 @@
     step("guess", "done");
 
     step("answers", "running");
-    for (const [ri, round] of S.rounds.entries()) {
-      await say(() => ask(round.ask), 700);
-      for (const a of round.answers) {
-        await wait(500);
-        add(me(a.me, a.file && h("span", { class: "file" }, icon("i-copy"), a.file)));
-        if (a.followUp) {
-          await say(() => bot(h("p", {}, a.followUp)));
-          await wait(500);
-          add(me(a.clear));
-        }
-      }
-      if (ri === 1 && intake.priorExperiments.length) {
-        await say(() => bot(h("p", {}, "I read your file. Code judged each campaign, not my impression:")));
-        add(RI.adsPlate(intake.priorExperiments, intake.business));
-      }
+    const plates = {
+      economics: () => intake.business.unitEconomics && RI.economicsPlate(intake.business),
+      ads: () => intake.priorExperiments.length > 0 && RI.adsPlate(intake.priorExperiments, intake.business),
+      constraints: () => RI.constraintsPlate(intake.constraints),
+    };
+    for (const ev of S.interview) {
+      if (ev.ask) await say(() => ask(ev.ask), 700);
+      else if (ev.bot) await say(() => bot(h("p", {}, typeof ev.bot === "function" ? ev.bot(intake, window.R) : ev.bot)));
+      else if (ev.me) { await wait(500); add(me(ev.me, ev.file && h("span", { class: "file" }, icon("i-copy"), ev.file))); }
+      else if (ev.plate) { const el = plates[ev.plate]?.(); if (el) add(el); }
     }
-    await say(() => bot(h("p", {}, "Here's how I've sorted what you told me. Research can question a must-have once; after that it stands.")));
-    add(RI.constraintsPlate(intake.constraints));
     step("answers", "done");
     return research();
   }

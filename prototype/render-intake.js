@@ -13,17 +13,30 @@
         h("div", {}, h("h4", {}, "Lines it suggested"), h("ul", {}, b.taglines.map((x) => h("li", {}, x))))));
   }
 
+  // What the ads are judged against: the owner's stated target, or the max worked out from their numbers.
+  function targetLine(business) {
+    const cur = business.pricing?.currency || "USD";
+    const ue = business.unitEconomics;
+    const used = ue?.targetCpaUsed ?? business.targetCpa;
+    if (used == null) return "No limit on cost per sign-up yet, so every result is too early to tell.";
+    return ue?.targetCpaSource === "derived"
+      ? `Judged against ${money(used, cur)}, the most you can spend per paying customer, worked out from your numbers.`
+      : `Judged against your target of ${money(used, cur)} per paying customer.`;
+  }
+  const CONVERSION = { paying: "Paying sign-ups", trial: "Free trials, not judged", unknown: "Not sure if paying, not judged" };
+
   function adsPlate(pxs, business) {
     const cur = business.pricing?.currency || "USD";
     return h("section", { class: "plate", "aria-label": "Your past ads" },
       h("h3", {}, pxs.length === 1 ? "Your past campaign" : `Your ${pxs.length} past campaigns`),
-      h("p", { class: "meta" }, business.targetCpa ? `Judged against your target of ${money(business.targetCpa, cur)} per sign-up. From ${pxs[0]?.sourceFile}.` : "No target cost per sign-up yet, so every result is too early to tell."),
+      h("p", { class: "meta" }, `${targetLine(business)} From ${pxs[0]?.sourceFile}.`),
       h("table", { class: "board" },
         h("thead", {}, h("tr", {}, h("th", {}, "Ad"), h("th", { class: "num" }, "Spent"), h("th", { class: "num hide-sm" }, "Clicks"), h("th", { class: "num" }, "Sign-ups"), h("th", { class: "num" }, "Per sign-up"))),
         h("tbody", {}, pxs.map((p) => {
           const per = p.spend != null && p.metrics.conversions ? p.spend / p.metrics.conversions : null;
           return h("tr", {},
-            h("td", {}, h("span", { class: "strong" }, p.message.headline || p.audience), h("span", { class: "sub" }, p.audience),
+            h("td", {}, h("span", { class: "strong" }, p.message.headline || p.audience),
+              h("span", { class: "sub" }, p.audience + (p.conversionType ? ` · ${CONVERSION[p.conversionType]}` : "")),
               h("span", { class: "sub" }, tag(PLAIN.adVerdict[p.verdict], "v-" + p.verdict), " ", p.verdictReason || "")),
             h("td", { class: "num" }, p.spend != null ? money(p.spend, cur) : "–"),
             h("td", { class: "num hide-sm" }, num(p.metrics.clicks ?? 0)),
@@ -77,7 +90,9 @@
           h("h5", {}, "What they worry about (times it came up)"), concernRows(s, intake.concerns),
           lex.length > 0 && [h("h5", {}, "In their words"), lex.map((l) => quote(ev[l.evidenceId], l.phrase))],
           h("dl", { class: "facts-grid" },
-            sv.size.population != null && [h("dt", {}, "Size"), h("dd", {}, `About ${num(sv.size.population)} people${sv.size.isEstimate ? " (estimate)" : ""}. You need at least ${num(sv.sizeMath.minPopulation)} to reach your goal.`)],
+            sv.size.population != null && [h("dt", {}, "Size"), h("dd", {}, `About ${num(sv.size.population)} people${sv.size.isEstimate ? " (estimate)" : ""}. ` +
+              (sv.sizeMath?.minPopulation != null ? `You need at least ${num(sv.sizeMath.minPopulation)} to reach your minimum revenue.` : "Not judged yet: an input for the size check is missing.")
+            )],
             inc && [h("dt", {}, "Main alternative"), h("dd", {}, inc.name + (inc.rating ? `, rated ${inc.rating} from ${num(inc.reviewCount)} reviews` : ""))],
             [h("dt", {}, "Why now"), h("dd", {}, sv.motivation)]));
       }));
@@ -89,9 +104,14 @@
       h("ul", { class: "findings" }, intake.findings.map((f) =>
         h("li", {}, tag(PLAIN.kind[f.kind], "k-" + f.kind), h("span", {}, f.claim), h("span", { class: "applies" }, `${PLAIN.confidence[f.confidence]} · ${f.evidenceIds.length} source${f.evidenceIds.length === 1 ? "" : "s"}`)))),
       h("h4", {}, "Looking for reasons we're wrong"),
-      h("ul", { class: "findings" }, intake.skeptic.map((s) =>
-        h("li", {}, tag(PLAIN.skeptic[s.result], "s-" + s.result), h("span", {}, s.claim), h("span", { class: "applies" }, "Searched: " + s.queries.join(" · "))))));
+      h("ul", { class: "findings" }, [...intake.skeptic].sort((a, b) => SKEPTIC_ORDER.indexOf(a.kind) - SKEPTIC_ORDER.indexOf(b.kind)).map((s) =>
+        h("li", {}, tag(PLAIN.skeptic[s.result], "s-" + s.result),
+          h("span", {}, h("span", { class: "q" }, SKEPTIC_Q[s.kind] || "Other check"), s.claim),
+          h("span", { class: "applies" }, "Searched: " + s.queries.join(" · "))))));
   }
+
+  const SKEPTIC_ORDER = ["motivation", "incumbent-gap", "size", "other"];
+  const SKEPTIC_Q = { motivation: "Do people want this?", "incumbent-gap": "Is there a gap to fill?", size: "Is the group big enough?" };
 
   const sentence = (x) => `${x.segment} will ${x.action} because ${x.motivation}, instead of ${x.insteadOf}, at ${x.price}.`;
 
@@ -123,5 +143,5 @@
       h("div", { class: "actions" }, h("button", { class: "btn secondary small", type: "button", onclick: onDownload }, icon("i-down"), "Download save file (intake.json)")));
   }
 
-  window.RI = { baselinePlate, adsPlate, constraintsPlate, researchPlate, evidencePlate, briefPlate };
+  window.RI = { baselinePlate, economicsPlate: (b) => window.Econ.economicsPlate(b), adsPlate, constraintsPlate, researchPlate, evidencePlate, briefPlate };
 })();

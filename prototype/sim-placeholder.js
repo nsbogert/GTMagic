@@ -19,7 +19,10 @@
     const msgs = intake.roughMessaging.map((m, i) => ({ label: "ABCDEF"[i], ...m }));
 
     // Split SIZE by sampleShare with largest-remainder rounding.
-    const raw = segs.map((s) => (s.sampleShare ?? 1 / segs.length) * SIZE);
+    // sampleShare may be rough relative numbers (e.g. 7 and 3); normalize before splitting.
+    const shares = segs.map((s) => s.sampleShare ?? 1);
+    const total = shares.reduce((x, y) => x + y, 0);
+    const raw = shares.map((x) => (x / total) * SIZE);
     const n = raw.map(Math.floor);
     let left = SIZE - n.reduce((a, b) => a + b, 0);
     raw.map((r, i) => [r - Math.floor(r), i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if (left-- > 0) n[i]++; });

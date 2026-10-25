@@ -75,3 +75,17 @@ mark { background: #f2d8a0; color: inherit; padding: 0 .125rem; }
   .checks li { grid-template-columns: 1.375rem 1fr; }
   .checks .applies { grid-column: 2; }
 }
+
+/* What a new customer can cost. Shares are ink values, not hues: hue belongs to customer groups. */
+.econ-head { display: flex; align-items: baseline; gap: .75rem; flex-wrap: wrap; font-size: .9375rem; color: var(--ink-2); }
+.econ-big { font-size: var(--step3); font-weight: 500; color: var(--ink); line-height: 1; }
+.econ-bar { display: flex; height: 1.75rem; border: 1.5px solid var(--ink); }
+.econ-bar span + span { border-left: 1.5px solid var(--ground); }
+.seg-serve { background: var(--ink-3); }
+.seg-win { background: var(--ink); }
+.seg-keep { background: var(--ground); }
+.econ-key { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: .375rem 1.25rem; font-size: .875rem; }
+.econ-key li { display: flex; align-items: center; gap: .375rem; }
+.econ-key i { width: .875rem; height: .875rem; border: 1.5px solid var(--ink); }
+.econ-facts b { font-weight: 500; }
+.findings .q { display: block; font-size: .8125rem; color: var(--ink-3); }
