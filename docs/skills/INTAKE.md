@@ -26,7 +26,8 @@ The first GTMagic skill. It interviews a small-business owner, researches their 
 | One-line description | ✅ | ✅ | Frozen first, for the baseline |
 | Conversation answers | ✅ | ✅ | The question bank |
 | Website URL | ✅ | ✅ | Current headline (tested later as the control), pricing, claims |
-| Prior ad results | One **Meta CSV** | CSV/XLSX from Meta, Google, Reddit; screenshots | `PriorExperiment`s, campaign level only; customer names and emails are never kept |
+| Prior ad results | One **Meta CSV** | CSV/XLSX from Meta, Google, Reddit, TikTok; email results; screenshots; numbers typed by hand | `PriorExperiment`s, campaign or ad level only; customer names and emails are never kept |
+| Existing creatives | ✅ text, CSV rows, images | ✅ | `creatives[]`: the owner's headlines, body text, CTAs and images (described from what's visible), linked to their results; risky wording is flagged, never rewritten |
 | Pasted customer language | ✅ | ✅ | Founder-text evidence for the lexicon |
 | Decks, guardrail docs | — | ✅ | Product facts, locked claim and targeting rules |
 | A previous save file | — (deferred) | ✅ resume | Picks up at the first failing readiness check |
@@ -136,6 +137,7 @@ The schema's single source of truth is [`.claude/skills/gtm-intake/references/sc
   prompts/baseline.md               the fixed baseline prompt (versioned)
   references/question-bank.md
   references/schema.md              this schema
+  references/imports.md             ad-export column names → results and creatives
   scripts/validate_intake.py        counts, weights, size math, ad verdicts, readiness status, reference + verbatim checks
   scripts/render_brief.py           owner-facing brief.md from intake.json (--public for demos and videos)
 ```

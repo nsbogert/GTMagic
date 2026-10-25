@@ -15,9 +15,9 @@ import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from brief_sections import (CHANNELS, EXPERIMENT_VERDICTS, FINDING_KINDS, READINESS,  # noqa: E402
-                            SEGMENT_VERDICTS, SKEPTIC_RESULTS, SOURCE_TYPES, Json, best_guess,
-                            currency_of, customer_worth, money, must_be_true, not_done)
+from brief_sections import (CHANNELS, FINDING_KINDS, READINESS, SEGMENT_VERDICTS,  # noqa: E402
+                            SKEPTIC_RESULTS, SOURCE_TYPES, Json, best_guess, count, currency_of,
+                            customer_worth, made, money, must_be_true, not_done, verdict_text)
 from guardrails import DRUG_NAMES  # noqa: E402  (drug names only: generic words like "medication" stay)
 
 QUOTE_SOURCES = {"forum-post", "review"}  # first-hand customer words, not stats
@@ -29,8 +29,8 @@ DRUG_MASK = re.compile(rf"(?:{DRUG_NAMES})\w*", re.IGNORECASE)
 
 def plain(text: str) -> str:
     """Strip internal IDs like '(ev_15)' or '(see concernBundles)', and speak to the owner directly."""
-    text = re.sub(r"\s*\((?:see [A-Za-z]+|(?:ev|seg|con|px|fnd|lex|int)_\w+(?:,\s*\w+)*)\)", "", text)
-    text = re.sub(r"\s*\b(?:ev|seg|con|px|fnd|lex|int|hyp)_\d+\b,?", "", text)  # bare IDs inside longer notes
+    text = re.sub(r"\s*\((?:see [A-Za-z]+|(?:ev|seg|con|px|cr|fnd|lex|int)_\w+(?:,\s*\w+)*)\)", "", text)
+    text = re.sub(r"\s*\b(?:ev|seg|con|px|cr|fnd|lex|int|hyp)_\d+\b,?", "", text)  # bare IDs inside longer notes
     text = re.sub(r"\bthe owner's\b", "your", text)
     return re.sub(r"\bThe owner's\b", "Your", text).strip()
 
@@ -43,10 +43,6 @@ def masked(texts: list[str], public: bool) -> list[str]:
 def cell(items: list[str], empty: str) -> str:
     """Join items into one Markdown table cell."""
     return "<br>".join(s.replace("|", "\\|").replace("\n", " ") for s in items) or empty
-
-
-def count(value: int | None) -> str:
-    return "not recorded" if value is None else f"{value:,}"
 
 
 def people(n: float) -> str:
@@ -204,8 +200,7 @@ def tried(brief: Json) -> list[str]:
                 f"- **Spent:** {money(spend, currency)} · **Clicks:** {count(metrics.get('clicks'))} "
                 f"· **Sign-ups:** {count(signups)}",
                 f"- **Cost per sign-up:** {cost}{goal}",
-                f"- **Result:** {EXPERIMENT_VERDICTS.get(px.get('verdict', ''), 'Not judged yet.')}"
-                + (f" ({px['verdictReason']})" if px.get("verdict") == "inconclusive" and px.get("verdictReason") else ""), ""]
+                f"- **Result:** {verdict_text(px)}", ""]
     return out
 
 
@@ -239,7 +234,8 @@ def render(brief: Json, links: bool = True, public: bool = False) -> str:
     if brief.get("mode") == "demo":
         out += ["**Demo run — all data is fictional.**", ""]
     for section in (short_version(brief), must_be_true(brief), best_guess(brief), before_after(brief, public),
-                    customer_groups(brief), worries(brief, links and not public), tried(brief), how_sure(brief)):
+                    customer_groups(brief), worries(brief, links and not public), made(brief), tried(brief),
+                    how_sure(brief)):
         out += section
     out += ["## Still open", ""] + ([f"- {plain(q)}" for q in brief.get("openQuestions") or []] or ["Nothing open right now."])
     return "\n".join(out).rstrip() + "\n"

@@ -1,4 +1,4 @@
-"""Unit economics, size math and prior-ad verdicts (used by validate_intake.py).
+"""Unit economics, size math and prior-ad verdicts (used by validate_intake.py and creatives.py).
 
 Every figure comes from the owner's own inputs: price, purchases per year, minimum revenue, cost
 to serve, the share they choose to spend on acquisition, and their adoption estimate. Nothing here
@@ -16,14 +16,18 @@ if TYPE_CHECKING:  # avoid a runtime import cycle; only the type is needed
 MIN_CLICKS, MIN_CONVERSIONS = 100, 10
 
 
-def num(value: object, r: Report, field: str) -> float | None:
-    """Parse a number the model or a file supplied; record an error instead of crashing."""
+def num(value: object, r: Report | None, field: str) -> float | None:
+    """Parse a number the model or a file supplied; record an error instead of crashing.
+
+    Pass r=None to re-read a value already checked elsewhere, so a bad value isn't reported twice.
+    """
     if value is None or value == "":
         return None
     try:
         return float(value)  # type: ignore[arg-type]
     except (TypeError, ValueError):
-        r.errors.append(f"{field}: '{value}' is not a number")
+        if r is not None:
+            r.errors.append(f"{field}: '{value}' is not a number")
         return None
 
 
@@ -82,26 +86,35 @@ def compute_unit_economics(brief: dict, r: Report) -> tuple[float | None, str]:
     return target, source
 
 
-def compute_ads(brief: dict, r: Report) -> None:
+def judge_ad(spend: float | None, clicks: float, conversions: float, kind: str | None,
+             target: float | None, source: str) -> tuple[str, str]:
+    """One ad result against the owner's target, as (verdict, plain-words reason).
+
+    Shared by prior experiments and creatives (via their linked results), so the two can never disagree.
+    The first blocking reason wins, so the brief explains *why* a result is inconclusive.
+    """
+    reason = ("no target cost per sign-up, and not enough numbers to work one out" if target is None else
+              "these sign-ups were free trials, not paying customers" if kind == "trial" else
+              "we don't know whether these sign-ups were paying customers" if kind != "paying" else
+              "no spend was recorded" if spend is None else
+              f"fewer than {MIN_CLICKS} clicks" if clicks < MIN_CLICKS else
+              f"fewer than {MIN_CONVERSIONS} sign-ups" if conversions < MIN_CONVERSIONS else None)
+    if reason:
+        return "inconclusive", reason
+    cpa = spend / conversions  # type: ignore[operator]  (no reason means spend, target and conversions are set)
+    label = "most you can spend, worked out from your numbers" if source == "derived" else "target"
+    return ("worked" if cpa <= target else "didnt-work",
+            f"cost per sign-up {cpa:.2f} {'within' if cpa <= target else 'above'} the {target:g} {label}")
+
+
+def compute_ads(brief: dict, r: Report) -> tuple[float | None, str]:
+    """Judge every prior experiment; returns the target and its source so creatives are judged the same way."""
     target, source = compute_unit_economics(brief, r)
     for px in brief.get("priorExperiments", []):
         pid, m = px.get("id"), px.get("metrics") or {}
         spend = num(px.get("spend"), r, f"{pid}.spend")
         clicks = num(m.get("clicks"), r, f"{pid}.clicks") or 0
         conv = num(m.get("conversions"), r, f"{pid}.conversions") or 0
-        kind = px.get("conversionType")
-        # The first blocking reason wins, so the brief explains *why* a result is inconclusive.
-        reason = ("no target cost per sign-up, and not enough numbers to work one out" if target is None else
-                  "these sign-ups were free trials, not paying customers" if kind == "trial" else
-                  "we don't know whether these sign-ups were paying customers" if kind != "paying" else
-                  "no spend was recorded" if spend is None else
-                  f"fewer than {MIN_CLICKS} clicks" if clicks < MIN_CLICKS else
-                  f"fewer than {MIN_CONVERSIONS} sign-ups" if conv < MIN_CONVERSIONS else None)
-        if reason:
-            px["verdict"], px["verdictReason"] = "inconclusive", reason
-        else:
-            cpa = spend / conv
-            px["verdict"] = "worked" if cpa <= target else "didnt-work"
-            label = "most you can spend, worked out from your numbers" if source == "derived" else "target"
-            px["verdictReason"] = f"cost per sign-up {cpa:.2f} {'within' if cpa <= target else 'above'} the {target:g} {label}"
+        px["verdict"], px["verdictReason"] = judge_ad(spend, clicks, conv, px.get("conversionType"), target, source)
         r.notes.append(f"ad {pid}: {clicks:g} clicks, {conv:g} conversions -> {px['verdict']} ({px['verdictReason']})")
+    return target, source

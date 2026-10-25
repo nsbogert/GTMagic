@@ -2,7 +2,7 @@
 
 > **FICTIONAL. Every person, business, number and source in this file is made up for the GTMagic demo.** KeepStrong, its owner, "TrackAll" and all ad results are invented. Nothing here describes a real company or real people.
 
-In demo mode (`mode: "demo"`), the `gtm-intake` skill plays the interviewer and reads the owner's answers from this file instead of waiting for a person. The answers must produce `fixtures/demo/intake.json`. The prior ad results are in `fixtures/demo/meta-ads.csv`.
+In demo mode (`mode: "demo"`), the `gtm-intake` skill plays the interviewer and reads the owner's answers from this file instead of waiting for a person. The answers must produce `fixtures/demo/intake.json`. The prior ad results are in `fixtures/demo/meta-ads.csv`. The owner's ad screenshot is fictional and has no file; its description is recorded in `intake.json`.
 
 **How to use it:** ask the questions in your own words, in roughly this order. Where an answer is marked *vague*, run the vagueness check (one concrete follow-up) and use the owner's clearer answer. Each topic notes the field it feeds.
 
@@ -20,6 +20,17 @@ In demo mode (`mode: "demo"`), the `gtm-intake` skill plays the interviewer and 
 **Owner:** "It's called KeepStrong. Short strength workouts, about 20 minutes, plus protein tracking. The idea is you keep your muscle while the weight comes off on the medication. The website's at example.com/keepstrong."
 
 → `business.description`, `business.websiteUrl`
+
+### What you've already made
+**Skill:** "Do you have ads, landing pages, headlines or CTAs you've already used? Any results?"
+
+**Owner:** "Two Meta ads from September. The results are in the export, meta-ads.csv. I've also got a screenshot of the muscle one, the woman with the kettlebell. And there's a headline I wrote for the website but never used: 'Strength first, scale second', with '20-minute strength workouts and a daily protein target, built for the months you're losing weight.' The button would say 'Start your first workout'."
+
+→ `creatives[]`: `cr_1` (the muscle ad, an image; `px_1`), `cr_2` (the GLP-1 ad, text; `px_2`), linked to the CSV rows by their headlines; `cr_3` (the website draft, no results). The screenshot is fictional, so `cr_1`'s image description is copied from `fixtures/demo/intake.json`, never made up.
+
+**Skill:** reads back the three, each marked "please confirm", and notes once: "Your September GLP-1 ad names a medication. Ad platforms may restrict ads like that, so it's worth knowing before you run it again."
+
+**Owner:** "Fair enough. That's all of them."
 
 ### Price
 **Owner:** "$14.99 a month. That's not changing, so don't plan around a different price."
@@ -60,9 +71,9 @@ In demo mode (`mode: "demo"`), the `gtm-intake` skill plays the interviewer and 
 → `business.costToServeShare: 0.3`, `business.acquisitionShare: 0.4`, no `targetCpa`. The script computes `business.unitEconomics` (`targetCpaSource: "derived"`) and judges the ads against that max. Don't quote the dollar figure until the script has written it.
 
 ### What you've tried
-**Owner:** "Two Meta campaigns in September. I exported them, it's the meta-ads.csv. The muscle one did okay, I think? The GLP-1 one flopped."
+**Owner:** "Just those two Meta campaigns in September, the ones in the CSV I gave you. The muscle one did okay, I think? The GLP-1 one flopped."
 
-→ `priorExperiments` px_1 and px_2, read from `meta-ads.csv`. The script decides the verdicts, not the owner's impression.
+→ `priorExperiments` px_1 and px_2, read from `meta-ads.csv` and linked to `cr_1` and `cr_2`. The script decides the verdicts, not the owner's impression.
 
 **Skill:** reads back the campaign numbers from the CSV as draft facts, "please confirm".
 

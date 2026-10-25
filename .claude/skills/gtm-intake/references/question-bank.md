@@ -19,6 +19,13 @@ Each topic has:
 - **Good answer:** "A phone app. Day one you get a 20-minute strength plan and a daily protein target."
 - **Fills:** `business.description`, `business.stage`.
 
+## What you've already made (ask in the first round)
+
+- **Ask:** "Do you have ads, landing pages, headlines or CTAs (the button text, like 'Start free trial') you've already used? Any results? Screenshots, exports or copy-and-paste all work, and so do drafts you never ran."
+- **If vague:** "What's the headline on your website right now, and what does the main button say?"
+- **Good answer:** "Two Facebook ads from last month, here's the export and a screenshot of the better one. And a headline I wrote but never used: 'Strength first, scale second'."
+- **Fills:** `creatives[]` (wording verbatim, `status`, `imageFile` and `imageDescription` for images), `priorExperiments[]` for any results, linked both ways. "No results" is a fine answer: record the creative with `experimentIds: []`. Never fill in numbers the owner didn't give. If an ad names a medication or makes a claim, tell the owner once that platforms may restrict it, and record it unchanged.
+
 ## Traction
 
 - **Ask:** "How many paying customers do you have today, and roughly how did the last few find you?"
@@ -67,7 +74,7 @@ Many owners don't know this number. Don't treat "I don't know" as the end here: 
 - **Ask:** "What have you already tried to find customers, and what happened? If you've run ads, can you share the export?"
 - **If vague:** "Pick the one thing you spent the most money or time on. What did you try, and roughly what came back?"
 - **Good answer:** "Two Meta campaigns last spring, about $700 total. The muscle one got sign-ups; the general one barely did. Here's the CSV."
-- **Fills:** `priorExperiments[]` (metrics copied from the file, campaign level only), owner-text evidence.
+- **Fills:** `priorExperiments[]` (metrics copied from the file at campaign or ad level, or typed exactly as the owner says them with `source: "manual"`; column names in `imports.md`), linked to the matching `creatives[]`, plus owner-text evidence. Skip this if the owner already covered it under "What you've already made".
 
 ## Alternatives and who customers switch from
 

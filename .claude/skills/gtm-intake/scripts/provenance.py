@@ -87,7 +87,13 @@ def check_evidence(brief: dict, seg_ids: set, con_ids: set, log: dict[str, str],
     return by_id
 
 
-def check_lexicon(brief: dict, evidence: dict, seg_ids: set, r: Report) -> set[str]:
+def check_lexicon(brief: dict, evidence: dict, seg_ids: set, r: Report) -> dict[str, str]:
+    """Check each phrase and set its script-computed `voice`; returns lexicon id -> voice.
+
+    "customer" only for reviews and forum posts. The owner's own words (chat answers, their ad copy) are
+    "owner", so later steps never mistake the owner's phrasing for how customers talk.
+    """
+    voices: dict[str, str] = {}
     for lex in brief.get("lexicon", []):
         where, ev = f"lexicon {lex.get('id')}", evidence.get(lex.get("evidenceId"))
         r.ref(ev is not None, where, lex.get("evidenceId"), "evidence")
@@ -99,4 +105,7 @@ def check_lexicon(brief: dict, evidence: dict, seg_ids: set, r: Report) -> set[s
             r.errors.append(f"{where}: phrase is not verbatim in {ev.get('id')}'s excerpt")
         if ev and ev.get("sourceType") not in LEXICON_SOURCE_TYPES and ev.get("origin") != "owner-text":
             r.errors.append(f"{where}: lexicon must come from a review, forum post, or the owner's own words")
-    return {lex.get("id") for lex in brief.get("lexicon", [])}
+        if ev:
+            lex["voice"] = "customer" if ev.get("sourceType") in LEXICON_SOURCE_TYPES else "owner"
+        voices[lex.get("id")] = lex.get("voice", "owner")
+    return voices
