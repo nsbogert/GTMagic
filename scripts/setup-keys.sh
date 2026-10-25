@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
-# Saves GTMagic's API keys in your macOS login Keychain, then checks them.
+# Saves GTMagic's API keys in your macOS Keychain, then checks them.
 #
 # Usage: scripts/setup-keys.sh [tavily] [openrouter]     (no arguments = both)
 #
 # Why the Keychain: the key is typed at a hidden prompt and handed to the Keychain over stdin, so it
 # never lands in shell history, a file in the repo, the process list, a commit or a chat transcript.
 # The skills read it back from the same place (service gtmagic-tavily / gtmagic-openrouter,
-# account $USER), or from TAVILY_API_KEY / OPENROUTER_API_KEY if you set those instead.
+# account $USER), or from TAVILY_API_KEY / GTMAGIC_OPENROUTER_API_KEY if you set those instead.
 set -euo pipefail
+set +x  # never trace: a trace would print the key
 
 here="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source-path=SCRIPTDIR source=lib/keys.sh
 . "$here/lib/keys.sh"
 
+check_args=("$@")  # the check gets only what the user named, so "no arguments" keeps OpenRouter optional
 # shellcheck disable=SC2086  # word-splitting the provider list is intended
 [ $# -gt 0 ] || set -- $KEY_PROVIDERS
 for provider in "$@"; do provider_info "$provider" || exit 1; done
@@ -21,7 +23,7 @@ if ! has_keychain; then
   cat >&2 <<'EOF'
 This script saves keys in the macOS Keychain, so it only runs on a Mac.
 On Linux or WSL, put the keys in your shell profile instead (README → "Not on a Mac?"):
-  export TAVILY_API_KEY=...        export OPENROUTER_API_KEY=...
+  export TAVILY_API_KEY=...   export GTMAGIC_OPENROUTER_API_KEY=...
 then open a new terminal and run: scripts/check-keys.sh
 EOF
   exit 1
@@ -56,7 +58,12 @@ save_one() {
   fi
 
   local key
-  read -r -s -p "Paste your $PROVIDER_NAME API key (typing is hidden), then press Return: " key
+  if ! read -r -s -p "Paste your $PROVIDER_NAME API key (typing is hidden), then press Return: " key; then
+    key=""
+    echo
+    echo "The input ended before Return, so nothing was saved." >&2
+    return 1
+  fi
   echo
   key="$(trim "$key")"
 
@@ -78,11 +85,11 @@ save_one() {
 
   if ! keychain_write "$KEY_SERVICE" "GTMagic $PROVIDER_NAME API key" "$key"; then
     key=""
-    echo "The Keychain refused the key (is your login keychain locked?). Nothing saved." >&2
+    echo "The Keychain refused the key (is your Keychain locked?). Nothing saved." >&2
     return 1
   fi
   key=""
-  echo "Saved in your login Keychain as '$KEY_SERVICE'."
+  echo "Saved in your Keychain as '$KEY_SERVICE'."
 
   if [ -n "$(env_key)" ]; then
     echo "Heads-up: \$$KEY_ENV_VAR is set in this shell, and it takes priority over the Keychain."
@@ -91,9 +98,17 @@ save_one() {
 }
 
 echo "GTMagic key setup. Keys are saved to your Keychain only; they are never shown or written to the repo."
+setup_failed=0
 for provider in "$@"; do
-  save_one "$provider" || true  # a bad paste for one key shouldn't stop the other; the check below reports it
+  # `if` keeps one bad paste from stopping the other key; the failure still sets the exit status.
+  if ! save_one "$provider"; then setup_failed=1; fi
 done
 
 echo
-exec "$here/check-keys.sh" "$@"
+check_failed=0
+# ${arr[@]+...} expands an empty array safely under `set -u` on bash 3.2
+"$here/check-keys.sh" ${check_args[@]+"${check_args[@]}"} || check_failed=1
+if [ "$setup_failed" -ne 0 ]; then
+  echo "Not every key you entered was saved (see above); rerun the setup for that key."
+fi
+[ "$setup_failed" -eq 0 ] && [ "$check_failed" -eq 0 ]

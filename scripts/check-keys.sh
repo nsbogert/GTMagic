@@ -2,16 +2,19 @@
 # Confirms GTMagic's API keys are present and accepted, without ever printing them.
 #
 # Usage: scripts/check-keys.sh [tavily] [openrouter]     (no arguments = both)
-# Exit status: 0 when every key checked is usable, 1 otherwise.
+# Exit status: 0 when every key checked was accepted (warnings allowed), 1 otherwise. With no
+# arguments, a missing optional key (OpenRouter) is only a warning; name it to require it.
 #
 # Each key is looked up where the skills look (environment variable, then macOS Keychain) and sent
 # to the provider's free "who am I" endpoint, so a check spends no search or model credits.
 set -uo pipefail
+set +x  # never trace: a trace would print the key
 
 here="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source-path=SCRIPTDIR source=lib/keys.sh
 . "$here/lib/keys.sh"
 
+named_explicitly=$#
 # shellcheck disable=SC2086  # word-splitting the provider list is intended
 [ $# -gt 0 ] || set -- $KEY_PROVIDERS
 for provider in "$@"; do provider_info "$provider" || exit 1; done
@@ -34,28 +37,40 @@ note_env_override() {  # a stale env var silently shadowing a fresh Keychain key
   fi
 }
 
-# Returns 0 when the key is usable, 1 otherwise.
+# Returns 0 when the key is usable, 1 otherwise. Counts warnings in $warnings.
 check_one() {
   provider_info "$1"
   resolve_key
 
+  if [ -z "$KEY_VALUE" ] && [ -n "$KEY_OPTIONAL_FOR" ] && [ "$named_explicitly" -eq 0 ]; then
+    report warn "no key found; optional, only $KEY_OPTIONAL_FOR needs it. Add one: scripts/setup-keys.sh $1"
+    warnings=$((warnings + 1))
+    return 0
+  fi
   if [ -z "$KEY_VALUE" ]; then
     report fail "no key found. Run: scripts/setup-keys.sh $1"
     return 1
   fi
 
-  local source status verdict
+  local source result status curl_rc verdict
   source="$(key_source_label)"
 
   : >"$body_file"
   : >"$err_file"
-  status="$(probe_key "$KEY_VALUE" "$body_file" "$err_file")"
+  result="$(probe_key "$KEY_VALUE" "$body_file" "$err_file")"
   KEY_VALUE=""
+  status="${result% *}"
+  curl_rc="${result#* }"
 
   case "$status" in
     200)
+      if [ "$curl_rc" != "0" ]; then
+        report fail "the answer from $PROVIDER_NAME was cut off ($(head -n 1 "$err_file")). Try again."
+        return 1
+      fi
       verdict="$(read_usage "$1" "$body_file")"
       report "${verdict%% *}" "${verdict#* } (key from $source)"
+      [ "${verdict%% *}" != "warn" ] || warnings=$((warnings + 1))
       note_env_override
       [ "${verdict%% *}" != "fail" ]
       return
@@ -89,12 +104,15 @@ fi
 
 echo "Checking GTMagic API keys (the keys themselves are never shown):"
 failures=0
+warnings=0
 for provider in "$@"; do
   check_one "$provider" || failures=$((failures + 1))
 done
 
-if [ "$failures" -eq 0 ]; then
-  echo "All set."
+if [ "$failures" -eq 0 ] && [ "$warnings" -eq 0 ]; then
+  echo "All set: every key was accepted, and none is known to be out of credits."
+elif [ "$failures" -eq 0 ]; then
+  echo "Usable, with $warnings warning(s) above."
 else
   echo "$failures key(s) need attention; see above."
   exit 1

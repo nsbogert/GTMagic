@@ -10,8 +10,9 @@ KEY_PROVIDERS="tavily openrouter"
 SECURITY_BIN=/usr/bin/security
 KEY_ACCOUNT="${USER:-$(id -un)}"
 
-# Sets PROVIDER_NAME, KEY_SERVICE, KEY_ENV_VAR, KEY_PREFIX, KEY_CHECK_URL and KEY_HELP_URL for $1.
-# KEY_CHECK_URL is a free "who am I" endpoint: checking a key spends no credits.
+# Sets PROVIDER_NAME, KEY_SERVICE, KEY_ENV_VAR, KEY_PREFIX, KEY_CHECK_URL, KEY_HELP_URL and
+# KEY_OPTIONAL_FOR for $1. KEY_CHECK_URL is a free "who am I" endpoint: checking a key spends no
+# credits. KEY_OPTIONAL_FOR names the one skill that needs an optional key ("" = required).
 provider_info() {
   case "$1" in
     tavily)
@@ -21,14 +22,16 @@ provider_info() {
       KEY_PREFIX="tvly-"
       KEY_CHECK_URL="https://api.tavily.com/usage"
       KEY_HELP_URL="https://app.tavily.com"
+      KEY_OPTIONAL_FOR=""
       ;;
     openrouter)
       PROVIDER_NAME="OpenRouter"
       KEY_SERVICE="gtmagic-openrouter"
-      KEY_ENV_VAR="OPENROUTER_API_KEY"
+      KEY_ENV_VAR="GTMAGIC_OPENROUTER_API_KEY"
       KEY_PREFIX="sk-or-"
       KEY_CHECK_URL="https://openrouter.ai/api/v1/key"
       KEY_HELP_URL="https://openrouter.ai/settings/keys"
+      KEY_OPTIONAL_FOR="gtm-creatives"
       ;;
     *)
       echo "Unknown key '$1'. Choose from: $KEY_PROVIDERS" >&2
@@ -95,50 +98,64 @@ key_source_label() {
 }
 
 # $1 = key, $2 = file for the response body, $3 = file for curl's error text.
-# Prints the HTTP status ("000" when there was no response). The header goes in on stdin (-H @-).
+# Prints "<HTTP status> <curl exit code>"; status "000" means no response. The header goes in on
+# stdin (-H @-). -q must come first: it skips ~/.curlrc, where a "verbose" or "trace" line would
+# write the Authorization header out.
 probe_key() {
-  printf 'Authorization: Bearer %s\n' "$1" |
-    curl -sS -m 20 -o "$2" -w '%{http_code}' -H @- "$KEY_CHECK_URL" 2>"$3" || true
+  local status rc=0
+  status="$(printf 'Authorization: Bearer %s\n' "$1" |
+    curl -q -sS -m 20 -o "$2" -w '%{http_code}' -H @- "$KEY_CHECK_URL" 2>"$3")" || rc=$?
+  printf '%s %s\n' "${status:-000}" "$rc"
 }
 
 # $1 = provider, $2 = response body file. Prints one line, "ok|warn|fail <message>", read from the
 # provider's usage numbers. Only derived numbers are printed: OpenRouter's response includes a
-# masked copy of the key in "label", so the raw body is never shown.
+# masked copy of the key in "label", so the raw body is never shown. "warn" means the key was
+# accepted but its credit details are unreadable or ambiguous.
 read_usage() {
+  local unreadable="warn key accepted, but the credit details couldn't be read"
   if ! command -v python3 >/dev/null 2>&1; then
-    echo "ok key accepted (install python3 to see credits left)"
+    echo "$unreadable (install python3 to see them)"
     return
   fi
-  python3 -I - "$1" "$2" <<'PY' 2>/dev/null || echo "ok key accepted (couldn't read the credit details)"
+  python3 -I - "$1" "$2" <<'PY' 2>/dev/null || echo "$unreadable"
 import json, sys
 
 provider, path = sys.argv[1], sys.argv[2]
 with open(path, encoding="utf-8") as f:
     body = json.load(f)
 
+def number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
 def left(limit, used):
-    return None if not isinstance(limit, (int, float)) else limit - (used or 0)
+    return limit - (used if number(used) else 0) if number(limit) else None
 
 if provider == "tavily":
-    key, account = body.get("key") or {}, body.get("account") or {}
+    key, account = body.get("key"), body.get("account")
+    if not isinstance(key, dict) or not isinstance(account, dict) or not number(account.get("plan_limit")):
+        sys.exit(1)  # not the shape we know, so say "couldn't read" rather than guess
     key_left = left(key.get("limit"), key.get("usage"))
     plan_left = left(account.get("plan_limit"), account.get("plan_usage"))
+    paygo_left = left(account.get("paygo_limit"), account.get("paygo_usage"))
     if key_left is not None and key_left <= 0:
         print("fail this key's own credit limit is used up; raise it at app.tavily.com")
-    elif plan_left is not None and plan_left <= 0:
+    elif plan_left <= 0 and paygo_left is not None and paygo_left > 0:
+        print(f"ok plan credits are used up; {paygo_left:,g} pay-as-you-go credits left")
+    elif plan_left <= 0:
         print("warn this billing cycle's plan credits are used up; searches fail unless pay-as-you-go is on")
-    elif plan_left is not None:
-        print(f"ok {plan_left:,g} plan credits left this billing cycle")
     else:
-        print("ok key accepted")
+        print(f"ok {plan_left:,g} plan credits left this billing cycle")
 else:
-    data = body.get("data") or {}
+    data = body.get("data")
+    if not isinstance(data, dict) or not isinstance(data.get("is_free_tier"), bool):
+        sys.exit(1)
     remaining = data.get("limit_remaining")
-    if data.get("is_free_tier") is True:
+    if data["is_free_tier"]:
         print("fail no credits bought on this account yet; add some at openrouter.ai/settings/credits")
-    elif isinstance(remaining, (int, float)) and remaining <= 0:
+    elif number(remaining) and remaining <= 0:
         print("fail this key's credit limit is used up; raise it at openrouter.ai/settings/keys")
-    elif isinstance(remaining, (int, float)):
+    elif number(remaining):
         print(f"ok ${remaining:,.2f} left under this key's credit limit")
     else:
         print("ok key accepted (no credit limit set on this key)")

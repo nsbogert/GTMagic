@@ -47,7 +47,7 @@ Synthetic customers produce **hypotheses to test**, not proof. Every result is l
 
 ## Getting started
 
-From a fresh clone to running the skills in about 15 minutes. The web app (`npm run dev`) isn't scaffolded yet; these steps set up the Claude Code skills in `.claude/skills/`. The key scripts are built for macOS, where keys live in your login Keychain. On Linux or WSL, see [Not on a Mac?](#not-on-a-mac).
+From a fresh clone to running the skills in about 15 minutes. The web app (`npm run dev`) isn't scaffolded yet; these steps set up the Claude Code skills in `.claude/skills/`. The key scripts are built for macOS, where keys live in your Keychain. On Linux or WSL, see [Not on a Mac?](#not-on-a-mac).
 
 ### 1. Install the prerequisites and clone
 
@@ -55,7 +55,7 @@ From a fresh clone to running the skills in about 15 minutes. The web app (`npm 
 |---|---|---|
 | git | Clone the repo, open PRs | `git --version` |
 | Python 3.9 or newer | The skills' helper scripts (standard library only, nothing to `pip install`) | `python3 --version` |
-| [Claude Code](https://claude.com/claude-code), signed in (CLI or desktop app) | Runs the skills | `claude --version` |
+| [Claude Code](https://claude.com/claude-code), signed in (CLI or desktop app) | Runs the skills | `claude --version`, or the desktop app opens |
 
 On a Mac, `xcode-select --install` provides git and Python 3 if either check fails. Node isn't needed for the skills; `evals/` has its own setup in [evals/README.md](evals/README.md).
 
@@ -77,7 +77,7 @@ Paste it only into the setup prompt in step 4: never into chat, a file or a comm
 
 ### 3. Get an OpenRouter key (draft creatives, optional)
 
-The `gtm-creatives` skill writes draft ads with GPT Sol through OpenRouter. Skip this step if you won't run it.
+The `gtm-creatives` skill (in progress; it lands in its own PR) writes draft ads with GPT Sol through OpenRouter. Skip this step if you won't run it: press Return at the OpenRouter prompt in step 4, and the check notes the key as optional instead of failing. Run `scripts/setup-keys.sh tavily` to skip the prompt entirely.
 
 1. Sign up at [openrouter.ai](https://openrouter.ai).
 2. Add credits at [Settings → Credits](https://openrouter.ai/settings/credits). GPT Sol is a paid model, so a key on an account with no credits fails. A few dollars is enough to start.
@@ -89,16 +89,18 @@ The `gtm-creatives` skill writes draft ads with GPT Sol through OpenRouter. Skip
 scripts/setup-keys.sh
 ```
 
-For each key, it asks you to paste it at a hidden prompt, saves it in your macOS login Keychain, then runs the check from step 5. Nothing is shown on screen or written to the repo, and the key never appears on a command line. To add or replace one key, name it: `scripts/setup-keys.sh tavily` or `scripts/setup-keys.sh openrouter`.
+For each key, it asks you to paste it at a hidden prompt, saves it in your macOS Keychain, then runs the check from step 5. Nothing is shown on screen or written to the repo, and the key never appears on a command line. To add or replace one key, name it: `scripts/setup-keys.sh tavily` or `scripts/setup-keys.sh openrouter`. It exits 1 if a key wasn't saved or doesn't pass the check.
 
 The skills look for each key in this order:
 
 | Key | 1. Environment variable | 2. Keychain item (account: your macOS user) |
 |---|---|---|
 | Tavily | `TAVILY_API_KEY` | `gtmagic-tavily` |
-| OpenRouter | `OPENROUTER_API_KEY` | `gtmagic-openrouter` |
+| OpenRouter | `GTMAGIC_OPENROUTER_API_KEY` | `gtmagic-openrouter` |
 
-The environment variable wins, so an old one in your shell profile hides a fresh Keychain key. The check flags that case.
+The environment variable wins, so an old one in your shell profile hides a fresh Keychain key. The check flags that case. The OpenRouter variable has a `GTMAGIC_` prefix so an OpenRouter key you set for another project is never billed for GTMagic.
+
+**Known extra, not scripted yet:** the in-progress `gtm-evaluate` skill reads an Anthropic API key from `GTMAGIC_ANTHROPIC_API_KEY` or the Keychain item `gtmagic-anthropic`. If you need it before the scripts cover it, run `security add-generic-password -U -s gtmagic-anthropic -a "$USER" -w` and paste the key at the hidden prompt (it asks twice).
 
 ### 5. Check the keys
 
@@ -106,13 +108,19 @@ The environment variable wins, so an old one in your shell profile hides a fresh
 scripts/check-keys.sh
 ```
 
-It confirms each key is present and accepted, and shows the credits left. It never prints a key, and it calls each provider's free account endpoint, so it spends no credits. It exits 0 when every key is usable and 1 otherwise. Check one key with `scripts/check-keys.sh tavily`. Example output:
+It confirms each key is present and accepted, and shows the credits left.
+
+- It never prints a key. It calls each provider's free account endpoint, so it spends no credits.
+- It exits 0 when every key it checks was accepted (warnings, such as a skipped OpenRouter key, are allowed), and 1 otherwise. Name a key to check only that one; `scripts/check-keys.sh openrouter` also makes that key required.
+- For OpenRouter it sees only the key's own credit limit, not your account balance; that's on [Settings → Credits](https://openrouter.ai/settings/credits).
+
+Example output:
 
 ```text
 Checking GTMagic API keys (the keys themselves are never shown):
   [ok]   Tavily      1,500 plan credits left this billing cycle (key from Keychain item 'gtmagic-tavily')
   [ok]   OpenRouter  $5.00 left under this key's credit limit (key from Keychain item 'gtmagic-openrouter')
-All set.
+All set: every key was accepted, and none is known to be out of credits.
 ```
 
 | If it says | Do this |
@@ -120,8 +128,10 @@ All set.
 | `no key found` | Run `scripts/setup-keys.sh tavily` (or `openrouter`) |
 | `was rejected (HTTP 401)` | Copy the key again from the provider's dashboard and rerun the setup script. If the key came from an environment variable, fix or unset that variable |
 | `no credits bought on this account yet` | Add OpenRouter credits (step 3) |
-| `credit limit is used up` | Raise the key's limit on the provider's dashboard |
-| `couldn't reach …` | A network, VPN or proxy problem; try again |
+| `credit limit is used up` or `plan credits are used up` | Raise the key's limit, add credits, or turn on Tavily pay-as-you-go on the provider's dashboard |
+| `credit details couldn't be read` | The key works; check your credits on the provider's dashboard |
+| `optional, only gtm-creatives needs it` | Nothing, unless you'll run `gtm-creatives` (then do step 3) |
+| `couldn't reach …` or `was cut off` | A network, VPN or proxy problem; try again |
 
 ### 6. Run the skills
 
@@ -133,7 +143,7 @@ Start Claude Code in the repo folder (`claude` in a terminal, or open the folder
 
 ```bash
 export TAVILY_API_KEY="tvly-..."
-export OPENROUTER_API_KEY="sk-or-..."
+export GTMAGIC_OPENROUTER_API_KEY="sk-or-..."
 ```
 
 Open a new terminal, then run `scripts/check-keys.sh`; it works anywhere with bash and curl. There's no `.env.local` option because the skills read keys only from the environment or the Keychain, so a key file in the repo would be invisible to them.
