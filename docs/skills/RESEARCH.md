@@ -1,19 +1,21 @@
 # Research skill (`gtm-research`)
 
-The second GTMagic skill. After intake, it goes out to the communities and products closest to the owner's customer groups, collects recent real quotes, sentiment and demographic signals, and keeps looping (with the owner in the loop) until the target market and ICP are well supported or honestly unsupported. It ends by handing back learnings, quotes and statistics, and one recommendation: **refine** specific things, **generate creatives**, or **evaluate an existing set of creatives**.
+The second GTMagic skill. After intake, it goes out to the communities and products closest to the owner's customer groups, collects recent real customer language, sentiment and demographic signals, and keeps looping (with the owner in the loop) until the target market and ICP are well supported or honestly unsupported. It ends by handing back a recommendation in plain words: **refine** specific things, or **proceed** to generate creatives or evaluate an existing set.
 
-> **Status:** design spec v0.1, 2026-10-25, not yet reviewed. No code yet. **Today** marks the hackathon slice; **full** is the target after. Numbers quoted in this spec describe tools and limits; they are never evidence, and the skill must not copy them into a brief.
+> **Status:** design spec v0.2, 2026-10-25, revised after a senior-engineer and a devil's-advocate review. No code yet. **Today** marks the hackathon slice; **full** is the target after. Every threshold here is **provisional until the Tavily-coverage spike** (build task 1) measures how much Reddit and review content Tavily returns and how often `published_date` is missing. Numbers in this spec describe tools and limits; they are never evidence. Details (Tavily parameters, file formats, schema delta, operations, build plan, sources) are in [RESEARCH-APPENDIX.md](RESEARCH-APPENDIX.md).
 
-**Principles.** Intake's four carry over: code computes every number (the model labels; scripts count, weight, rank, gate and decide); evidence comes only from logged tool results or the owner's words and files (verbatim, ≤ 25 words, personal details removed); "not supported yet" is a valid result; every claim traces to evidence through `findings[]`. **New:** scripts write the research log. Every web call goes through a bundled script that records the request and response itself, so the model can't add a source by saying it saw one.
+**Principles.** Intake's four carry over: code computes every number (the model labels; scripts count, weight, rank, gate and decide); evidence comes only from logged tool results or the owner's words and files (verbatim, ≤ 25 words, personal details removed); "not supported yet" is a valid result; every claim traces to evidence through `findings[]`. **New in research:** scripts write the research log and every change to `intake.json`. The model writes only plans, quote candidates and proposals; it can't add a source by saying it saw one, or edit the brief directly.
 
 ## 1. Purpose, inputs, outputs, handback
 
 | | |
 |---|---|
 | **Runs after** | `gtm-intake` hands off `intake.json` with any readiness status (`needs-more` included; research is how gaps close) |
-| **Inputs** | `gtm-workspace/<slug>/intake.json`, the existing `research-log.jsonl`, `sources/`, optional owner files: exported reviews of their own product, a Google Trends CSV, a `creatives/` folder |
-| **Outputs** | The same `intake.json`, grown (new evidence, revised findings, segments, lexicon, a new optional `research` block); the append-only log, grown; `research/` working files; `research-brief.md` for the owner |
-| **Handback** | A plain-words summary: what changed, the strongest recent quotes and script-computed statistics, confidence per customer group, and the recommendation with its reasons. The owner picks the next step |
+| **Inputs** | `gtm-workspace/<slug>/intake.json`, the existing `research-log.jsonl` and `sources/`, and the **owner's own customer voice**, asked for up front (below), plus optional Google Trends CSVs and a `creatives/` folder |
+| **Outputs** | The same `intake.json`, grown (new evidence, appended findings, revised segments and lexicon, a `research.decision`); the log, grown; `research/` working files; `research-brief.md` for the owner |
+| **Handback** | Leads with the recommendation in plain words, then why, then what changed, then quotes and figures (section 8) |
+
+**Owner's own data first.** Before the first search, the run asks once (through the intake addendum, section 7) for reviews exported from the owner's own app store, Google Business Profile or Shopify; support emails; survey answers; sales-call notes. `import_owner_file.py` turns them into `origin: "owner-file"` evidence: verbatim excerpts, customer names and emails dropped (intake's rule). This is the cleanest source there is (no terms-of-service risk, and it's the owner's actual customers), so it counts toward every gate.
 
 Intake's own capped research turn stays as it is. It draws the first picture; `gtm-research` deepens and tests it.
 
@@ -23,136 +25,154 @@ Intake's own capped research turn stays as it is. It draws the first picture; `g
 
 | File | Writer | Role |
 |---|---|---|
-| `research-log.jsonl` | Scripts only (in research runs) | **The ledger.** One JSON line per event: `run`, `search`, `fetch`, `source`, `reject`, `loop`. Each line carries `seq`, `at`, `runId`, `pass`, `writer` (script@version), `prev` (SHA-256 of the previous line). Never edited |
-| `intake.json` | Scripts merge; model writes labels | The current picture. `evidence[]` only grows (stable IDs `ev_<n>` assigned by script, `runId` on each); `findings[]` are revised in place, with `runId` and `supersedes` |
-| `research/state.json` | `loop.py` | Run, pass and loop counters, open tasks, credits used, status |
-| `research/owner-questions.json` | `loop.py` + addendum | The owner-question queue (section 7) |
-| `research/runs/<runId>.json` | `loop.py` | Snapshot at the end of each pass: gates, sentiment, decision. Lets the owner see how confidence moved |
-| `research/cache/` | `tavily_search.py` | Result text kept only to verify quotes; deleted when the run closes (only hashes stay in the log) |
+| `research-log.jsonl` | Scripts only, from the first `run` line on | **The ledger.** One JSON line per event: `run`, `search`, `fetch`, `source`, `reject`, `merge`, `loop`. Never edited |
+| `intake.json` | Scripts only during research | The current picture. `evidence[]` and `findings[]` only grow (script-assigned IDs, `runId` on each); segments and lexicon change only through merged proposals |
+| `research/state.json` | `loop.py` | **The single source of truth for loop state:** run, pass, passes this run, credits, status, open tasks |
+| `research/owner-questions.json` | `loop.py`, `apply_addendum.py` | The owner-question queue and each question's lifecycle (section 7) |
+| `research/plan.json`, `candidates.jsonl`, `proposals.jsonl` | Model | The only files the model writes during research (formats in appendix A3) |
+| `research/cache/` | `tavily_search.py` | Result text kept only to verify quotes; deleted when the run closes, or after 7 days if a run is abandoned |
 
 **Why this shape:**
-- **The intake validator already reads this log.** `provenance.load_log` builds sources from `kind:"source"` lines and skeptic queries from `kind:"search"` lines, and ignores other kinds and extra fields. Research lines add fields but never change those two kinds. **Rule:** after every merge, `validate_research.py` first runs `validate_intake.py --log research-log.jsonl --write`, which must exit 0; research never weakens an intake check.
+- **The intake validator already reads this log.** `provenance.load_log` builds sources from `kind:"source"` lines and skeptic queries from `kind:"search"` lines, and ignores other kinds and extra fields. **Rule:** after every merge, `validate_research.py` first runs `validate_intake.py --log research-log.jsonl --write`, which must exit 0. A brief and log in the proposed shape were checked against both the `main` and `fix/demo-critical` validators: both exit 0.
 - **One save file** for the owner and for the simulation skill, which already reads `segments`, `lexicon` and `constraints` from it.
-- **Append-only with a hash chain** gives "growing body" and auditability for free: any pass can be replayed from the log, and an edited line breaks the chain.
+- **Append-only** gives the "growing body" and lets any pass be replayed from the log.
 
-**Re-confirmation:** when a pass changes anything the owner confirmed (segments, hypothesis status, ICP), the merge script flips the "Owner confirmed the brief" check to `pass: false` with a note saying what changed. The brief can't read `ready` again until the owner re-confirms at handback.
+**Intake-era evidence** (written by intake, logged by the model) stays in the brief and still feeds intake's `concernBundles`. It does **not** count toward research gates G1–G4 and is shown as "from the first interview's research". Research can upgrade a record by re-fetching its URL through the script; if the quote is found verbatim, the record gains `fetchId` and `logSeq` and starts counting.
+
+**When research changes the confirmed brief,** the merge script flips the "Owner confirmed the brief" check to `pass: false`, and the handback opens with a one-screen **what changed** summary (at most 5 lines, before → after in plain words, generated from the merge diffs). The owner re-confirms when choosing the next step (section 8).
 
 ## 3. Provenance made real
-
-**Scripts, not self-reports.** The model never writes a `search` or `source` line. It runs:
 
 ```
 python3 scripts/tavily_search.py search --plan research/plan.json    # or: extract --urls ... --query ...
 python3 scripts/add_evidence.py research/candidates.jsonl            # model-proposed quotes → verified evidence
+python3 scripts/merge_proposals.py research/proposals.jsonl          # model-proposed changes → checked merge
 ```
 
-- `tavily_search.py` sends each call, logs a `search`/`fetch` line with the parameters (never the key), Tavily's `request_id` and the credits Tavily reports (`include_usage: true`), caches result text under a `fetchId`, and prints a numbered digest (`fetchId:resultIdx`, URL, date, text) for the model to read.
-- The model proposes quotes as `{fetchId, resultIdx, quote, segmentIds, concernIds, sentiment, stances, demographicCues}`.
-- `add_evidence.py` accepts a candidate only if: the quote is verbatim in that cached result (each `[removed]` may stand in for at most 4 words of the original), it's ≤ 25 words, it passes the intake personal-details regex, and every enum is valid. It then assigns `ev_<n>`, writes the `source` line (excerpt = the verified quote), and merges the record into `intake.json` atomically. Rejections are logged as `reject` lines with the reason; the rejection rate is a quality metric in the run summary.
-- `validate_research.py` adds: research-run evidence must cite a `source` line whose `writer` is a script and whose `fetchId` maps to a logged `request_id`; the hash chain is intact; no file in the workspace matches `tvly-[A-Za-z0-9_-]+`.
-- **Threat model, stated honestly:** this stops habitual or hallucinated sourcing, not a deliberately adversarial operator. Tavily `request_id`s let a human audit a run against Tavily's usage logs.
+- **Calls:** `tavily_search.py` sends each call, logs a `search`/`fetch` line with the parameters (never the key), Tavily's `request_id` and the credits Tavily reports, caches the result text under a `fetchId`, and prints a numbered digest for the model to read.
+- **Quotes:** the model proposes `{fetchId, resultIdx, quote, segmentIds, concernIds, sentiment, stances, demographicCues}`. `add_evidence.py` accepts one only if all of these hold:
+  - The quote is verbatim in that cached result.
+  - It stays inside one paragraph and doesn't cross a comment marker (Tavily chunks can splice several commenters together; markers are listed in `references/source-policy.md`).
+  - It's ≤ 25 words and passes intake's personal-details regex.
+  - Each `[removed]` replaces 1–4 words that match the personal-details regex, look like a capitalised name, or contain a digit. Never a negation ("not", "never", "no", "n't") or a run of stopwords, so redaction can't flip a meaning.
+  - It isn't a duplicate (same URL and normalised excerpt), and the URL has fewer than 2 accepted quotes.
 
-**API key.** `tavily_client.py` reads `TAVILY_API_KEY` from the environment, else the macOS Keychain (`security find-generic-password -s gtmagic-tavily -a "$USER" -w`, captured through a pipe, never through argv). It never prints, logs or caches the key; every exception message and log line passes a `tvly-…` redactor. No key → exit code 3 with "No Tavily key found; run the GTMagic key setup script." The setup script exists separately and isn't part of this spec. Standard library only (`urllib`), like the intake scripts.
+  The script then assigns `ev_<n>`, writes the `source` line (with `evidenceId`, `fetchId`, `seq`), and merges the record, carrying `fetchId` and `logSeq`. Re-running the same candidates file is a no-op. A chunk with comment markers sets `spliceRisk: true`: that quote counts toward themes but never feeds the lexicon or the handback's quotes. Single-comment permalinks are preferred for extraction.
+- **Changes to the brief:** each proposal names its target by ID (`{collection: "segments", id: "seg_2", field: "barriers"}`, never `/segments/0`) and carries the `before` value. `merge_proposals.py` applies it only if the current value still equals `before`, refuses owner-owned fields, turns structural changes (split, merge, drop a segment) into owner questions, and logs a `merge` line with the diff. New findings are appended with `runId`; earlier findings are never rewritten.
+- **Checks in `validate_research.py`:**
+  - After the first `run` line, any log line without a script `writer` is an error.
+  - Every research evidence record's `logSeq` points at a `source` line with the same ID, URL and excerpt; in reverse, every script-written `source` line's `evidenceId` exists in `intake.json`.
+  - No file in the workspace matches `tvly-[A-Za-z0-9_-]+`.
+  - The hash chain is intact. Each line carries `prev` = SHA-256 of the previous line, starting at the first `run` line. That's low value against anyone determined (it can be recomputed) but cheap, and it catches accidental edits.
+- **Threat model, stated honestly:** this stops habitual or hallucinated sourcing, not a deliberately adversarial operator. Tavily `request_id`s let a human audit a run against Tavily's usage logs. A verbatim match also doesn't prove one person said the words (see splicing above).
 
-**Tavily facts the scripts rely on** [T1–T5]: `POST https://api.tavily.com/search`, `/extract`, `/map` with `Authorization: Bearer tvly-…`.
-- **Search** params used: `search_depth` (`basic` 1 credit, `advanced` 2), `max_results` ≤ 20, `chunks_per_source` 1–3, `include_domains` (≤ 300) with `include_domains_mode` (`restrict`/`prefer`), `exact_match` (quoted customer phrases), `country` (from a geography lock), `topic`, recency via `time_range` (`day`…`year`) or `start_date`/`end_date`, `include_published_date` (beta), and `filter_by_published_date` (drops undated results, so recent-only queries only). `days` isn't in the current docs; `auto_parameters` stays off (2 credits).
-- **Extract:** ≤ 20 URLs per call; with `query` it returns the top `chunks_per_source` (1–5) chunks, not whole pages: right for quotes, and we store less. 1 credit per 5 successful URLs (basic); failures are free and arrive in `failed_results` even on HTTP 200. **Map** (competitor sites): 1 credit per 10 pages; map + targeted extract, never crawl.
-- **Limits:** 100 requests/min on development keys, 1,000 on production; HTTP 429 with `Retry-After`; the script throttles to 30/min and retries once. `include_raw_content` with `include_domains` has returned empty results [T6], so search snippets first, extract second. Nebius acquired Tavily in 2026 [T7]; keeping Tavily behind `tavily_client.py` makes a provider swap one file.
+**API key.** `tavily_client.py` reads `TAVILY_API_KEY` from the environment, else the macOS Keychain (`security find-generic-password -s gtmagic-tavily -a "$USER" -w`, read through a pipe, never through argv). It never prints, logs or caches the key, and every message passes a `tvly-…` redactor. No key → status `blocked` with "No Tavily key found; run the GTMagic key setup script" (that script exists separately). Standard library only, like the intake scripts.
 
-## 4. Sources: access, limits and terms
+**Provider coupling, honestly.** A swap away from Tavily (now owned by Nebius [T7]) touches more than the client: `request_id` auditing, credit accounting, `published_date` semantics (recency), chunking (the splice check) and the replay cassette all depend on Tavily. Keep those behind `tavily_client.py`'s return type and expect a swap to take about a day, not one file.
 
-| Source | Access path | What we take | Terms and limits that shape the design |
-|---|---|---|---|
-| **Reddit threads** | Tavily search, `include_domains: ["reddit.com"]`, snippets + query-focused extract | ≤ 25-word quotes, thread date, community name | Official Data API: self-service closed in Nov 2025; new access needs approval under the Responsible Builder Policy [R2]; commercial use needs a separate agreement; AI training needs rightsholder permission; data must be deleted when no longer needed [R1]. Rate limits are reported as 100 QPM per OAuth client (one source says 60) [R1, R6]. robots.txt has blocked most non-Google crawlers since July 2024 [R3], so Tavily's Reddit coverage may be partial: measure it in the spike. Reddit sued SerpApi, Oxylabs, AWMProxy and Perplexity in Oct 2025 over Reddit content obtained through search results [R4]. **So:** snippets and short quotes only, never usernames, never `/user/` URLs (the script blocks them), no bulk storage; get legal sign-off and Reddit approval before the paid hosted product (grill Q2) |
-| **Subreddit metadata** | Tavily extract of the community page, if rendered | Weekly visitors and contributions, copied with an evidence ID | Reddit replaced public member counts with 7-day visitors (28-day rolling average) and contributions in 2025 [R5]; the API's `about` data needs approved OAuth. Without it, community activity is **observed-in-search** (dated threads found, computed by code), labeled as such, never as size |
-| **Google Trends** | Owner uploads a Trends CSV (`trends_csv.py`); official API later | Relative interest over time, script-computed change | The official Trends API is an application-only alpha (since July 2025): consistently scaled data, 5-year rolling window, daily to yearly, country and sub-region [G1, G2]. `pytrends` was archived on 2025-04-17 [G3]. Tavily can find articles that cite Trends but not the series itself. Never scrape Trends |
-| **App-store reviews** | Tavily search/extract of store pages; owner exports for their own app | Rating and review count as printed, a few visible reviews | App Store Connect and Play Developer APIs cover **your own apps only** [A2, A3]. Apple's legacy public reviews RSS (~500 recent per storefront) is undocumented [A1]; adapter only after a terms check |
-| **Google Maps reviews** (local businesses) | Places API (New), full version only | Rating, `userRatingCount`, ≤ 5 reviews | Returns at most 5 reviews, sorted by relevance [P1]; policies forbid caching Places content beyond exceptions (place IDs are exempt) and require author attribution when displaying reviews [P2]. **So:** `retention: run` (excerpts dropped at run end), or prefer the owner's own Business Profile reviews as an owner file |
-| **Trustpilot, G2 and similar** | Tavily search snippets only; no extract or crawl | Short quotes, aggregate rating | Secondary sources say Trustpilot's terms ban text and data mining without permission; G2 unconfirmed [TP]. Treat both as snippet-only until checked |
-| **Platform demographics** | Tavily search of Pew and similar | Copied survey figures with n and date | Pew publishes Reddit use by age, gender, income and education (2026 survey, n = 5,511) [D1]. It reports use *within* each group, not the age mix *of* users; converting needs a sourced population mix, done by code |
+## 4. Sources: access and the terms that shape the design
 
-Every adapter declares `access`, `retention` (`log` or `run`) and `snippetOnly` in `references/source-policy.md`; the scripts enforce them.
+| Source | Access path | Constraint that shapes the design (detail: appendix A2) |
+|---|---|---|
+| **Owner's own customer voice** | Owner files | None beyond intake's rules: drop names and emails. First-class; asked for up front |
+| **Reddit threads** | Tavily search with `include_domains: ["reddit.com"]`, snippets + query-focused extract | Reddit sued Perplexity, SerpApi, Oxylabs and AWMProxy on 2025-10-22 over Reddit content obtained through search results [R4]. Commercial use needs a separate agreement [R1]. Non-Google crawlers blocked since July 2024 [R3], so coverage may be partial. Short quotes only; never usernames or `/user/` URLs. Hosted use is decision (c) |
+| **Subreddit size** | Tavily extract of the community page, if shown | Public member counts were replaced by 7-day visitors and contributions [R5]. Otherwise activity is "observed in search" (dated threads found), never a size |
+| **Google Trends** | Owner-uploaded CSV; official alpha API later | The official API is an application-only alpha [G1, G2]; `pytrends` is archived [G3]; never scrape |
+| **App-store reviews** | Tavily search/extract of store pages | The official review APIs cover your own apps only [A2, A3]; owners export their own |
+| **Google Maps reviews** | Places API, full version only | At most 5 reviews; no caching of Places content [P1, P2]. **So Places text never enters the append-only log or the brief:** only place IDs and counts taken during the run, so Places gives themes, never quotes |
+| **Trustpilot, G2** | Tavily search snippets only | Reported text-mining bans [TP]; no extract or crawl |
+| **Platform demographics** | Tavily search of Pew and similar | Copied figures with n and date [D1]; converting "share of each age group who use Reddit" into the users' age mix needs a sourced population mix, done by code |
 
 ## 5. Discovery, extraction and labeling
 
-**Seeds come from intake:** segment names and descriptions, needs and barriers, `lexicon[]` phrases (real customer words make the best queries), `interests[].researchDefinition` (may name a condition), `targetableProxies`, incumbents, `channels`, and locks (geography → `country`; age → query terms).
+**Seeds come from intake:** segment descriptions, needs and barriers, `lexicon[]` phrases (real customer words make the best queries), `interests[].researchDefinition` (may name a condition), `targetableProxies`, incumbents, and locks (geography → Tavily `country`).
 
-**Discovery (pass 1, and whenever a diversity gate fails).**
-1. The model writes `research/plan.json`: queries with an `intent` (`discover-community`, `voice-of-customer`, `incumbent-reviews`, `demographics`, `skeptic`, `momentum`) and the segment they serve. Recipes live in `references/query-recipes.md`.
-2. `communities.py` parses source keys from result URLs (`reddit:r/<name>`, `appstore:<id>`, `play:<package>`, `trustpilot:<domain>`, else the domain) and computes, per candidate: `breadth` (share of seed queries that hit it), mean Tavily `score`, distinct threads, and `recentShare` (dated in the last 12 months). **Rank = breadth × meanScore × (0.5 + 0.5 × recentShare)**, a versioned ranking heuristic, not a business assumption.
-3. The model may exclude an off-topic candidate with a one-line reason (logged). The top 5 communities and top 5 products go forward.
+**Discovery** (pass 1, and whenever the diversity gate fails):
+1. The model writes `plan.json`: queries with an `intent` (`discover-community`, `voice-of-customer`, `incumbent-reviews`, `demographics`, `skeptic`, `momentum`) and the segment each serves.
+2. `communities.py` derives a **`sourceKey`** per result URL: `reddit:r/<name>`, `appstore:<id>`, `play:<package>`, `trustpilot:<domain>`, `owner:<file>`, else the domain. **A "source" everywhere in this spec means a distinct `sourceKey`.**
+3. Per candidate source, code computes `breadth` (share of seed queries that hit it), mean Tavily score, distinct threads and `recentShare`. **Rank = breadth × meanScore × (0.5 + 0.5 × recentShare)**, a versioned heuristic, not a business assumption.
+4. The model may exclude an off-topic source with a logged reason. The top 5 communities and top 5 products go forward.
 
-**Extraction (each pass).** Per selected source, `voice-of-customer` queries built from needs, barriers, lexicon and switching language ("switched from", "cancelled", "gave up on"), restricted to that source, with `time_range: "year"` first. If that returns fewer than 5 usable results, the script widens to 3 years and logs the widening.
+**Extraction** (each pass): per selected source, `voice-of-customer` queries from needs, barriers, lexicon and switching language ("switched from", "cancelled", "gave up on"), restricted to that source, with `time_range: "year"` first. If that returns fewer than 5 usable results, the script widens to 3 years and logs the widening.
 
-**Labels per excerpt** (model, using the versioned rubric in `prompts/label-rubric.md`):
-- `segmentIds`, `concernIds` (stable `con_` IDs, as in intake).
-- `sentiment: {label: "negative" | "mixed" | "neutral" | "positive", target}`, where `target` is `problem`, `category`, `incumbent:<name>` or `offer-concept`.
-- `stances: [{hypothesisId, stance: "supports" | "contradicts"}]`.
-- `demographicCues`: verbatim cue phrases (for example "52F", "my grandkids"), checked against the cached text by `add_evidence.py`.
+**Labels per excerpt** (model, using the versioned rubric `prompts/label-rubric.md`):
+- `segmentIds` and `concernIds`, as in intake.
+- `sentiment: {label: negative | mixed | neutral | positive, target}`, where the target is `problem`, `category`, `incumbent:<name>` or `offer-concept`.
+- `stances: [{hypothesisId, stance: supports | contradicts}]`.
+- Verbatim `demographicCues`.
 
-**Aggregation (code).** `confidence.py` computes per segment × target: n, counts per label, net sentiment = (positive − negative) ÷ n, and the recency-weighted versions. **Label agreement:** in Claude Code, a separate subagent re-labels a 20% sample (minimum 10); code reports percent agreement. If it isn't checked, the segment's confidence is capped at medium.
+Code aggregates per segment × target, recency-weighted. In Claude Code, a separate subagent re-labels a 20% sample (minimum 10) and code reports the agreement.
 
-**Recency.** `publishedAt` comes from Tavily's `published_date` only; otherwise `undated`. The weight is 0.5^(age in months ÷ 12) (12-month half-life). Undated excerpts get a fixed 0.25, count toward themes, and never count toward the recency gate. Customer voice older than 36 months isn't added; official statistics up to 5 years (grill Q5). Recency weighting applies to gates and sentiment, not to intake's `concernBundles` (grill Q12).
+**Recency.** `publishedAt` comes from Tavily's `published_date` only, else `undated`. Weight = 0.5^(age in months ÷ 12). Undated excerpts weigh 0.25, count toward themes, and never count toward the recency gate. Customer voice older than 36 months isn't added; official statistics may be up to 5 years old. If the spike shows dates missing for most Reddit results, the recency gate is redesigned before build, not loosened silently.
 
 **Demographic signals,** each labeled with its `basis`:
-- **`self-disclosed`:** `demographics.py` extracts bands with fixed patterns ("52F" → age 50–54, sex F; "I'm 34" → 30–34), plus model-proposed cues that are verbatim in the text. Only age band, sex, life stage and country or state. Bands are stored on the evidence record, never with a username. In health-topic briefs the exact age token is replaced by `[removed]` in the excerpt.
 - **`community-level`:** a sourced figure about the platform or community (a Pew table, a subreddit's own census post), copied with its evidence ID and n.
-- **`interpolated`:** computed by code with a named method, inputs and evidence IDs in `logic`. `self-disclosed-sample` (counts of bands); `platform-prior` (a community-level figure applied to one community); `blend` = w × sample + (1 − w) × prior with w = n ÷ (n + 20).
-- **Small cells:** any band with n < 5 is suppressed from shares and reports. The model never types a share.
+- **`self-disclosed`:** `demographics.py` extracts bands with fixed patterns ("52F" → 50–54, F; "I'm 34" → 30–34), plus verified model cues. Only age band, sex, life stage, and country or state.
+  - **Health-topic briefs: off until decision (b).** If enabled, bands live only in an aggregate tally per segment, never on a record that carries a thread URL, and exact ages are redacted from quotes.
+  - Other briefs may keep bands on the evidence record.
+- **`interpolated`:** computed by code with a named method, its inputs and evidence IDs in `logic`: `self-disclosed-sample`, `platform-prior`, or `blend` = w × sample + (1 − w) × prior, with w = n ÷ (n + 20).
+- **Small cells:** any band with n < 5 is suppressed. The model never types a share.
 
-## 6. Confidence model: when "we're confident"
+## 6. Confidence model: when the research backs a customer group
 
-Gates are **validation thresholds** in `confidence.py` (constants, versioned). They measure the evidence, not the market, and owner economics never enter them.
+Gates are **validation thresholds** in `confidence.py`: versioned constants, provisional until the spike. They measure the evidence, not the market; owner economics never enter them. They count only **script-sourced web evidence and owner-file evidence** (not intake-era records), and only customer voice (`review`, `forum-post`).
 
-| Gate (per segment) | Pass when (full · Today) | What fails it tells the next pass |
+| Gate (per segment) | Pass when (full · Today) | What a failure tells the next pass |
 |---|---|---|
-| G1 Volume | ≥ 30 · 15 customer-voice excerpts (`review` or `forum-post`) tagged to the segment | Run more voice-of-customer queries |
+| G1 Volume | High at ≥ 30, medium at ≥ 10 tagged excerpts (the same breakpoints as intake's `concernBundles`) | Run more voice-of-customer queries |
 | G2 Recency | ≥ 50% dated within 24 months, and recency-weighted volume ≥ 15 · 8 | Re-query with `time_range: "year"` |
-| G3 Diversity | ≥ 3 · 2 distinct sources, none over 40%, ≥ 2 source types | Discover another community or product |
-| G4 Corroboration | Each of the top 3 concerns appears in ≥ 2 distinct sources; each hypothesis's support comes from ≥ 2 sources | Target the uncorroborated concern elsewhere |
-| G5 Skeptic | No `unresolved` skeptic claim on the segment, unless the owner has answered it | Owner question or more disconfirming queries |
-| G6 Labels | Second-label agreement ≥ 80% (Claude Code) | Revise the rubric; confidence capped at medium |
+| G3 Diversity | ≥ 3 · 2 sources, none over 40% · 60%, ≥ 2 source types | Discover another community or product |
+| G4 Corroboration | Each of the top 3 concerns appears in ≥ 2 sources; each hypothesis's support (by `segmentId`) comes from ≥ 2 sources | Look for the uncorroborated concern elsewhere |
+| G5 Skeptic | ≥ 1 skeptic entry for the segment, its queries logged in this run, none `unresolved` unless the owner answered it | Owner question or disconfirming queries |
+| G6 Labels | Second-label agreement ≥ 80% (Claude Code only) | Revise the rubric; confidence capped at medium |
 | G7 Owner alignment | No open `contradiction` question for the segment | Owner question |
 
-**Segment confidence (code):** `high` = all gates pass; `medium` = G1 ≥ 10 excerpts, G3 and G7 pass; else `low`.
+**Segment confidence (code):** `high` = all gates pass; `medium` = G1 medium, plus G3, G5 and G7; else `low`.
 
-**Hypotheses:** code counts distinct-source support and contradiction. The model still writes `status`, but the validator errors on `supported` when contradictions ≥ supports or support comes from fewer than 2 sources, and on `refuted` without ≥ 5 contradicting excerpts from ≥ 2 sources or a cited "wrong if" match.
+**Why the counts can differ from intake's:** intake's `concernBundles` still counts every customer-voice record (theme weights for the simulation); G1 counts only research-grade records (confidence). The brief labels both.
 
-**How each pass narrows the ICP.** `loop.py` turns failing gates into research tasks and owner questions. The model may directly revise model-owned fields (needs, barriers, decision criteria, attribute weights, concerns), with each diff logged. Structural changes (split a segment whose concern ranking differs by community, merge two that don't, drop a `not-serviceable` one, change a must-have) are **proposals** the owner confirms (grill Q7). **Saturation** (a stop signal, not confidence) is the share of a pass's new excerpts that introduced a new concern ID; below 1 in 10 for two passes running means the web has little more to say.
+**Hypotheses and skeptic entries** gain `segmentId` (skeptic entries also an `id`). Code counts distinct-source support and contradiction. The validator errors on `supported` when contradictions ≥ supports or support comes from fewer than 2 sources, and on `refuted` without ≥ 5 contradicting excerpts from ≥ 2 sources or a cited "wrong if" match.
+
+**How each pass narrows the ICP.** `loop.py` turns failing gates into research tasks and owner questions. Proposals revise model-owned fields (needs, barriers, decision criteria, attribute weights, concerns, lexicon); structural changes become owner questions (decision 10). **Saturation** is the share of a pass's new excerpts that introduced a new concern ID. A pass below 1 in 10, or with zero new accepted quotes, counts as a saturated pass.
 
 ## 7. Closing the loop with the owner
 
-After every pass, `loop.py evaluate` checks for owner-facing gaps: **contradictions** between research and intake answers (an age lock of 35–64 while most self-disclosed ages are 25–34), **gaps** that block a gate and only the owner can fill (their own reviews, whether a competitor is really an alternative), **low-confidence segments** (narrow, keep researching, or drop?), **unverified locked constraints** that block a gate, and **narrowing** send-backs when a target is crowded or vague.
+After every pass, `loop.py evaluate` looks for owner-facing gaps:
+- **Contradictions** between research and intake answers (an age lock of 35–64 while most self-disclosed ages are 25–34).
+- **Gaps** that block a gate and only the owner can fill.
+- **Low-confidence segments:** narrow, keep researching, or drop?
+- **Unverified locked constraints** that block a gate.
+- **Narrowing** send-backs when a target is crowded or vague.
+- At run start only, **owner data** (section 1).
 
-**Option A: intake gains an `addendum` mode.** Research writes the question queue and stops; `gtm-intake` (same conversation, invoked by name) asks only those questions under its interview rules, records the answers, applies changes to owner-owned fields with `scripts/apply_addendum.py`, re-validates, and hands back.
-- **For:** one interviewer and one rulebook (plain words, the vagueness check, one pushback then gospel); the "who writes each field" table holds, since only intake writes owner-owned fields; about 30 lines of SKILL.md plus one script. **Against:** a skill switch mid-conversation (reliable in Claude Code, less certain in chat), and two skills editing one file (handled by turn-taking: research never writes while the queue has `asked` items).
+**Option A: intake gains an `addendum` mode.** Research writes the queue and stops; `gtm-intake` (same conversation, invoked by name) asks only those questions under its interview rules, then `apply_addendum.py` applies the answers.
+- **For:** one interviewer and one rulebook (plain words, the vagueness check, one pushback then gospel); only intake writes owner-owned fields. **Against:** a skill switch mid-conversation (reliable in Claude Code, less certain in chat).
 
 **Option B: a second-pass interviewer inside `gtm-research`.**
-- **For:** seamless; the evidence that raised each question is already in context; one skill to install. **Against:** it duplicates the interview rules (they drift), research gains write access to owner-owned fields, and SKILL.md grows past easy reading.
+- **For:** seamless, with the evidence already in context. **Against:** duplicated interview rules that drift, and research gains write access to owner-owned fields.
 
-**Recommendation: A.** Field ownership and a single interview rulebook are the integrity rules this product rests on. In Claude Code the switch is invisible to the owner. If `gtm-intake` isn't installed, research stops and says so; it never asks owner questions itself.
+**Recommendation: A** (decision 5). If `gtm-intake` isn't installed, the status is `blocked`; research never asks owner questions itself.
 
-**Handoff contract** (`research/owner-questions.json`, `schemaVersion: 1`):
+**Handoff contract** (`research/owner-questions.json`; full format in appendix A3):
 
 ```ts
 interface OwnerQuestion {
-  id: string;                 // q_<n>, script-assigned
-  pass: number;               // which research pass raised it
-  kind: "contradiction" | "gap" | "low-confidence" | "locked-unverified" | "narrowing";
-  target: string;             // JSON pointer into intake.json, e.g. "/constraints/1" or "/segments/0"
-  ask: string;                // plain words, one question; no ICP jargon
-  why: string;                // plain words, cites what research found
+  id: string; pass: number;   // q_<n>, script-assigned; the pass that raised it
+  kind: "owner-data" | "contradiction" | "gap" | "low-confidence" | "locked-unverified" | "narrowing";
+  target: { collection: "constraints" | "segments" | "hypotheses" | "business" | "icp"; id?: string; field?: string };
+  before: string;             // JSON of the target's value when asked; the answer applies only if it still matches
+  ask: string; why: string;   // plain words; `why` cites what research found
   evidenceIds: string[]; findingIds: string[];   // at least one; validated
-  blocking: boolean;          // blocks a confidence gate
+  blocking: boolean;          // blocks a gate
   status: "open" | "asked" | "answered" | "skipped" | "withdrawn";
-  answer?: { evidenceId: string; changes: Array<{ path: string; before: string; after: string }> };   // JSON-encoded; apply_addendum.py
+  answer?: { evidenceId: string; mergeSeq: number };   // owner-text evidence + the log line holding the diff
 }
 ```
 
 - **Selection (code):** at most 4 per round, blocking first, then by the number of gates a question would unblock. A locked constraint that already has a `pushback` is never raised again; a contradiction on a locked constraint *is* its one pushback.
-- **Answers:** each becomes `evidence` with `origin: "owner-text"`, `sourceType: "first-party"`, a verbatim ≤ 25-word excerpt and `questionId` (the full answer goes to `research/answers/q_<n>.txt`). `apply_addendum.py` diffs owner-owned fields before and after, appends a `loop` line (`answers-applied`, with the diff), and runs `validate_intake.py`, which must exit 0.
-- **Resume:** `loop.py resume` reads `state.json` and the answers, re-plans only the affected tasks, and starts the next pass. It never restarts discovery unless G3 fails.
-- **State in the files:** `state.json` (`runId`, `pass` counted across runs, `loop.count` = passes this run, `loop.max`, credits, `status`); the question lifecycle in `owner-questions.json`; every transition as a `loop` line in the log (`questions-issued`, `answers-applied`, `resumed`, `stopped`); a `research.loop` mirror in `intake.json`.
+- **Answers:** each becomes `origin: "owner-text"` evidence (a verbatim ≤ 25-word excerpt, plus `questionId`; the full answer goes to `research/answers/q_<n>.txt`). `apply_addendum.py` uses the same ID-targeted, `before`-checked merge as proposals, logs a `merge` line, and runs `validate_intake.py`, which must exit 0.
+- **Turn-taking:** while the status is `awaiting-owner`, `add_evidence.py` and `merge_proposals.py` refuse to run.
+- **Resume:** `loop.py resume` re-plans only the affected tasks; discovery reruns only if G3 fails.
 
 ```
  gtm-research
@@ -170,130 +190,102 @@ interface OwnerQuestion {
  └──── loop.py resume ◄───── validate_intake.py exits 0
 ```
 
-**Termination, computed as validation gates** (`loop.py status`):
+**Termination, computed as validation gates** (`loop.py status`; also `researching` and `awaiting-owner` while running):
 
-| Gate | Pass when | Stops as |
+| Gate | Stops when | Status |
 |---|---|---|
-| T1 Confident | Primary segment `high` (Today: `medium`), every alternate has a verdict, no blocking question open | `confident` |
-| T2 Owner says good enough | The owner accepts; the script records `ownerAccepted` with the gates still failing, so later skills see "accepted at medium" | `owner-accepted` |
-| T3 Pass cap | `loop.count` (passes this run) has reached 3 (Today: 2), or credits have reached the run cap | `cap-reached` |
-| T4 Saturation | Two passes below the saturation threshold with gates still failing | `saturated` (recommend narrowing or a real-world test) |
+| T0 Setup or integrity | No key, Tavily out of credits, `gtm-intake` missing | `blocked` |
+| | Network failing after retries, the validator failing after a merge, a script crash | `error` |
+| T1 Research-backed | Primary segment `high` (Today: `medium`), every alternate has a verdict, no blocking question open | `research-backed` (never "validated") |
+| T2 Owner says good enough | The owner accepts; the script records the gates still failing, so later skills see "accepted at medium" | `owner-accepted` |
+| T3 Pass cap | Passes this run reach 3 (Today: 2), failed passes included, or credits reach the run cap | `cap-reached` |
+| T4 Saturation | Two saturated passes in a row with gates still failing | `saturated` |
 
-The cap limits owner time and credit spend; it says nothing about the market. Reaching it hands off with every failing gate listed in plain words.
+The cap limits owner time and credit spend; it says nothing about the market. Every stop hands off with the failing gates translated into plain words.
 
 ## 8. End-of-run decision and handoffs
 
-`decide.py` computes the recommendation; the model explains it and the owner chooses (grill Q11).
+`decide.py` computes the recommendation; the model explains it; the owner chooses (decision 4). Readiness is judged with intake's checks **excluding** "Owner confirmed the brief", because research has just invalidated it. Rows apply in strict precedence: the first match wins.
 
-| Recommendation | When (code) | What the owner sees | Next skill receives |
+| # | Recommendation | When (code) | Next skill receives |
 |---|---|---|---|
-| **Refine** | Primary confidence `low`; or a blocking question open; or an `unresolved` skeptic claim on the primary motivation; or stopped as `saturated`/`cap-reached` with gates failing | Each item to refine with the evidence and the gate it fails, and how: an owner answer, another run, or a cheap real-world test | — (a new `gtm-research` run resumes from `state.json`) |
-| **Generate creatives** | Primary ≥ `medium`, intake validator ready, ≥ 10 lexicon phrases for the primary, no creatives supplied | Top concerns, net sentiment toward incumbents (angles), the quotes to borrow | `intake.json` (segments, lexicon, constraints with `appliesTo` messaging/targeting, `roughMessaging` as seeds) plus `research.decision` (`focusSegmentIds`, ranked concerns). Output: text (headline, body) or images (with their on-image text supplied separately so guardrails can check it) |
-| **Evaluate existing creatives** | Same gates, and the owner has ≥ 2 creatives in `creatives/` | The same, plus what the test will compare | `intake.json`, `research.decision`, and `creatives/manifest.json`: `{id, kind: "text" or "image", path or text, headline?, body?, onImageText, channel?}` |
+| 1 | **Fix setup** | Status `blocked` or `error` | Nothing; the owner is told what to fix |
+| 2 | **Refine** | Primary confidence `low`; a blocking question open; an `unresolved` skeptic claim on the primary motivation; intake readiness failing; or stopped as `saturated`/`cap-reached` with gates failing | A new `gtm-research` run resumes from `state.json` |
+| 3 | **Evaluate existing creatives** | Otherwise, if the owner supplied ≥ 2 creatives (text or images) | `intake.json`, `research.decision`, `creatives/manifest.json` |
+| 4 | **Generate creatives** | Otherwise | `intake.json` and `research.decision` |
 
-The handback shows, in order: what changed this run (findings added, revised, superseded); per segment, the 3 strongest recent quotes with links (no links in `--public` renders) and the script's statistics (excerpts, sources, recency share, net sentiment by target, top concerns, demographic shares with n); confidence with failing gates in plain words; then the recommendation and the other two options.
+**Creatives get customer phrases and themes, never quotes.** Next skills receive lexicon phrases (≤ 6 words when used in copy), concern themes with counts, and sentiment summaries; never `evidence[].excerpt`.
+- **Overlap guardrail** (reusable by both creative skills): reject any line that shares ≥ 6 consecutive words with a stored excerpt, other than an exact lexicon phrase.
+- **No testimonial framing:** reject copy that puts customer words in quotation marks or attributes them to a person. Real-sounding testimonials invite FTC endorsement trouble, and long quotes invite copyright trouble.
+- **Image creatives** must supply their on-image text so the same checks run.
 
-## 9. Health topics, copyright, compliance and budget
+**The handback, in this order, in plain words** (no gate names, no "net sentiment"; `render_research.py` maps each gate to a fixed plain sentence):
+1. The recommendation in one line ("Go ahead and make ads for midlife strength protectors", or "Before making ads, let's settle two things").
+2. Why, in 2–3 sentences.
+3. What changed (one screen) if the confirmed brief changed.
+4. Per customer group: the 3 strongest recent quotes with links (no links in `--public` renders) and plain figures from the script ("Most of the 34 recent comments were frustrated with…").
+5. The other options.
 
-**Health and sensitive topics** (intake's rules carry over unchanged; additions):
+**Recording the choice:** `loop.py record-choice` writes the owner's choice and, unless they chose to refine, the re-confirmation check in **one atomic write**, so a brief can't be re-confirmed without a recorded next step, or the reverse.
+
+## 9. Health topics, copyright, compliance, retention and budget
+
+**Health and sensitive topics.** Intake's rules carry over unchanged. Additions:
 - Queries, `researchDefinition` and `research.communities[]` may name a condition: they're research.
-- `segments[].channels` lead to targeting, so they get intake's proxy check (no condition terms) and the "verify platform policy" suffix. A community whose name names a condition stays in `research.communities` only.
-- Never infer a person's health status; self-disclosed signals exclude health attributes entirely; the community already implies the topic.
-- Self-disclosed bands only in aggregate with n ≥ 5; exact ages redacted from health quotes. Findings about drug effects never become messaging claims; intake's messaging check applies to every creative.
+- `segments[].channels` lead to targeting, so they get intake's proxy check (no condition terms) and the "verify platform policy" suffix.
+- Never infer a person's health status. Self-disclosed signals never include health attributes. See decision (b) for whether they run at all on health topics.
+- Findings about drug effects never become messaging claims.
 
-**Copyright:** ≤ 25-word excerpts, always with a source link (except `--public`); never whole reviews or threads; cached page text deleted when the run closes. **ToS:** per section 4, enforced by adapter policy: snippet-only domains, blocked `/user/` paths, `retention: run` for Places, no Trends scraping, no CAPTCHA or login bypass.
+**Copyright:** ≤ 25-word excerpts with a source link; never whole reviews or threads; creatives never reuse quotes (section 8); cached text deleted with the run.
 
-**Budget per run** (enforced by `tavily_search.py` from `state.json`): per pass ≤ 20 advanced searches (~40 credits) + ≤ 3 extract calls (≤ 12), so ≤ 55 credits; per run 3 passes under a 200-credit cap (≈ USD 1.60 pay-as-you-go at USD 0.008 per credit; the free tier is 1,000 credits a month [T4]). Time: about 5–8 minutes per pass, plus owner rounds.
+**ToS:** enforced by adapter policy (appendix A2): snippet-only domains, blocked `/user/` paths, no Places text in the log, no Trends scraping, no CAPTCHA or login bypass.
 
-## 10. Skill layout, schema delta, build plan
+**Retention:**
+- Claude Code: the owner's machine, under intake's rules.
+- **Hosted product:** excerpts and log lines expire after 12 months unless re-verified by a fresh fetch, and are deleted with the workspace. Reddit-sourced excerpts also follow whatever decision (c) settles.
+
+**Budget per run** (worst case checked before every call; appendix A5): per pass ≤ 20 advanced searches (~40 credits) + ≤ 3 extracts (≤ 12) + optional map (≤ 5); per run 3 passes under a 200-credit cap (≈ USD 1.60 at pay-as-you-go rates [T4]). Time: about 5–8 minutes per pass, plus owner rounds.
+
+## 10. Skill layout and build plan
 
 ```
 .claude/skills/gtm-research/            requires gtm-intake installed alongside
-  SKILL.md                              the pass loop, labeling rules, handback
-  prompts/label-rubric.md               sentiment, concern and stance rubric (versioned)
-  references/source-policy.md           per-source access, retention, snippet-only, ToS notes
-  references/query-recipes.md           query templates per intent
-  scripts/tavily_client.py              key loading (env → Keychain), HTTP, throttle, 429, redaction, --replay
-  scripts/tavily_search.py, ledger.py   search / extract / map from a plan → log + cache; hash chain, verify, close-run
-  scripts/add_evidence.py               verify candidates → evidence + source lines; IDs; atomic merge
-  scripts/communities.py, demographics.py      source keys, metrics, rank; bands, interpolation, small cells
-  scripts/confidence.py, loop.py, decide.py    gates, sentiment, saturation; question queue, resume, stop; recommendation
-  scripts/trends_csv.py                 owner-uploaded Google Trends CSV → series summary
-  scripts/validate_research.py, render_research.py   intake validator + research checks; research-brief.md (--public)
-.claude/skills/gtm-intake/scripts/apply_addendum.py   (Option A) answers → owner-owned fields, diff
+  SKILL.md · prompts/label-rubric.md · references/source-policy.md · references/query-recipes.md
+  scripts/tavily_client.py              key loading, HTTP, throttle, retries, redaction, worst-case budget, --replay
+  scripts/tavily_search.py, ledger.py   plan → calls → log + cache; hash chain, verify, close-run, cache TTL
+  scripts/add_evidence.py, import_owner_file.py   verified quotes and owner files → evidence; idempotent
+  scripts/merge_proposals.py            ID-targeted, before-checked merges of model proposals
+  scripts/communities.py, demographics.py      sourceKeys, metrics, rank; bands, interpolation, small cells
+  scripts/confidence.py, loop.py, decide.py    gates, saturation; queue, resume, status, record-choice; precedence
+  scripts/trends_csv.py · validate_research.py · render_research.py · quote_overlap.py (creative guardrail)
+.claude/skills/gtm-intake/scripts/apply_addendum.py   (Option A) answers → owner-owned fields, same merge rules
 ```
 
-`validate_research.py` imports the intake validator from `../gtm-intake/scripts/` and fails clearly if it's missing; one copy of the rules, no vendoring. Confirm the sibling path in Claude chat's skill layout during the spike.
+`validate_research.py` imports the intake validator from `../gtm-intake/scripts/` and fails clearly if it's missing; the spike confirms that sibling path works in Claude chat. The schema delta (all optional fields, so schema v1 holds, plus a one-line `search-trend` source type) is in appendix A4.
 
-**Schema delta** (to add to `gtm-intake/references/schema.md`; all optional, so the version stays 1):
+**Build plan** (detail in appendix A6): about **9–10 person-days** for the full design, about **7** with the Today cuts. **Day 1** produces the file contract and schema delta, a SKILL.md skeleton, and a hand-labelled fixture, so the script tasks can run in parallel. **The spike and the Tavily client are one task**, because the client is what the spike needs.
 
-```ts
-interface Evidence {                    // + optional fields
-  runId?: string; questionId?: string; sourceKey?: string;      // e.g. "reddit:r/xyz"
-  publishedAt?: string | null; recencyWeight?: number;           // script
-  sentiment?: { label: "negative" | "mixed" | "neutral" | "positive"; target: string };   // model
-  stances?: Array<{ hypothesisId: string; stance: "supports" | "contradicts" }>;          // model
-  demographicSignals?: Array<{ attribute: "age" | "sex" | "lifeStage" | "geography"; value: string; cue: string }>;  // script-verified
-}
-// sourceType gains "search-trend" (Trends series): a one-line change to provenance.SOURCE_TYPES
-interface Finding { runId?: string; supersedes?: string }        // + optional
-// InterestGroup.demographics[] + optional: basis: "self-disclosed" | "community-level" | "interpolated"; method?: string; n?: number
-interface IntakeBrief { research?: ResearchBlock }               // new optional top-level block
+**Today slice:**
+- Tavily plus owner files; 2 passes and 1 owner round.
+- Gates G1–G5 and G7 at the Today thresholds; no label-agreement check, so confidence is capped at medium.
+- Community-level demographics only.
+- The demo runs from a recorded cassette.
 
-interface ResearchBlock {
-  schemaVersion: 1;
-  runs: Array<{ runId: string; startedAt: string; endedAt?: string; passes: number; creditsUsed: number }>;   // script
-  loop: { count: number; max: number; status: "researching" | "awaiting-owner" | "confident" | "owner-accepted" | "cap-reached" | "saturated";
-          ownerAccepted?: { at: string; failingGates: string[] } };                                            // script
-  communities: Array<{ id: string; sourceKey: string; segmentIds: string[]; breadth: number; meanScore: number; threads: number;
-                       recentShare: number; rank: number; visitorsWeekly?: number; evidenceIds: string[]; excludedReason?: string }>;
-  products: Array<{ id: string; name: string; sourceKey: string; rating?: number; reviewCount?: number; evidenceIds: string[] }>;
-  confidence: Array<{ subjectId: string; level: "low" | "medium" | "high";
-                      gates: Array<{ gate: string; pass: boolean; value: number; threshold: number }> }>;      // script
-  sentiment: Array<{ segmentId: string; target: string; n: number; negative: number; mixed: number; neutral: number;
-                     positive: number; net: number; weightedNet: number }>;                                    // script
-  trends: Array<{ term: string; geo: string; evidenceId: string; change12mo: number | null }>;                 // script
-  decision?: { recommendation: "refine" | "generate-creatives" | "evaluate-creatives"; reasons: string[]; focusSegmentIds: string[];
-               refineItems: Array<{ what: string; gate?: string; evidenceIds: string[] }>; ownerChoice?: string; decidedAt?: string };
-}
-```
-
-**Who writes:** script: every number above, IDs, `publishedAt`, `recencyWeight`, `demographicSignals`, `loop`, `decision.recommendation`. Model: labels, findings, skeptic entries, question wording, community exclusions, refine-item wording. Owner: answers, structural segment changes, `ownerAccepted`, `ownerChoice`.
-
-**Build plan** (3 people, tasks ≤ half a day, ~7 person-days, ~2.5 days elapsed):
-
-| # | Task | Done when |
-|---|---|---|
-| 0 | **Spike:** 10 seed queries on the demo business against Reddit, app stores, Trustpilot; record a replay cassette; check chat sandbox egress to api.tavily.com | Measured hit rate, dated share and credits per query written up; cassette in `fixtures/demo/research/` |
-| 1 | `tavily_client.py` + `tavily_search.py` + `ledger.py`, with `--replay` | Unit tests: hash chain, key never in output (grep test), 429 retry, budget refusal |
-| 2 | `add_evidence.py` | Tests: verbatim with `[removed]`, ≤ 25 words, personal-detail rejection, cue verification, atomic merge, intake validator still exits 0 |
-| 3 | `communities.py` + query recipes | Ranks are deterministic on the cassette |
-| 4 | `confidence.py` + `demographics.py` | Gate and sentiment numbers match hand-computed fixtures; n < 5 suppressed |
-| 5 | `loop.py` + intake addendum mode + `apply_addendum.py` | A contradiction round-trips: question → answer → diff logged → resume |
-| 6 | `decide.py`, `validate_research.py`, `render_research.py` | Fixtures produce each of the three recommendations |
-| 7 | SKILL.md, label rubric, source policy | End-to-end demo run from the cassette, offline; senior-engineer and GPT review |
-
-**Today slice:** Tavily only (Reddit, app-store pages, competitor sites), 2 passes, 1 owner round, the Today thresholds, no label-agreement check (confidence capped at medium), demo from the cassette. **Full:** Trends (CSV, then the alpha), Places, label agreement, multi-run growth.
+Decision (a) asks whether v1 should be slimmer still.
 
 ## 11. Questions to grill the product owner on
 
-1. **Owner loop: intake "addendum" mode (A) or an interviewer inside research (B)?** Default **A**: one interviewer and one rulebook, and only intake writes owner-owned fields. B is smoother to build, but it duplicates the interview rules and blurs field ownership.
-2. **Reddit in the paid hosted product: keep reading via Tavily, apply for Reddit Data API approval and commercial terms, or drop Reddit there?** Default: Tavily snippets for Claude Code and the demo now; apply under the Responsible Builder Policy and get a legal read before the hosted launch. Reddit has sued over its content being obtained through third-party search, and requires a separate agreement for commercial use.
-3. **Which surface ships first: Claude Code only, or Claude chat too?** Default **Claude Code**. The scripts need an env or Keychain key and outbound network; if chat's sandbox blocks api.tavily.com, the model would be writing the log again, which breaks script-written provenance.
-4. **Whose Tavily key and credits?** Default: the owner's own key in Claude Code (free tier 1,000 credits a month, about 5 full runs); our key with hard per-run caps only in the hosted product. This changes billing, the setup flow and abuse risk.
-5. **How recent is "recent"?** Default: 12-month half-life, a 36-month hard window for customer voice, 5 years for official statistics; undated posts count toward themes, not toward the recency gate. A shorter window gives fresher sentiment but thin evidence for niche and local businesses.
-6. **What bar is "confident"?** Default: the gates as written (30 customer-voice excerpts, ≥ 3 independent sources, none over 40%, top concerns corroborated in ≥ 2 sources, skeptic resolved), with 15 for the hackathon slice. A higher bar costs credits and owner time; a lower one risks blessing an echo chamber.
-7. **May research change customer groups itself (split, merge, drop), or only propose?** Default: **propose**; the owner confirms in the addendum. Research directly updates only model-owned fields (needs, barriers, weights, concerns), with each diff logged.
-8. **Self-disclosed demographics on health topics: allowed?** Default: **yes, narrowly**: age band, sex, life stage, country or state; extracted by code; aggregates with n ≥ 5 only; exact ages redacted from health quotes; never health status per person. "No" loses the best age signal for the GLP-1 demo.
-9. **Google Trends: apply for the official alpha, accept owner-uploaded CSVs, or skip?** Default: owner-uploaded CSV now plus an alpha application; never `pytrends` (archived) or scraping. Without Trends, momentum comes from dated post volume, labeled as such.
-10. **Review sources beyond Tavily snippets (Apple's public reviews RSS, the Places API)?** Default: snippets plus the owner's exported reviews of their own product; add the RSS and Places adapters only after a terms check (Places forbids caching content; Trustpilot reportedly bans text mining).
-11. **End of run: always stop for the owner's choice, or auto-continue when the gates pass?** Default: **always stop**, with the recommendation preselected. The next skills cost money, and the owner must re-confirm a brief that research changed.
+The first four came out of the reviews, which disagree with the design or with the owner's brief. Each records both reviews' view and a recommendation.
+
+1. **(a) v1 scope: the full design, or the reviewers' slim v1?** *Senior engineer and devil's advocate:* ship one bounded pass plus one optional owner round, owner reviews first-class, three gates (volume, sources, recency) and a proceed/refine choice; add demographics and multiple passes after the spike. *Owner's brief:* "as much demographic information as possible" and a loop "until we feel we are confident". **Recommendation:** build the slim v1 on the full design's plumbing (script-written log, proposals, question queue, `state.json`), so more passes is a cap change (1 → 3), not a rewrite. Include sourced community-level demographics in v1; they're cheap and safe. Defer self-disclosed extraction and G4–G6 until the spike shows Reddit coverage and date availability. Building seven gates on unmeasured data is waste.
+2. **(b) Self-disclosed demographics on health topics: on or off for v1?** *Owner:* asked for as much demographic information as possible. *Devil's advocate:* off for v1. Health-data laws such as Washington's My Health My Data Act cover data linking a person to a health status, including inferences, and allow private lawsuits [L1]; verbatim quotes can be searched back to their author. *Senior engineer:* allow it, aggregates only, never on a record with a thread URL. **Recommendation:** off for health-topic briefs in v1 (community-level sourced figures only); on, as aggregates, for other briefs; revisit after a legal read. The demo business is exactly the case those laws target, and sourced community figures still give the age skew.
+3. **(c) Reddit via Tavily in the paid hosted product?** *Both reviews:* don't assume it's fine. Reddit sued Perplexity, SerpApi, Oxylabs and AWMProxy on 2025-10-22 over Reddit content obtained through search results [R4] (verified), and Tavily is that kind of intermediary. The Nov 2025 closure of self-service API access comes from a mirrored r/redditdev post and is **unconfirmed on official Reddit pages** [R2]. **Recommendation:** keep it for Claude Code and the demo (owner-run, short excerpts with links). For hosted, first get Tavily's sourcing and commercial-use terms **in writing**, then a legal read, and apply for Reddit access in parallel. Launch hosted without Reddit if either is unresolved; owner reviews, app stores and other forums fill in.
+4. **(d) "Generate vs evaluate": keep it as an owner choice, or collapse it into routing?** *Reviews:* collapse it. Research decides only proceed vs refine; whether to generate or evaluate follows from whether creatives exist. *Owner's brief:* names three outcomes. **Recommendation:** research computes proceed/refine; on proceed, routing defaults to evaluate when ≥ 2 creatives were supplied, else generate, and the handback offers the other as a one-click alternative. Always stop for the owner's choice; never auto-continue, since the next skills cost money and the brief needs re-confirming.
+5. **Owner loop: intake "addendum" mode (A) or an interviewer inside research (B)?** Default **A**: one interviewer and one rulebook, and only intake writes owner-owned fields. B is smoother to build, but it duplicates the interview rules and blurs field ownership.
+6. **Which surface ships first: Claude Code only, or Claude chat too?** Default **Claude Code**. The scripts need an env or Keychain key and outbound network; if chat's sandbox blocks api.tavily.com, the model would be writing the log again, which breaks script-written provenance.
+7. **Whose Tavily key and credits?** Default: the owner's own key in Claude Code (free tier 1,000 credits a month, about 5 full runs); our key with hard per-run caps only in the hosted product. This changes billing, the setup flow and abuse risk.
+8. **How recent is "recent"?** Default: 12-month half-life, a 36-month window for customer voice, 5 years for official statistics; undated posts count toward themes, not toward recency. A shorter window gives fresher sentiment but thin evidence for niche and local businesses. All provisional until the spike measures date coverage.
+9. **What bar is "research-backed"?** Default: the gates in section 6 (30 research-grade excerpts for high, ≥ 3 sources, none over 40%, top concerns corroborated, a skeptic pass per group), provisional until the spike. A higher bar costs credits and owner time; a lower one risks blessing an echo chamber.
+10. **May research change customer groups itself (split, merge, drop), or only propose?** Default: **propose**. Structural changes become owner questions; proposals update only model-owned fields, with each `before` value checked and the diff logged.
+11. **Non-Tavily sources: Google Trends (owner CSV now, alpha application), Apple's public reviews RSS, the Places API?** Default: Trends via owner CSV plus an alpha application, never `pytrends` or scraping. RSS and Places only after a terms check; Places can supply themes, never quotes.
 12. **Should recency weighting flow into the simulation's concern weights, or stay in confidence and sentiment only?** Default: confidence and sentiment only for v1, so the intake validator stays unchanged and concern counts stay comparable across runs. Revisit once simulations show it matters.
-
-## Sources (checked 2026-10-25)
-
-- **Tavily:** [T1] search https://docs.tavily.com/documentation/api-reference/endpoint/search · [T2] extract https://docs.tavily.com/documentation/api-reference/endpoint/extract · [T3] map https://docs.tavily.com/documentation/api-reference/endpoint/map · [T4] credits and pricing https://docs.tavily.com/documentation/api-credits · [T5] rate limits https://docs.tavily.com/documentation/rate-limits · [T6] raw-content + domains issue https://community.tavily.com/t/combining-include-raw-content-and-include-domains-leads-to-no-results/170 · [T7] Nebius acquisition (Q2 2026 6-K) https://www.sec.gov/Archives/edgar/data/0001513845/000110465926094844/nbis-20260812xex99d2.htm
-- **Reddit:** [R1] Data API Terms (rev. 2026-07-20; the page blocks automated fetching, so read via a summary) https://redditinc.com/policies/data-api-terms, https://vorplabs.com/agent-tools/reddit-data-api · [R2] Responsible Builder Policy announcement, r/redditdev 2025-11-11 (mirror) https://r.datuan.dev/r/redditdev/comments/1oug31u/introducing_the_responsible_builder_policy_new/noc31sg · [R3] robots.txt block https://searchengineland.com/microsoft-confirms-reddit-blocked-bing-search-444385 · [R4] Reddit v. Perplexity, SerpApi et al. https://searchengineland.com/reddit-sues-perplexity-serpapi-scraping-google-463681, https://www.sdnyblog.com/files/2025/10/25-Civ-8736-Reddit-Inc.-Complaint.pdf · [R5] visitors and contributions https://www.socialsamosa.com/news-2/reddit-member-count-new-engagement-metrics-10067678 · [R6] rate limits (secondary) https://www.socialcrawl.dev/blog/reddit-api-key-limits-alternatives-2026
-- **Google Trends:** [G1] https://developers.google.com/search/apis/trends · [G2] https://developers.google.com/search/blog/2025/07/trends-api · [G3] pytrends (archived) https://github.com/GeneralMills/pytrends
-- **Reviews:** [A1] Apple reviews RSS cap (secondary) https://dev.to/quantoracle/the-app-store-review-ceiling-nobody-mentions-and-how-to-get-8x-past-it-484h · [A2] App Store Connect customer reviews https://developer.apple.com/documentation/appstoreconnectapi/customer-reviews · [A3] Play reviews API scope https://aso.dev/google-play/metadata/reviews/ · [P1] Places API (New) Place resource https://developers.google.com/maps/documentation/places/web-service/reference/rest/v1/places · [P2] Places policies https://developers.google.com/maps/documentation/places/web-service/policies · [TP] Trustpilot terms (secondary, unverified) https://webscraping.ai/faq/trustpilot-scraping/what-are-the-alternatives-to-scraping-trustpilot-directly
-- **Demographics:** [D1] Pew social media fact sheet https://www.pewresearch.org/internet/fact-sheet/social-media/
