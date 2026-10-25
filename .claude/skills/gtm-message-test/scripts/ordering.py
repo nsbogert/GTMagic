@@ -1,5 +1,5 @@
-"""Test design for build_test.py: the order each customer sees the options in, and who is asked twice.
-Standard library only."""
+"""Test design: the order each customer sees the options in (used by build_test.py, and by the simulation
+via ordering_index), and who is asked twice. Standard library only."""
 from __future__ import annotations
 
 import json
@@ -21,6 +21,14 @@ def williams_square(labels: list[str]) -> list[list[str]]:
             hi -= 1
     rows = [[labels[(b + r) % n] for b in base] for r in range(n)]
     return rows if n % 2 == 0 else rows + [list(reversed(row)) for row in rows]
+
+
+def ordering_index(segment_index: int, n_segments: int, j: int, k: int) -> int:
+    """The ordering the j-th customer (from 0) of a segment sees. segment_index counts only segments that have
+    customers in the sample, in intake.json segments[] order. Each segment starts at an evenly spaced row, so with
+    equal-sized segments the whole sample sees every ordering within one of equally often. Plain j % k would stack
+    every segment's leftover customers on the first rows."""
+    return (segment_index * k // n_segments + j) % k
 
 
 def pick_repeats(audience_path: str | None, rng: random.Random, warnings: list[str], seg_ids: set) -> list[str]:

@@ -134,7 +134,7 @@ All Claude calls go through one wrapper:
 
 **DESIGN** (pure code) builds the experiment:
 - **Stimuli:** every option in the same format (headline + ≤30-word subheadline), including the founder's current message if one was given.
-- **Orderings:** a Williams Latin square, counted within each segment, so every option appears in every position and right after every other option about equally often, and every segment sees the orderings about equally (exactly, when a segment's size is a multiple of the number of orderings).
+- **Orderings:** a Williams Latin square, counted within each segment, with each segment starting at an evenly spaced row. Every option appears in every position and right after every other option about equally often, every segment with at least as many customers as orderings sees every ordering, and with equal-sized segments the whole sample sees each ordering within one showing of the others.
 - **Repeat subset:** ~10 customers, spread across segments, are asked again with their ordering reversed.
 - **Protocol:** the instructions and the dimension definitions. The experimental method lives here, not in the Audience module.
 

@@ -1,20 +1,48 @@
 [
-  {
-    "id": "refactor-1",
-    "request": "Compare these images, which would work better for Refactor Fitness?",
-    "audience": "infer",
-    "candidates": [
-      { "id": "image-1", "imagePath": "images/refactor-1/image-1.png" },
-      { "id": "image-2", "imagePath": "images/refactor-1/image-2.png" }
-    ]
-  },
-  {
-    "id": "refactor-2",
-    "request": "Compare these images, which would work better for Refactor Fitness?",
-    "audience": "infer",
-    "candidates": [
-      { "id": "image-1", "imagePath": "images/refactor-2/image-1.png" },
-      { "id": "image-2", "imagePath": "images/refactor-2/image-2.png" }
-    ]
-  }
+ {
+  "id": "refactor-1",
+  "request": "Compare these images, which would work better for Refactor Fitness?",
+  "audience": "infer",
+  "candidates": [
+   {
+    "id": "image-1",
+    "imagePath": "images/refactor-1/image-1.jpg"
+   },
+   {
+    "id": "image-2",
+    "imagePath": "images/refactor-1/image-2.jpg"
+   },
+   {
+    "id": "image-3",
+    "imagePath": "images/refactor-1/image-3.jpg"
+   },
+   {
+    "id": "image-4",
+    "imagePath": "images/refactor-1/image-4.jpg"
+   },
+   {
+    "id": "image-5",
+    "imagePath": "images/refactor-1/image-5.jpg"
+   },
+   {
+    "id": "image-6",
+    "imagePath": "images/refactor-1/image-6.jpg"
+   }
+  ]
+ },
+ {
+  "id": "refactor-2",
+  "request": "Compare these images, which would work better for Refactor Fitness?",
+  "audience": "infer",
+  "candidates": [
+   {
+    "id": "image-1",
+    "imagePath": "images/refactor-2/image-1.png"
+   },
+   {
+    "id": "image-2",
+    "imagePath": "images/refactor-2/image-2.png"
+   }
+  ]
+ }
 ]
