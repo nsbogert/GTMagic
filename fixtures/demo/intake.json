@@ -26,7 +26,9 @@
     "taglines": [
       "Lose the fat, keep the strength",
       "Your medication's training partner",
-      "Smaller and stronger"
+      "Smaller and stronger",
+      "The strength plan built for GLP-1",
+      "Don't just lose weight, build what lasts"
     ],
     "frozenAt": "2026-10-25T12:55:00-07:00"
   },
@@ -1335,6 +1337,10 @@
       },
       {
         "check": "[script] No integrity errors",
+        "pass": true
+      },
+      {
+        "check": "[script] Owner confirmation recorded",
         "pass": true
       }
     ]

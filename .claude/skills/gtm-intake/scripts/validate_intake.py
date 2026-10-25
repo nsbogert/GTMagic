@@ -248,6 +248,8 @@ def readiness(brief: dict, messaging_ok: bool, r: Report) -> None:
         "No integrity errors": not r.errors,
     }
     block = brief.setdefault("readiness", {"status": "needs-more", "checks": []})
+    checks["Owner confirmation recorded"] = any(
+        c.get("check", "").startswith("Owner confirmed") and c.get("pass") for c in block.get("checks", []))
     kept = [c for c in block.get("checks", []) if not c.get("check", "").startswith(SCRIPT_PREFIX)]
     block["checks"] = kept + [{"check": SCRIPT_PREFIX + k, "pass": v} for k, v in checks.items()]
     if r.errors or not all(c.get("pass") for c in block["checks"]):
