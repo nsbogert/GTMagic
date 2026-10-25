@@ -5,6 +5,7 @@ import { listSessions } from "@/app/_session/store";
 import { Rail } from "@/components/shell/Rail";
 import { BotTurn } from "@/components/turns/BotTurn";
 import { SessionList } from "@/components/home/SessionList";
+import { StartSession } from "@/components/home/StartSession";
 import { Tag } from "@/components/evidence/Tag";
 
 export const dynamic = "force-dynamic";
@@ -17,8 +18,8 @@ export default async function Home() {
       <Rail />
       <main className="main"><div className="thread">
         <BotTurn lede text="Find out who will buy from you, and what to say to them.">
-          <p>In Claude Code, at this folder, ask for the GTMagic web UI. Claude will interview you here, research how real customers talk, and build your save file as you go.</p>
-          <div className="actions"><Link className="btn" href="/run/demo?replay=1">Try the example</Link></div>
+          <p>Click Start, answer a few questions here, and GTMagic researches how real customers talk and builds your save file as you go. It runs on your computer, using your Claude Code login.</p>
+          <div className="actions"><StartSession /><Link className="btn secondary" href="/run/demo?replay=1">Try the example</Link></div>
         </BotTurn>
         <section className="plate" aria-label="Sessions">
           <h3>Sessions</h3>

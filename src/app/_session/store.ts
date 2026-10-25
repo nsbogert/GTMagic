@@ -1,6 +1,7 @@
 /* Session files under gtm-workspace/.sessions/<id>/: session.json, transcript.jsonl, uploads/.
    The app writes only answer events and uploads here (the gtm-web CLI writes everything else). */
-import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
+import { randomBytes } from "node:crypto";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { readdir, stat } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
 import { z } from "zod";
@@ -9,7 +10,8 @@ import { parseTranscript, type TranscriptEvent } from "./events";
 
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 const ALLOWED_EXT = new Set([".csv", ".xlsx", ".txt", ".pdf", ".png", ".jpg", ".jpeg", ".webp"]);
-const SessionMetaSchema = z.looseObject({ id: z.string(), business: z.string().nullable().optional() });
+export const SessionMetaSchema = z.looseObject({ id: z.string(), business: z.string().nullable().optional(), pid: z.number().optional() });
+export type SessionMeta = z.infer<typeof SessionMetaSchema>;
 
 export type SessionView = {
   id: string;
@@ -19,6 +21,36 @@ export type SessionView = {
   lastEventAt: string | null;
   transcriptUpdatedAt: string | null;
 };
+
+/** Create a session with the same files the `ui start` CLI writes. */
+export function createSession(): string {
+  const id = randomBytes(6).toString("hex");
+  const dir = join(workspaceDir(), ".sessions", id);
+  mkdirSync(join(dir, "uploads"), { recursive: true });
+  writeFileSync(join(dir, "session.json"), JSON.stringify({ id, createdAt: new Date().toISOString(), business: null }) + "\n");
+  writeFileSync(join(dir, "transcript.jsonl"), "");
+  return id;
+}
+
+export function readMeta(id: string): SessionMeta | null {
+  const dir = sessionDir(id);
+  if (!dir) return null;
+  const r = SessionMetaSchema.safeParse(JSON.parse(readFileSync(join(dir, "session.json"), "utf8")));
+  return r.success ? r.data : null;
+}
+
+export function writeMeta(id: string, meta: SessionMeta): void {
+  const dir = sessionDir(id);
+  if (dir) writeFileSync(join(dir, "session.json"), JSON.stringify(meta) + "\n");
+}
+
+/** Append an event the app itself owns (only `done` today, when the owner stops a session). */
+export function appendDone(id: string): void {
+  const dir = sessionDir(id);
+  if (!dir) return;
+  const ev = { id: nextId(readEvents(dir)), at: new Date().toISOString(), kind: "done" };
+  appendFileSync(join(dir, "transcript.jsonl"), JSON.stringify(ev) + "\n");
+}
 
 export function sessionDir(id: string): string | null {
   if (!isSafeName(id, "session")) return null;

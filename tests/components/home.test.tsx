@@ -22,6 +22,6 @@ describe("SessionList", () => {
   });
 
   it("explains how to start one when there are none", () => {
-    expect(renderToStaticMarkup(<SessionList sessions={[]} />)).toContain("Start one from Claude Code");
+    expect(renderToStaticMarkup(<SessionList sessions={[]} />)).toContain("Start one above");
   });
 });

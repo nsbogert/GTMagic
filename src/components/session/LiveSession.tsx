@@ -16,6 +16,7 @@ import { BotTurn } from "../turns/BotTurn";
 import { Notice } from "../turns/Notice";
 import { OwnerTurn } from "../turns/OwnerTurn";
 import { Typing } from "../turns/Typing";
+import { Icon } from "../figures";
 
 const SessionResponse = z.object({
   id: z.string(),
@@ -25,6 +26,7 @@ const SessionResponse = z.object({
   brief: IntakeBriefSchema.nullable(),
   briefUpdatedAt: z.string().nullable(),
   briefIssues: z.array(z.string()),
+  agent: z.enum(["running", "stopped", "none"]),
 });
 type Session = z.infer<typeof SessionResponse>;
 
@@ -70,9 +72,17 @@ export function LiveSession({ id, hideLinks }: { id: string; hideLinks: boolean 
     await load();
   }
 
+  async function stop() {
+    await fetch(`/api/sessions/${id}/stop`, { method: "POST" });
+    await load();
+  }
+
+  const agentGone = s?.agent === "stopped" && !t.finished;
+
   return (
     <div className="app">
-      <Rail badge={t.mode === "scripted" || s?.brief?.mode === "demo" ? "Example · fictional data" : undefined}>
+      <Rail footer={s?.agent === "running" && !t.finished ? <button className="ghost-btn" type="button" onClick={() => void stop()}><Icon name="i-trash" />Stop session</button> : null}
+        badge={t.mode === "scripted" || s?.brief?.mode === "demo" ? "Example · fictional data" : undefined}>
         <Steps steps={t.steps} />
         <Legend segments={s?.brief?.segments ?? []} />
       </Rail>
@@ -96,7 +106,8 @@ export function LiveSession({ id, hideLinks }: { id: string; hideLinks: boolean 
           {canAnswer && t.openAsk?.chips.length ? (
             <div className="turn bot"><div className="chips">{t.openAsk.chips.map((c) => <button key={c} type="button" className="chip" onClick={() => void answer(c, [])}>{c}</button>)}</div></div>
           ) : null}
-          {s && !t.openAsk && !t.finished && !quiet ? <Typing /> : null}
+          {s && !t.openAsk && !t.finished && !quiet && !agentGone ? <Typing /> : null}
+          {agentGone ? <Notice title="Claude Code stopped before the session finished." tone="error">Its log is in gtm-workspace/.sessions/{id}/agent.log. Start a new session from the home page.</Notice> : null}
           {quiet ? <Notice title="Claude Code hasn't sent anything for a while." tone="error">Check the terminal where it&apos;s running.</Notice> : null}
           {sendError ? <Notice title={sendError} tone="error" /> : null}
           {t.finished ? <BotTurn text="That's the end of this session. Your save file is in gtm-workspace." /> : null}

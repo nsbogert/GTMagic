@@ -1,4 +1,5 @@
 import { readBusiness } from "@/app/_intake/workspace";
+import { agentState } from "@/app/_session/launcher";
 import { readSession } from "@/app/_session/store";
 
 export const dynamic = "force-dynamic";
@@ -9,6 +10,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const r = s.business ? await readBusiness(s.business) : null;
   return Response.json({
     ...s,
+    agent: agentState(s.id),
     brief: r && "brief" in r ? r.brief : null,
     briefUpdatedAt: r && "brief" in r ? r.updatedAt : null,
     briefIssues: r && "error" in r ? r.issues : [],

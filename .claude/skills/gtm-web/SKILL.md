@@ -15,6 +15,8 @@ Without this skill, gtm-intake runs in the terminal exactly as before.
 2. Give the owner the URL and say: "Answer in the page. I'll keep working here."
 3. If `ui start` fails, say so in one line and run gtm-intake in the terminal instead.
 
+**Started from the page?** When your prompt already gives you a session id (the owner clicked "Start a new session"), skip `ui start`: the page is open and waiting. Post straight to that session, starting with the one-liner question.
+
 Below, `ui` means `node .claude/skills/gtm-web/scripts/ui.ts` and `<id>` is the session id.
 
 ## The one rule: every owner-facing line goes through the page
