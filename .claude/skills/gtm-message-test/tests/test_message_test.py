@@ -88,6 +88,16 @@ class Build(unittest.TestCase):
         self.assertEqual(owner["headline"], next(c for c in INTAKE["creatives"] if c["id"] == "cr_1")["headline"])  # copied by code
         self.assertEqual(len(req["fingerprint"]), 12)
 
+    def test_offset_start_rows_keep_the_whole_sample_balanced(self):
+        from collections import Counter
+        from ordering import ordering_index
+        shown = Counter(ordering_index(s, 3, j, 6) for s in range(3) for j in range(16))
+        self.assertEqual(set(shown.values()), {8})                     # plain j % k: rows 0-3 shown 9 times, rows 4-5 only 6
+        self.assertEqual({ordering_index(s, 3, j, 6) for j in range(6) for s in range(3)}, set(range(6)))  # every group sees all
+        mains = [r["orderingIndex"] for r in RUN["customer-responses"]["responses"] if not r["isRepeat"]]
+        counts = Counter(mains)
+        self.assertLessEqual(max(counts.values()) - min(counts.values()), 1)
+
     def test_odd_number_of_options_gets_mirrored_rows(self):
         rows = build_test.williams_square(list("ABCDE"))
         self.assertEqual(len(rows), 10)

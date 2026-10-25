@@ -28,7 +28,7 @@ How the test is built and scored. **CONTRACTS.md** marks what follows `docs/CONT
 - **Labels and order:**
   - Labels A–F are shuffled with a seed derived from the options, so the decoy's label varies between businesses.
   - The orderings are a **Williams Latin square** (Needs the lead's OK; CONTRACTS.md says cyclic): every option appears in every position equally often, and right after every other option exactly once. A cyclic square always puts each option after the same neighbour.
-  - Within each customer group, the *j*-th customer sees `orderings[j % k]`, so every group sees every ordering (Needs the lead's OK; CONTRACTS.md counts across the whole sample).
+  - Within each customer group, the *j*-th customer sees `orderings[(⌊s × k / S⌋ + j) % k]` (*s* among the *S* groups with customers in the sample): every group with at least *k* customers sees every ordering, and each group starts at an evenly spaced row so that, with equal-sized groups, the whole sample sees every ordering within one of equally often (plain `j % k` stacks every group's leftovers on the first rows: 9 vs 6 showings for 3 groups of 16 and 6 orderings). CONTRACTS.md change in #8.
 - **Repeat subset (CONTRACTS.md):** 10 customers, round-robin across groups, chosen when `--audience` is given. Without it the simulation picks them.
 
 ## Scoring (`evaluate.py`, `stats.py`)
@@ -78,7 +78,7 @@ Simulated customers can be more alike than real ones, so a lopsided result is a 
 ## Needs the lead's OK
 
 1. **`source: "decoy"`** on `PositioningHypothesis`. It widens an enum, so it's a contract change.
-2. **Williams square and per-group ordering**, replacing the cyclic square and `orderings[i % k]` across the whole sample.
+2. **Williams square and per-group ordering with offset start rows**, replacing the cyclic square and `orderings[i % k]` across the whole sample (in #8).
 3. **ICP thresholds.** With truly equal groups, the agreed rules call `guess-holds` about 48% (2 groups) and `different-segment` about 14% of the time. Proposals:
    - require 95% of resamples for `different-segment`;
    - require the guess to come first in ≥ 80% for `guess-holds`;

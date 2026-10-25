@@ -11,8 +11,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import random
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # works under python -I too
+from ordering import ordering_index  # noqa: E402
 
 DIMENSIONS = ("relevance", "credibility", "differentiation", "clarity", "actionIntent")
 OBJECTIONS = ["Sounds like every other app.", "Not sure it's worth the price.", "I'd need to see how it works first.",
@@ -48,8 +52,9 @@ def fake(intake: dict, positioning: dict, request: dict, n: int, seed: int) -> d
                 "objections": objections, "reasoning": "FAKE", "model": "fake", "promptVersion": "fake-v1"}
 
     position = {s: 0 for s in seg_ids}
+    present = [s for s in seg_ids if any(seg == s for _, seg in customers)]  # segments with nobody in the sample don't count
     for cust, seg in customers:
-        k = position[seg] % len(orderings)  # each group sees every ordering equally often
+        k = ordering_index(present.index(seg), len(present), position[seg], len(orderings))
         position[seg] += 1
         responses.append(answer(cust, seg, k, False))
         if cust in repeat_ids:  # asked again with the same ordering reversed
