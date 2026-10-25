@@ -125,3 +125,13 @@ The user's words:
 - ESLint details, including whether to add the module-boundary rule.
 - `.gitignore` additions (`.playwright-mcp/`, `.impeccable/review/`).
 - Splitting into commits; this lands on the `ui` branch as one piece of work.
+
+## Addendum (2026-10-25): one-click start from the page (user decision)
+
+The user wants the whole experience in the browser: "one click start is the way to go." The home page gets **Start a new session**. Clicking it:
+
+1. The app creates a session (`gtm-workspace/.sessions/<id>/`, same layout the `ui` CLI uses) and opens `/session/<id>`.
+2. The app launches Claude Code in the background: `claude -p "<prompt>" --permission-mode dontAsk --allowedTools <list>`, working directory = repo root, output to `.sessions/<id>/agent.log`, process id recorded in `session.json`. The prompt tells it to use the `gtm-web` skill with this existing session (no `ui start`).
+3. Pre-approved actions only (everything else is refused without asking): the `ui` bridge (`Bash(node .claude/skills/gtm-web/scripts/ui.ts *)`), the intake scripts (`Bash(python3 .claude/skills/gtm-intake/scripts/*)`), copying uploads into the workspace (`Bash(cp gtm-workspace/*)`, `Bash(mkdir -p gtm-workspace/*)`), `Read`, `Glob`, `Grep`, `Write(gtm-workspace/**)`, `Edit(gtm-workspace/**)`, `WebSearch`, `WebFetch`, `Skill`.
+4. The session page shows **Stop session** (kills the process, records a `done`) and, if the process exits without `done`, "Claude Code stopped. See agent.log." Uses the owner's existing Claude Code login; the app still holds no API key.
+5. Starting from the terminal (`/gtm-web`) keeps working exactly as before.

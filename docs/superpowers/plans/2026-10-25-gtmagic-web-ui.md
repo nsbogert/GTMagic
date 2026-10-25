@@ -196,3 +196,12 @@
 - [ ] **Step 2:** End-to-end bridge check: `node .claude/skills/gtm-web/scripts/ui.ts start`, then `ui say`, `ui ask --wait` in one shell; answer in the browser; confirm the CLI prints `ANSWER` and the page shows the answer; `ui link <id> demo`-equivalent with a temp business folder shows plates.
 - [ ] **Step 3:** Delete `prototype/`; run `npm test && npm run typecheck && npm run lint && npm run build` — all pass.
 - [ ] **Step 4:** Commit `chore: replace the HTML prototype with the Next.js app`.
+
+### Task 12: One-click start from the page (spec addendum)
+
+**Files:** Create `src/app/_session/launcher.ts`, `src/app/api/sessions/[id]/stop/route.ts`, `src/components/home/StartSession.tsx`. Modify `src/app/_session/store.ts` (`createSession`), `src/app/api/sessions/route.ts` (POST), `src/app/page.tsx`, `src/components/session/LiveSession.tsx`, `.claude/skills/gtm-web/SKILL.md`. Test: `tests/session/launcher.test.ts`, `tests/api/start-stop.test.ts`.
+
+**Interfaces:** `createSession(): string` (id, same files as `ui start`); `claudeArgs(id: string): string[]` (pure: `-p <prompt> --permission-mode dontAsk --allowedTools …`); `launchAgent(id, spawnFn = spawn): number | null` (pid; writes `agent.log`, records `pid` in session.json); `agentRunning(id): boolean` (pid alive); `stopAgent(id): boolean`. `POST /api/sessions` → `{ id }` (409 never; 500 with plain message if `claude` isn't found); `POST /api/sessions/[id]/stop` → `{ ok }`. `SessionView` gains `agent: "running" | "stopped" | "none"`.
+
+- [ ] Tests: `claudeArgs` contains `--permission-mode dontAsk`, every pre-approved entry from the addendum, and the session id in the prompt, and nothing that allows arbitrary Bash; `POST /api/sessions` with a fake spawn creates the session folder and records the pid; stop on a session with a dead pid returns ok and appends `done`; `agent` is `"stopped"` when the pid isn't alive and no `done` exists.
+- [ ] Run — FAIL. Implement. Run — PASS. Browser check: click Start, first question appears in the page (real Claude Code run). Commit `feat: one-click start from the page`.
