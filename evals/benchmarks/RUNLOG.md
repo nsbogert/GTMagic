@@ -309,3 +309,7 @@ Then reply "done".
 **Results (16:40):**
 - Profile-richness taste r, 95% bootstrap CI over people: demographics only 0.12 [0.04, 0.20]; + key traits 0.18 [0.09, 0.27]; full 0.15 [0.06, 0.24]. Traits minus demographics +0.06 [−0.03, +0.16], not significant. No profile beat "same average for everyone" on within-person r (0.48) or MAE (1.52).
 - Upworthy crowd v3 (own pain points): 53/100 [43.5, 62.5], against crowd v2 51/100 and vanilla Opus 68/100 (−15 pts [−25, −5], significant). Readers still agree with each other 74% (v2: 74%); each reader alone 45–60% right.
+
+### What simulation IS good at (Mega-Study val, segment level, from existing outputs, no new runs)
+
+Sonnet-high twins averaged into segments predict each segment's mean rating of 18 different news-post concepts with card r 0.89 [0.88, 0.91] and MAE 0.33 (demographics-only profiles), against vanilla Opus asked for the segment average 0.79 [0.76, 0.82] / 0.53, published GPT-4.1 0.71 / 0.54, and Gemini 3 Pro 0.84 / 0.54. A real survey of 120 *other* people (train-split average) gives 0.94 / 0.30. Real-gap direction 100% (1 real gap), magnitude shrunk 0.3–0.6×. Contrast: on Upworthy pairs (same story, subtle wording differences) every crowd is at chance. Simulation predicts coarse concept-level preference (topic, source, framing, political fit), not fine copy tweaks.
