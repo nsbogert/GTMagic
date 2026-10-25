@@ -87,7 +87,7 @@ The first GTMagic skill. It interviews a small-business owner, researches their 
 - **Incumbents:** name, rating, review count.
 - **Unresolved concerns:** themes that incumbents' reviews show go unaddressed.
 - **Switching or quitting language:** evidence IDs.
-- **Size:** `customersNeeded = revenueGoal ÷ (price × purchasesPerYear)`; `minPopulation = customersNeeded ÷ adoptionRate` (default 1%, stated). The script computes both.
+- **Size:** `customersNeeded = revenueGoal ÷ (price × purchasesPerYear)`; `minPopulation = customersNeeded ÷ adoptionRate` (the owner's own estimate; no default). The script computes both.
 - **Motivation:** why this person buys now (trigger + job to be done).
 
 Verdict: `serviceable` · `marginal` · `not-serviceable` · `insufficient-evidence`.
@@ -137,7 +137,7 @@ The schema's single source of truth is [`.claude/skills/gtm-intake/references/sc
   references/question-bank.md
   references/schema.md              this schema
   scripts/validate_intake.py        counts, weights, size math, ad verdicts, readiness status, reference + verbatim checks
-  scripts/render_brief.py           owner-facing brief.md from intake.json (--no-links for public videos)
+  scripts/render_brief.py           owner-facing brief.md from intake.json (--public for demos and videos)
 ```
 
 ## Today's demo plan

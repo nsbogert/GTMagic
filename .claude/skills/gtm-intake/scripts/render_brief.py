@@ -1,63 +1,48 @@
 #!/usr/bin/env python3
-"""Render the owner-facing brief.md from intake.json: render_brief.py <intake.json> [-o brief.md] [--no-links]
+"""Render the owner-facing brief.md from intake.json: render_brief.py <intake.json> [-o brief.md] [--no-links] [--public]
 
 Plain language only ("customer group", not "segment"; no "ICP"). Numbers come from the JSON, computed by
 validate_intake.py; the only math here is cost per sign-up, for display. Estimates are always labeled.
+--public = no links, and drug names in the plain-AI baseline are masked (for video or sharing).
+Plain-words tables and the owner-input sections live in brief_sections.py.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
-from typing import Any
 
-Json = dict[str, Any]
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from brief_sections import (CHANNELS, EXPERIMENT_VERDICTS, FINDING_KINDS, READINESS,  # noqa: E402
+                            SEGMENT_VERDICTS, SKEPTIC_RESULTS, SOURCE_TYPES, Json, best_guess,
+                            currency_of, customer_worth, money, must_be_true, not_done)
+from guardrails import DRUG_NAMES  # noqa: E402  (drug names only: generic words like "medication" stay)
 
-# Plain-words versions of the schema's enum values.
-SEGMENT_VERDICTS = {"serviceable": "Worth going after", "marginal": "Possible, but a weaker bet",
-                    "not-serviceable": "Not worth going after right now",
-                    "insufficient-evidence": "Not enough evidence to judge yet"}
-READINESS = {
-    "ready": "Ready. The brief is complete and you confirmed it.",
-    "no-supported-segment": "No customer group we can stand behind yet. That is a useful answer, not a failure.",
-    "needs-more": "Not finished. A few questions still need answers before the next step.",
-}
-EXPERIMENT_VERDICTS = {"worked": "Worked: it beat your target cost per sign-up.",
-                       "didnt-work": "Didn't work: it cost more per sign-up than your target.",
-                       "inconclusive": "Too early to tell."}
-FINDING_KINDS = [("observed", "What we saw directly"),
-                 ("estimated", "What we estimated (calculated from other numbers, so treat as rough)"),
-                 ("inferred", "What we concluded (our reading of the evidence)")]
-SKEPTIC_RESULTS = {"nothing-found": "found nothing against it", "resolved": "the evidence backed it up",
-                   "unresolved": "an open doubt we could not settle, so treat this with care"}
-SOURCE_TYPES = {"forum-post": "forum post", "review": "app review", "review-aggregate": "app store rating",
-                "survey": "survey", "official-stats": "official statistics", "news-report": "news report",
-                "competitor-site": "competitor's website", "first-party": "your own data"}
-CHANNELS = {"meta": "Meta (Facebook/Instagram)", "google": "Google", "reddit": "Reddit",
-            "tiktok": "TikTok", "email": "Email", "other": "Other"}
 QUOTE_SOURCES = {"forum-post", "review"}  # first-hand customer words, not stats
 NO_GROUP = "We didn't find a group we can stand behind yet."
 MAX_WORRIES = 5  # keep the list scannable; the full counts stay in intake.json
+# \w* swallows word endings ("GLP-1s") so no fragment of a name is left behind.
+DRUG_MASK = re.compile(rf"(?:{DRUG_NAMES})\w*", re.IGNORECASE)
 
 
 def plain(text: str) -> str:
     """Strip internal IDs like '(ev_15)' or '(see concernBundles)', and speak to the owner directly."""
     text = re.sub(r"\s*\((?:see [A-Za-z]+|(?:ev|seg|con|px|fnd|lex|int)_\w+(?:,\s*\w+)*)\)", "", text)
+    text = re.sub(r"\s*\b(?:ev|seg|con|px|fnd|lex|int|hyp)_\d+\b,?", "", text)  # bare IDs inside longer notes
     text = re.sub(r"\bthe owner's\b", "your", text)
     return re.sub(r"\bThe owner's\b", "Your", text).strip()
+
+
+def masked(texts: list[str], public: bool) -> list[str]:
+    """Public mode hides drug names in the plain-AI baseline only; research text and quotes stay verbatim."""
+    return [DRUG_MASK.sub("[medication]", t) for t in texts] if public else texts
 
 
 def cell(items: list[str], empty: str) -> str:
     """Join items into one Markdown table cell."""
     return "<br>".join(s.replace("|", "\\|").replace("\n", " ") for s in items) or empty
-
-
-def money(amount: float | None, currency: str, decimals: int = 0) -> str:
-    if amount is None:
-        return "not recorded"
-    value = f"{amount:,.{decimals}f}"
-    return f"${value}" if currency == "USD" else f"{value} {currency}"
 
 
 def count(value: int | None) -> str:
@@ -79,17 +64,6 @@ def target_message(brief: Json) -> Json | None:
     return next((m for m in lines if m.get("segmentId") == seg_id), lines[0] if lines else None)
 
 
-PLAIN_CHECKS = {"ICP": "Who to target", "customer groups": "customer groups", "Skeptic pass": "Trying to prove it wrong",
-                "integrity errors": "problems in the data"}
-
-
-def plain_check(check: str) -> str:
-    text = check.replace("[script] ", "")
-    for jargon, words in PLAIN_CHECKS.items():
-        text = text.replace(jargon, words)
-    return text
-
-
 def short_version(brief: Json) -> list[str]:
     icp: Json | None = brief.get("icp")
     readiness: Json = brief.get("readiness") or {}
@@ -105,25 +79,26 @@ def short_version(brief: Json) -> list[str]:
         out.append(f"**Who to target:** {NO_GROUP}")
     msg = target_message(brief)
     what = f"\"{msg.get('headline', '')}\" — {msg.get('subheadline', '')}" if msg else "No message lines yet."
-    out += ["", f"**What to say:** {what}", "", f"**Where things stand:** {READINESS.get(status, status)}"]
-    # Script check names are internal; show the owner plain words only.
-    out += [f"- Not done yet: {plain_check(c.get('check', ''))}" for c in readiness.get("checks", []) if not c.get("pass")]
+    out += ["", f"**What to say:** {what}"] + customer_worth(brief)
+    out += ["", f"**Where things stand:** {READINESS.get(status, status)}"]
+    # Check names are internal; say what's still missing in the owner's terms.
+    out += [f"- Not done yet: {not_done(c.get('check', ''))}." for c in readiness.get("checks", []) if not c.get("pass")]
     return out + [""]
 
 
-def before_after(brief: Json) -> list[str]:
+def before_after(brief: Json, public: bool) -> list[str]:
     base: Json = brief.get("baseline") or {}
     icp: Json | None = brief.get("icp")
     out = ["## Before and after", ""]
     if base.get("ownerFirstDescription"):
-        out += [f"You started with: \"{base['ownerFirstDescription']}\"", ""]
+        out += [f"You started with: \"{masked([base['ownerFirstDescription']], public)[0]}\"", ""]
     after_who = [icp.get("statement", "")] if icp else [NO_GROUP]
     after_say = [m.get("headline", "") for m in brief.get("roughMessaging") or []]
     return out + [
         "| | Before research (plain AI, no evidence) | After research |",
         "|---|---|---|",
-        f"| **Who** | {cell(base.get('icps', []), '(none)')} | {cell(after_who, '(none)')} |",
-        f"| **What to say** | {cell(base.get('taglines', []), '(none)')} | {cell(after_say, '(none yet)')} |",
+        f"| **Who** | {cell(masked(base.get('icps', []), public), '(none)')} | {cell(after_who, '(none)')} |",
+        f"| **What to say** | {cell(masked(base.get('taglines', []), public), '(none)')} | {cell(after_say, '(none yet)')} |",
         "",
     ]
 
@@ -153,15 +128,15 @@ def customer_groups(brief: Json) -> list[str]:
             out.append(f"- **How many people:** about {people(pop)}{label}.{how}")
         else:
             out.append("- **How many people:** we couldn't estimate this yet.")
-        # sizeMath is zero until the validator fills it in; only show it once computed.
+        # sizeMath is null until the validator can compute it from the owner's inputs; only show it once computed.
         math: Json = svc.get("sizeMath") or {}
         need, minimum = math.get("customersNeeded") or 0, math.get("minPopulation") or 0
         if need and minimum:
             clears = "" if not pop else (" This group clears that bar." if pop >= minimum
                                          else " This group may be too small.")
-            out.append(f"- **Is it big enough?** To hit your revenue goal you need about {need:,.0f} customers, "
-                       f"so the group must have at least {minimum:,.0f} people (assuming about "
-                       f"{math.get('adoptionRate') or 0:.0%} of them would buy).{clears}")
+            out.append(f"- **Is it big enough?** To reach the minimum revenue you said you need, you'd need about "
+                       f"{need:,.0f} customers, so the group must have at least {minimum:,.0f} people (assuming about "
+                       f"{math.get('adoptionRate') or 0:.0%} of them would buy, your estimate).{clears}")
         out.append("")
     return out
 
@@ -188,7 +163,7 @@ def worries(brief: Json, links: bool) -> list[str]:
             for cid in b.get("concernIds", []):
                 totals[cid] = totals.get(cid, 0) + b.get("observedCount", 0)
         for cid, n in sorted(totals.items(), key=lambda kv: -kv[1])[:MAX_WORRIES]:
-            out.append(f"- {labels.get(cid, cid)}: mentioned in {n} of {posts} sources")
+            out.append(f"- {labels.get(cid, cid)}: mentioned in {n} of {posts} customer posts and reviews")
         combos = [b for b in bundles if len(b.get("concernIds", [])) > 1][:3]
         if combos:
             out.append("- Often raised together: " + "; ".join(
@@ -209,9 +184,12 @@ def worries(brief: Json, links: bool) -> list[str]:
 def tried(brief: Json) -> list[str]:
     out = ["## What you've already tried", ""]
     business: Json = brief.get("business") or {}
-    currency = (business.get("pricing") or {}).get("currency", "USD")
-    target = business.get("targetCpa")
-    goal = f" (your target: {money(target, currency)})" if target else ""
+    econ, currency = business.get("unitEconomics") or {}, currency_of(brief)
+    if econ.get("targetCpaSource") == "derived" and econ.get("targetCpaUsed"):
+        goal = f" (most you can spend: {money(econ['targetCpaUsed'], currency, 2)}, worked out from your numbers)"
+    else:  # the owner's own target; files from before unitEconomics only carry targetCpa
+        target = econ.get("targetCpaUsed") or business.get("targetCpa")
+        goal = f" (your target: {money(target, currency, 2)})" if target else ""
     experiments: list[Json] = brief.get("priorExperiments") or []
     if not experiments:
         return out + ["You didn't share any past ad results.", ""]
@@ -255,15 +233,15 @@ def how_sure(brief: Json) -> list[str]:
     return out
 
 
-def render(brief: Json, links: bool = True) -> str:
+def render(brief: Json, links: bool = True, public: bool = False) -> str:
     name = (brief.get("business") or {}).get("name", "Your business")
     out = [f"# {name}: your GTMagic brief", ""]
     if brief.get("mode") == "demo":
         out += ["**Demo run — all data is fictional.**", ""]
-    for section in (short_version(brief), before_after(brief), customer_groups(brief),
-                    worries(brief, links), tried(brief), how_sure(brief)):
+    for section in (short_version(brief), must_be_true(brief), best_guess(brief), before_after(brief, public),
+                    customer_groups(brief), worries(brief, links and not public), tried(brief), how_sure(brief)):
         out += section
-    out += ["## Still open", ""] + ([f"- {q}" for q in brief.get("openQuestions") or []] or ["Nothing open right now."])
+    out += ["## Still open", ""] + ([f"- {plain(q)}" for q in brief.get("openQuestions") or []] or ["Nothing open right now."])
     return "\n".join(out).rstrip() + "\n"
 
 
@@ -272,13 +250,14 @@ def main() -> int:
     parser.add_argument("intake", help="path to intake.json")
     parser.add_argument("-o", "--output", help="write here instead of stdout")
     parser.add_argument("--no-links", action="store_true", help="hide source links (e.g. for video)")
+    parser.add_argument("--public", action="store_true", help="no links, and mask medication names in the baseline")
     args = parser.parse_args()
     try:
         with open(args.intake, encoding="utf-8") as fh:
             brief = json.load(fh)
         if not isinstance(brief, dict):
             raise ValueError("top level is not a JSON object")
-        text = render(brief, links=not args.no_links)
+        text = render(brief, links=not args.no_links, public=args.public)
         if not args.output:
             sys.stdout.write(text)
             return 0

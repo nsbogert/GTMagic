@@ -12,7 +12,15 @@ interface IntakeBrief {
   mode: "live" | "demo";
   business: { name: string; description: string; websiteUrl?: string; stage: "idea" | "launched" | "established";
               pricing?: { amount: number; currency: string; period: "one-time" | "month" | "year"; purchasesPerYear: number };
-              revenueGoal12mo?: number; targetCpa?: number };            // same currency as pricing
+              revenueGoal12mo?: number;          // minimum revenue needed in a year to sustain or grow the business
+              adoptionRate?: number;             // 0–1, owner's estimate of the share of a group they could win in a year (no default)
+              targetCpa?: number;                // owner-stated max cost per paying sign-up; omit if they don't know
+              costToServeShare?: number;         // 0–1, owner-confirmed share of a customer's revenue spent serving them; sets the break-even
+              acquisitionShare?: number;         // 0–1, owner-confirmed share of first-year revenue they'll spend to win a customer
+              unitEconomics?: { annualRevenuePerCustomer: number | null; maxCac: number | null; breakEvenCac: number | null;
+                               firstYearMarginShare: number | null; firstYearMargin: number | null;
+                               targetCpaUsed: number | null; targetCpaSource: "owner" | "derived" | "none" } };  // script-computed
+                                                 // money fields use the same currency as pricing
   baseline: { ownerFirstDescription: string; promptVersion: string; icps: string[]; taglines: string[]; frozenAt: string };
   priorExperiments: PriorExperiment[];
   constraints: Constraint[];
@@ -26,7 +34,8 @@ interface IntakeBrief {
   lexicon: Array<{ id: string; phrase: string; segmentIds: string[]; evidenceId: string }>;   // phrase verbatim in the excerpt
   evidence: Evidence[];
   findings: Finding[];
-  skeptic: Array<{ claim: string; queries: string[]; result: "unresolved" | "resolved" | "nothing-found"; evidenceIds: string[] }>;
+  skeptic: Array<{ claim: string; kind: "motivation" | "incumbent-gap" | "size" | "other"; queries: string[];
+                   result: "unresolved" | "resolved" | "nothing-found"; evidenceIds: string[] }>;   // all three main kinds required
   readiness: { status: "ready" | "no-supported-segment" | "needs-more"; checks: Array<{ check: string; pass: boolean; note?: string }> };
   openQuestions: string[];
 }
@@ -83,7 +92,7 @@ interface InterestOverlap {
 
 interface Segment {
   id: string; name: string; description: string; isOwnerGuess: boolean; ownerRank?: number;
-  sampleShare?: number;                 // share of the synthetic audience; default = equal across segments
+  sampleShare?: number;                 // share of the synthetic audience; default = equal; rough relative numbers are fine (script normalizes)
   attributes: Array<{ name: CoreAttribute | string; values: Array<{ value: string; weight: number }> }>;
                                         // all 6 CoreAttributes required; locks already applied; weights normalized by the script
   needs: string[]; barriers: string[]; decisionCriteria: string[];
@@ -93,7 +102,7 @@ interface Segment {
     incumbents: Array<{ name: string; rating?: number; reviewCount?: number; evidenceIds: string[] }>;
     unresolvedConcernIds: string[]; switchingEvidenceIds: string[];
     size: { population: number | null; isEstimate: boolean; logic: string; evidenceIds: string[] };
-    sizeMath: { customersNeeded: number; adoptionRate: number; minPopulation: number };   // script-computed
+    sizeMath: { customersNeeded: number | null; adoptionRate: number | null; minPopulation: number | null };   // script-computed; null when an input is missing
     motivation: string;
     verdict: "serviceable" | "marginal" | "not-serviceable" | "insufficient-evidence";
     confidence: Confidence; reasoning: string;
@@ -107,7 +116,9 @@ interface PriorExperiment {
   message: { headline?: string; body?: string };
   spend?: number;
   metrics: { impressions?: number; clicks?: number; conversions?: number };   // cost per sign-up is computed by the script
-  verdict: "worked" | "didnt-work" | "inconclusive";                         // script-computed vs targetCpa
+  conversionType?: "paying" | "trial" | "unknown";  // ask the owner; only "paying" results are judged
+                                        // "sign-ups" in an ad export may be free trials, not paying customers: ask the owner which
+  verdict: "worked" | "didnt-work" | "inconclusive";                         // script-computed vs unitEconomics.targetCpaUsed
   verdictReason?: string;                                                    // script-computed: why, in plain words
   sourceFile: string;
 }
@@ -122,15 +133,18 @@ interface PriorExperiment {
 | Field | Written by | Notes |
 |---|---|---|
 | `segments[].concernBundles` | Script | Leave `[]`. Counts and weights come from evidence tags. |
-| `segments[].serviceability.sizeMath` | Script | Leave zeros. Uses `revenueGoal12mo`, `pricing`, adoption rate (default 0.01). |
-| `priorExperiments[].verdict`, `verdictReason` | Script | Leave `"inconclusive"`. Judged against `targetCpa`; the reason says why. |
+| `segments[].serviceability.sizeMath` | Script | Leave it out. Uses `revenueGoal12mo` (the minimum revenue needed in a year), `pricing`, and the owner's `business.adoptionRate`. No defaults: null when an input is missing, and size isn't judged. |
+| `business.unitEconomics` | Script | Leave it out. `annualRevenuePerCustomer` = price × purchases per year; `breakEvenCac` = that × (1 − `costToServeShare`), the most a new customer can cost before year one loses money; `maxCac` = that × `acquisitionShare`; `firstYearMarginShare` = 1 − `costToServeShare` − `acquisitionShare` (and `firstYearMargin` in dollars; the script warns at zero or below); `targetCpaUsed` = the owner's `targetCpa` if stated, else `maxCac`, with `targetCpaSource` saying which. Nulls where an input is missing; never a default. |
+| `priorExperiments[].verdict`, `verdictReason` | Script | Leave `"inconclusive"`. Judged against `unitEconomics.targetCpaUsed`; the reason says why. Ask the owner whether ad "sign-ups" are free trials or paying customers. |
 | `segments[].attributes[].values[].weight` | Script normalizes | You give rough relative weights; the script makes them sum to 1. |
-| `segments[].sampleShare` | Script normalizes | Default equal across segments; the owner's ranking may inform it. |
+| `segments[].sampleShare` | Model (rough) + script normalizes | Default equal across segments. You may set rough relative numbers from the owner's ranking (e.g. 7 and 3); the script normalizes them. |
 | `readiness.checks` | Script + model | The script fills the checks it can compute; you add the rest (including owner confirmation). |
 | `readiness.status` | Script | Set from all checks. Never `ready` while a check fails or before the owner's confirmation is recorded. |
 | `baseline` | Fixed prompt | Frozen in step 2 from `prompts/baseline.md`; never edited. |
-| `business.*` (name, description, stage, pricing, `revenueGoal12mo`, `targetCpa`, `websiteUrl`) | Owner | Drafted from the pre-read, marked "please confirm". |
-| `constraints[]` (bucket, rule, `pushback.ownerKept`) | Owner | You sort answers into buckets; the owner confirms must-haves and decides on pushback. |
+| `business.*` (name, description, stage, pricing, `revenueGoal12mo`, `websiteUrl`) | Owner | Drafted from the pre-read, marked "please confirm". |
+| `business.targetCpa` | Owner | Only when the owner states a number. Never derived or guessed. |
+| `business.costToServeShare`, `acquisitionShare` | Owner | From the cost-per-sign-up walk-through, confirmed as fractions. Ask cost to serve first (help the owner estimate it from their own cost lines); it sets the break-even. Then the owner picks `acquisitionShare` knowing the break-even. Never suggest a benchmark share. |
+| `constraints[]` (bucket, rule, `pushback.ownerKept`) | Owner | You sort answers into buckets; the owner confirms must-haves and decides on pushback. A `hypothesis`-bucket constraint carries no "wrong if" or confidence; those live on `hypotheses[]`. |
 | `segments[].ownerRank`, `isOwnerGuess` | Owner | Ranked in session 2. |
 | `hypotheses[]` wording | Owner | Converged with the owner; `status` and `evidenceIds` are model-written from research. |
 | `icp` | Owner | Final statement confirmed at handoff; `null` with `no-supported-segment`. |
