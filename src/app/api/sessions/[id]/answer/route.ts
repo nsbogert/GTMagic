@@ -1,11 +1,20 @@
-import { appendAnswer, askIsOpen, checkUpload, saveUpload, sessionDir } from "@/app/_session/store";
+import { appendAnswer, askIsOpen, checkUpload, MAX_ANSWER_BYTES, saveUpload, sessionDir } from "@/app/_session/store";
 
 export const dynamic = "force-dynamic";
+
+const TOO_BIG = `Those files are over ${MAX_ANSWER_BYTES / 1024 / 1024} MB together. Send fewer at a time.`;
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!sessionDir(id)) return Response.json({ error: "No such session" }, { status: 404 });
-  const form = await req.formData();
+  if (Number(req.headers.get("content-length") ?? 0) > MAX_ANSWER_BYTES) return Response.json({ error: TOO_BIG }, { status: 413 });
+  let form: FormData;
+  try {
+    form = await req.formData();
+  } catch {
+    // The proxy buffers bodies up to next.config's proxyClientMaxBodySize and cuts off the rest.
+    return Response.json({ error: `Couldn't read that upload. ${TOO_BIG}` }, { status: 400 });
+  }
   const askId = String(form.get("askId") ?? "");
   const text = String(form.get("text") ?? "").slice(0, 10_000);
   const files = form.getAll("files").filter((f): f is File => f instanceof File);

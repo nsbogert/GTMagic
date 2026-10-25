@@ -15,12 +15,15 @@ import os
 import sys
 from datetime import datetime, timezone
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # works under python -I too
+from safe_paths import readable, writable  # noqa: E402
+
 
 def main() -> int:
     if len(sys.argv) != 3:
         print(__doc__.strip().splitlines()[2])
         return 64
-    fixture, workspace = sys.argv[1], sys.argv[2]
+    fixture, workspace = readable(sys.argv[1]), writable(sys.argv[2])
     with open(fixture, encoding="utf-8") as f:
         brief = json.load(f)
     os.makedirs(workspace, exist_ok=True)

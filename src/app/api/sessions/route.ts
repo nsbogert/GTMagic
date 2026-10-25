@@ -14,7 +14,8 @@ export async function POST() {
     const pid = launchAgent(id);
     if (pid === null) throw new Error("no pid");
     return Response.json({ id });
-  } catch {
+  } catch (err) {
+    console.error(`[sessions] couldn't launch Claude Code for session ${id}:`, err); // the real cause (e.g. a missing scripts folder)
     return Response.json({ id, error: "Couldn't start Claude Code. Is it installed and signed in? (Run `claude` once in a terminal.)" }, { status: 500 });
   }
 }

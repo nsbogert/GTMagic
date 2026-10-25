@@ -5,7 +5,7 @@
    Exit codes: 0 ok · 2 usage or error · 3 still waiting (re-run `ui wait`). */
 import { spawn } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import { appendFileSync, existsSync, mkdirSync, openSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, constants, copyFileSync, existsSync, lstatSync, mkdirSync, openSync, readFileSync, writeFileSync } from "node:fs";
 import { connect } from "node:net";
 import { join, resolve } from "node:path";
 
@@ -16,6 +16,7 @@ const PLATES = ["baseline", "creatives", "economics", "ads", "constraints", "res
 const FROM = ["terminal", "scripted"];
 const SESSION_RE = /^[a-z0-9-]{8,40}$/;
 const BUSINESS_RE = /^[a-z0-9][a-z0-9-]{0,63}$/;
+const UPLOAD_RE = /^[a-z0-9_-][a-z0-9._-]*$/; // what the app's safeUploadName produces: one segment, no leading dot
 const REPO = resolve(import.meta.dirname, "..", "..", "..", "..");
 const ROOT = process.env.GTM_ROOT ?? process.cwd();
 const SESSIONS = join(ROOT, "gtm-workspace", ".sessions");
@@ -45,6 +46,18 @@ function dir(id: string): string {
   const d = join(SESSIONS, id);
   if (!existsSync(d)) fail(`no session ${id}; run \`ui start\` first`);
   return d;
+}
+
+/** The path under gtm-workspace/, failing if any part of it is a symlink (one could lead out of the workspace). */
+function noLinks(...parts: string[]): string {
+  let p = join(ROOT, "gtm-workspace");
+  for (const part of parts) {
+    p = join(p, part);
+    let link = false;
+    try { link = lstatSync(p).isSymbolicLink(); } catch { /* not there yet */ }
+    if (link) fail(`${p} is a symlink; GTMagic won't follow it`);
+  }
+  return p;
 }
 
 function events(id: string): Ev[] {
@@ -165,10 +178,36 @@ async function main() {
       writeFileSync(metaPath, JSON.stringify({ ...meta, business }) + "\n");
       return void append(id, { kind: "link", business });
     }
+    case "keep": {
+      // Copies an owner upload into the business's sources/. The launched agent has no cp rule:
+      // a `cp gtm-workspace/*` rule would also allow copying to anywhere.
+      const [upload = "", business = ""] = rest;
+      const inSession = `gtm-workspace/.sessions/${id}/`;
+      const name = (upload.startsWith(inSession) ? upload.slice(inSession.length) : upload).replace(/^uploads\//, "");
+      if (!UPLOAD_RE.test(name)) fail(`bad upload "${upload}"; pass a path from ANSWER's files`);
+      if (!BUSINESS_RE.test(business)) fail(`bad business folder name "${business}"`);
+      dir(id);
+      const from = noLinks(".sessions", id, "uploads", name);
+      if (!existsSync(from) || !lstatSync(from).isFile()) fail(`no upload ${name} in session ${id}`);
+      const sources = noLinks(business, "sources");
+      mkdirSync(sources, { recursive: true });
+      const dot = name.lastIndexOf(".");
+      const [stem, ext] = dot > 0 ? [name.slice(0, dot), name.slice(dot)] : [name, ""];
+      for (let n = 0; ; n++) {
+        const kept = n ? `${stem}-${n}${ext}` : name;
+        try {
+          copyFileSync(from, join(sources, kept), constants.COPYFILE_EXCL); // never overwrite an earlier source
+        } catch (e) {
+          if ((e as { code?: string }).code === "EEXIST") continue;
+          fail(`couldn't copy ${name}: ${(e as Error).message}`);
+        }
+        return void process.stdout.write(`KEPT sources/${kept}\n`);
+      }
+    }
     case "done": return void append(id, { kind: "done" });
     case "error": return void append(id, { kind: "error", message: rest.join(" ") || "Something went wrong." });
     default:
-      fail("usage: ui start|say|status|plate|ask|wait|answer|cancel|link|done|error <session> ...");
+      fail("usage: ui start|say|status|plate|ask|wait|answer|cancel|link|keep|done|error <session> ...");
   }
 }
 

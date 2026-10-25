@@ -9,6 +9,8 @@ import { insideDir, isSafeName, workspaceDir } from "../_intake/workspace";
 import { parseTranscript, type TranscriptEvent } from "./events";
 
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+// All files in one answer. next.config.ts's proxyClientMaxBodySize must stay above it, or the proxy truncates the body.
+export const MAX_ANSWER_BYTES = 50 * 1024 * 1024;
 const ALLOWED_EXT = new Set([".csv", ".xlsx", ".txt", ".pdf", ".png", ".jpg", ".jpeg", ".webp"]);
 export const SessionMetaSchema = z.looseObject({ id: z.string(), createdAt: z.string().optional(), business: z.string().nullable().optional(), pid: z.number().optional() });
 export type SessionMeta = z.infer<typeof SessionMetaSchema>;

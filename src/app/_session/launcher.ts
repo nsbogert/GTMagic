@@ -1,27 +1,49 @@
 /* One-click start: run Claude Code headless for a session, with a fixed list of pre-approved
    actions (permission mode dontAsk refuses everything else without prompting). Server-side only. */
 import { spawn } from "node:child_process";
-import { openSync } from "node:fs";
+import { openSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { appendDone, readMeta, readSession, sessionDir, writeMeta } from "./store";
 
-export const ALLOWED_TOOLS = [
-  "Bash(node .claude/skills/gtm-web/scripts/ui.ts *)",
-  "Bash(python3 .claude/skills/gtm-intake/scripts/*)",
-  "Bash(cp gtm-workspace/*)",
-  "Bash(mkdir -p gtm-workspace/*)",
-  "Read", "Glob", "Grep",
-  "Edit(gtm-workspace/**)", // Edit rules cover every file-writing tool; Write(path) rules are ignored
-  "WebSearch", "WebFetch", "Skill",
+// The agent reads web pages and owner uploads, so a prompt injection has to be assumed. Every rule
+// names exact files or folders: Claude Code matches Bash rules as text, so `scripts/*` also matched
+// `scripts/../../../gtm-workspace/x.py`, and bare Read/Grep/Glob reached the whole disk (~/.aws, ~/.ssh).
+// The scripts themselves refuse paths outside gtm-workspace/ (gtm-intake/scripts/safe_paths.py).
+export const INTAKE_SCRIPTS = ".claude/skills/gtm-intake/scripts";
+export const READABLE_DIRS = ["gtm-workspace", ".claude/skills", "fixtures"];
+export const DENIED_TOOLS = [
+  // Claude Code allows `cd` inside the repo by default; after `cd gtm-workspace/x` the relative rules
+  // above would run copies the agent wrote there. Denying it blocks every form (subshells, `builtin cd`).
+  "Bash(cd *)", "Bash(cd)",
+  // Reads anywhere in the repo are allowed by default; keep env files and git config (remote URLs can
+  // carry tokens) out. Read denials also apply to Grep and to shell reads like cat or head; read-only
+  // git commands are allowed separately, and the agent never needs git.
+  "Read(./**/.env)", "Read(./**/.env.*)", "Read(./.git/**)", "Bash(git *)", "Bash(git)",
 ];
 
-export function claudeArgs(id: string): string[] {
+/** The pre-approved actions. `root` is the repo root, where the agent runs. */
+export function allowedTools(root: string = process.cwd()): string[] {
+  // One rule per script; " *" stops at the file name, so no path can be tacked on after it.
+  const scripts = readdirSync(join(root, INTAKE_SCRIPTS)).filter((f) => /^[a-z0-9_-]+\.py$/.test(f)).sort();
+  return [
+    "Bash(node .claude/skills/gtm-web/scripts/ui.ts *)", // `ui keep` copies uploads into sources/, so no cp rule
+    ...scripts.map((f) => `Bash(python3 ${INTAKE_SCRIPTS}/${f} *)`),
+    ...READABLE_DIRS.flatMap((d) => [`Read(./${d}/**)`, `Grep(./${d}/**)`, `Glob(./${d}/**)`]),
+    "Edit(./gtm-workspace/**)", // Edit rules cover every file-writing tool (Write makes parent folders); Write(path) rules are ignored
+    "WebSearch", "WebFetch", "Skill",
+  ];
+}
+
+export function claudeArgs(id: string, root?: string): string[] {
   const prompt = [
     `Use the gtm-web skill to run the gtm-intake interview for the owner in the GTMagic web page.`,
     `The web session already exists: its id is ${id}. Don't run \`ui start\`; post everything to session ${id}.`,
     `The owner is in the browser and answers only there. Start by asking them to describe their business in one line.`,
   ].join(" ");
-  return ["-p", prompt, "--permission-mode", "dontAsk", "--allowedTools", ALLOWED_TOOLS.join(",")];
+  return [
+    "-p", prompt, "--permission-mode", "dontAsk",
+    "--allowedTools", allowedTools(root).join(","), "--disallowedTools", DENIED_TOOLS.join(","),
+  ];
 }
 
 type Spawned = { pid?: number; unref: () => void };

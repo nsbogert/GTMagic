@@ -169,7 +169,7 @@ The script sets `readiness.status` from the checks: never `ready` while any chec
 
 ## Scripts
 
-Script paths are relative to this skill's folder (in Claude Code: `.claude/skills/gtm-intake/`). Data paths point at your working folder.
+Script paths are relative to this skill's folder (in Claude Code: `.claude/skills/gtm-intake/`). Data paths point at your working folder; the scripts refuse any data path outside `gtm-workspace/` (inputs may also come from `fixtures/`).
 
 ```
 python3 scripts/validate_intake.py <intake.json> --log <research-log.jsonl> --write
@@ -178,7 +178,7 @@ python3 scripts/validate_intake.py <intake.json> --log <research-log.jsonl> --wr
 Fills the script-computed fields (concernBundles, sizeMath, unitEconomics, ad verdicts, each creative's performance and guardrailFlags, lexicon voice, normalized weights and sampleShare, the readiness checks it can compute), prints a report, and exits 1 on integrity errors. On errors, fix the JSON and re-run. **Never hand off a file that fails.** Warnings (a missing image file, a risky phrase in the owner's own ad) don't block handoff; pass on the ones that matter to the owner.
 
 ```
-python3 scripts/render_brief.py <intake.json> -o brief.md
+python3 scripts/render_brief.py <intake.json> -o <ws>/brief.md
 ```
 
 Writes the owner-facing summary. Add `--public` for demo runs and anything public: it drops source links and masks medication names. Real owners get the default render. Don't hand-edit `brief.md`: change the JSON and re-render.

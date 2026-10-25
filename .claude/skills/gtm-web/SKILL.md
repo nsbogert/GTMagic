@@ -32,7 +32,8 @@ Below, `ui` means `node .claude/skills/gtm-web/scripts/ui.ts` and `<id>` is the 
 - Exit 3 means no answer yet: run `ui wait <id> <askId>` (never re-ask; that would post the question twice). Keep re-running it; the owner may be thinking or away.
 - If the Bash call itself times out, the question is still open: run `ui wait`, never `ui ask` again.
 - Run `ui` commands one at a time, not in parallel.
-- `files` are paths inside the session folder, `gtm-workspace/.sessions/<id>/uploads/…`. Read them there and copy them into the business's `sources/` as gtm-intake says.
+- `files` look like `uploads/<name>`, relative to the session folder: read them at `gtm-workspace/.sessions/<id>/uploads/<name>`. To copy one into the business's `sources/` (as gtm-intake says), run `ui keep <id> uploads/<name> <business-slug>`, never `cp`; it prints `KEPT sources/<name>`, the path to use as `imageFile`.
+- Run every command from the repo root, exactly as written here and in gtm-intake (`python3 .claude/skills/gtm-intake/scripts/<script>.py …`); never `cd`. Script paths for files must stay inside `gtm-workspace/` (inputs may also come from `fixtures/`).
 - Asking a new question closes any earlier open one, so the page never shows two.
 - Never answer for the owner in a live session.
 
@@ -67,6 +68,7 @@ ui wait <id> <askId> [--timeout <seconds>]
 ui answer <id> <askId> --from terminal|scripted <text>
 ui cancel <id> <askId>
 ui link <id> <business-slug>
+ui keep <id> <uploads/file> <business-slug>
 ui done <id>
 ui error <id> <message>
 ```
