@@ -19,9 +19,7 @@ GTMagic runs today as a set of skills inside Claude Code. To try them, see [Gett
 
 - **In progress:** deeper research (`gtm-research`; the spec is in [docs/skills/RESEARCH.md](docs/skills/RESEARCH.md)) and draft ads (`gtm-creatives`).
 - **Not built yet:** the web app described in "How one run works" below. `src/` holds only each module's plan.
-- **Also in the repo:**
-  - `prototype/` is a clickable demo of the interface that replays a scripted, fictional intake.
-  - `evals/` checks whether GTMagic reaches the conclusions real founders reached.
+- **Also in the repo:** `prototype/` (a clickable demo of the interface that replays a scripted, fictional intake) and `evals/` (checks whether GTMagic reaches the conclusions real founders reached).
 
 ### Planned before the event
 
@@ -158,11 +156,7 @@ git clone https://github.com/nsbogert/GTMagic.git
 cd GTMagic
 ```
 
-What they do:
-
-- `cd ~` moves Terminal to your **home folder** (the one with your name on it in Finder).
-- `git clone …` downloads GTMagic into a new folder there called **GTMagic**.
-- `cd GTMagic` moves Terminal into that folder.
+What they do: `cd ~` moves Terminal to your **home folder** (the one with your name on it in Finder), `git clone …` downloads GTMagic into a new folder there called **GTMagic**, and `cd GTMagic` moves Terminal into that folder.
 
 To see the folder in Finder, click **Finder** in the Dock, then choose **Go → Home** from the menu bar.
 
