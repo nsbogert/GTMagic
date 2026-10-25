@@ -89,3 +89,8 @@ mark { background: #f2d8a0; color: inherit; padding: 0 .125rem; }
 .econ-key i { width: .875rem; height: .875rem; border: 1.5px solid var(--ink); }
 .econ-facts b { font-weight: 500; }
 .findings .q { display: block; font-size: .8125rem; color: var(--ink-3); }
+
+/* Attachments in the composer. */
+.composer-files { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.composer-files .file { display: inline-flex; align-items: center; gap: .375rem; font-size: .875rem; background: #fff; border: 1px solid var(--rule); padding: .125rem .5rem; }
+.turn.bot.ask-cancelled { opacity: .6; }
