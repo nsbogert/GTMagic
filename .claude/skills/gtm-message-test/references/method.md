@@ -9,7 +9,7 @@ How the test is built and scored. **CONTRACTS.md** marks what follows `docs/CONT
   - or 5 new options and the decoy when there's no current message.
   - Exits 1 unless intake.json is `ready`.
 - **Drafts are checked in order and the first clean ones kept.** An option is dropped when it:
-  - has no headline, or borrows no real lexicon phrase;
+  - has no headline, or borrows no real customer phrase (a lexicon entry with `voice: "customer"`; gtm-intake tags the owner's own words `owner`);
   - lacks a subheadline while the others show one, or has a subheadline over 30 words;
   - breaks a messaging rule;
   - or repeats another headline, ignoring case and punctuation (the current message included).

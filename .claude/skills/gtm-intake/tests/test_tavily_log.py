@@ -43,6 +43,7 @@ class TavilyLog(unittest.TestCase):
 
     def run_script(self, *args: str, key: bool = False) -> subprocess.CompletedProcess:
         env = {k: v for k, v in os.environ.items() if k != "TAVILY_API_KEY"}
+        env["TAVILY_NO_KEYCHAIN"] = "1"  # never pick up a real key from this machine's Keychain
         if key:
             env["TAVILY_API_KEY"] = "tvly-test"
         return subprocess.run([sys.executable, "-I", str(SCRIPTS / "tavily_log.py"), *args, "--log", str(self.log)],

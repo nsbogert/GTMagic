@@ -105,7 +105,8 @@ def check_draft(d: object, i: int, ctx: dict) -> tuple[dict | None, list[str]]:
     kept = {}
     for key, known in (("targetSegmentIds", ctx["seg_ids"]), ("lexiconIds", ctx["lex_ids"]), ("evidenceIds", ctx["ev_ids"])):
         kept[key] = [x for x in id_list(d.get(key)) if x in known]
-        notes += [f"{where}: dropped unknown {key[:-3]} '{x}'" for x in id_list(d.get(key)) if x not in known]
+        notes += [f"{where}: dropped {key[:-3]} '{x}': not tagged customer voice in intake.json" if x in ctx["not_customer_lex_ids"]
+                  else f"{where}: dropped unknown {key[:-3]} '{x}'" for x in id_list(d.get(key)) if x not in known]
     level, reasons = check_copy(ctx["visible"](head, sub), ctx["competitors"], ctx["health"])
     problem = (
         "no headline" if not head
@@ -146,9 +147,12 @@ def build(intake: dict, drafts: dict, args: argparse.Namespace) -> tuple[dict, d
     show_sub = not owner or bool(owner["subheadline"])  # same shape: no current subheadline, nobody shows one
     if not show_sub:
         warnings.append("The current message has no subheadline, so every option shows its headline only.")
+    lexicon = [x for x in intake.get("lexicon") or [] if isinstance(x, dict)]
     ctx = {
         "seg_ids": {s.get("id") for s in segments},
-        "lex_ids": {x.get("id") for x in intake.get("lexicon") or [] if isinstance(x, dict)},
+        # gtm-intake tags the owner's own ad copy voice "owner"; only customer voice counts as a real customer phrase.
+        "lex_ids": {x.get("id") for x in lexicon if x.get("voice") == "customer"},
+        "not_customer_lex_ids": {x.get("id") for x in lexicon if x.get("voice") != "customer"},
         "ev_ids": {e.get("id") for e in intake.get("evidence") or [] if isinstance(e, dict)},
         "competitors": [i.get("name", "") for s in segments for i in (s.get("serviceability") or {}).get("incumbents") or []
                         if isinstance(i, dict)],

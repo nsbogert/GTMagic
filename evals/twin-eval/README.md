@@ -26,7 +26,7 @@ Every score sits between a **ceiling**, the twin's own answer to the same questi
 ## Run it
 
 ```bash
-cd twin-eval
+cd evals/twin-eval                       # from the repo root
 pip install -r requirements.txt          # only needed for live runs
 python3 -m twin_eval download            # 3 files, ~26 MB, pinned revision
 python3 -m twin_eval run --mock --n 50 --out out/mock   # FAKE random answers, no key needed
@@ -49,7 +49,7 @@ Output: `report.md` (scorecard first) and `report.json` (every number, with coun
 
 ## How it fits GTMagic
 
-Checked against GitHub `main` at `18d64b5` (25 Oct 2026; the gtm-intake skill plus the demo-critical fixes) and the gtm-message-test skill (`repo-patches/01-gtm-message-test.patch` in Gwen's hand-off).
+Lives in `evals/twin-eval/` and needs nothing else from the repo. Checked against `main` after the creatives intake (#6), and against the gtm-message-test skill (`.claude/skills/gtm-message-test/`). Exported lexicon entries carry `voice: "customer"`, since the simulation reads only customer voice.
 
 - **Same customer shape.** On `main`, the simulation skill reads intake.json `segments[]` and `lexicon` and builds `SyntheticCustomer`s (docs/CONTRACTS.md): six core attributes, needs/barriers/criteria, and real quotes. The `gtmagic` arm builds each twin in that shape (`twin_eval/gtmagic.py`):
   - **Group:** household income band (three groups).

@@ -13,14 +13,16 @@ exactly the text Tavily returned (personal details replaced with [removed]). Cla
 evidence excerpts (at most 25 words) out of the logged text, and validate_intake.py checks they
 match. It refuses anything that would run past the research cap (15 today; reading the owner's own
 website with extract --pre-read doesn't count), never extracts Reddit pages, and keeps one short
-snippet from each Reddit search result. Needs TAVILY_API_KEY in the environment; never put the
-key in a file in this repo or paste it into chat. Standard library only.
+snippet from each Reddit search result. Reads TAVILY_API_KEY from the environment, else the macOS
+Keychain item 'gtmagic-tavily' (as docs/skills/RESEARCH.md specifies); never put the key in a file in
+this repo or paste it into chat. Standard library only.
 """
 from __future__ import annotations
 
 import argparse
 import json
 import os
+import subprocess
 import sys
 import urllib.error
 import urllib.request
@@ -34,6 +36,7 @@ API = "https://api.tavily.com"
 RESEARCH_CAP = 15            # SKILL.md: at most 15 searches and fetches today
 MAX_LOGGED_CHARS = 8000      # per extracted page; enough to quote from without bloating the log
 REDDIT_SNIPPET_CHARS = 400   # Reddit search results: one short snippet, never page text (Reddit's Responsible Builder Policy)
+KEYCHAIN_SERVICE = "gtmagic-tavily"
 
 
 def is_reddit(url: str) -> bool:
@@ -79,15 +82,29 @@ def append(path: str, entries: list[dict]) -> None:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 
+def api_key() -> str:
+    """TAVILY_API_KEY, else the macOS Keychain. The key comes back through a pipe, never argv, and is never printed.
+    TAVILY_NO_KEYCHAIN=1 skips the Keychain (the tests set it so they can never reach the network)."""
+    key = os.environ.get("TAVILY_API_KEY", "").strip()
+    if key or sys.platform != "darwin" or os.environ.get("TAVILY_NO_KEYCHAIN") == "1":
+        return key
+    try:
+        found = subprocess.run(["/usr/bin/security", "find-generic-password", "-s", KEYCHAIN_SERVICE,
+                                "-a", os.environ.get("USER", ""), "-w"], capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.TimeoutExpired):
+        return ""
+    return found.stdout.strip() if found.returncode == 0 else ""
+
+
 def call(endpoint: str, body: dict, replay: str | None) -> dict:
     """POST to Tavily, or read a saved response (for tests and offline demos)."""
     if replay:
         with open(replay, encoding="utf-8") as f:
             return json.load(f)
-    key = os.environ.get("TAVILY_API_KEY", "").strip()
+    key = api_key()
     if not key:
-        raise SystemExit("ERROR set TAVILY_API_KEY in your shell first (app.tavily.com → API Keys). "
-                         "Never paste it into chat or commit it.")
+        raise SystemExit(f"ERROR no Tavily key: set TAVILY_API_KEY in your shell, or save it in the macOS Keychain as "
+                         f"'{KEYCHAIN_SERVICE}' (app.tavily.com → API Keys). Never paste it into chat or commit it.")
     req = urllib.request.Request(f"{API}/{endpoint}", data=json.dumps(body).encode(), method="POST",
                                  headers={"Content-Type": "application/json", "Authorization": f"Bearer {key}"})
     try:
@@ -120,7 +137,7 @@ def search(args: argparse.Namespace) -> list[dict]:
     at = now()
     # The query is logged exactly as given, so skeptic queries match validate_intake.py's check.
     entries = [{"kind": "search", "query": args.query, "at": at, "tool": "tavily", "depth": args.depth,
-                "skeptic": args.skeptic,
+                "skeptic": args.skeptic, "requestId": data.get("request_id"),
                 "credits": (data.get("usage") or {}).get("credits")}]
     for r in data.get("results") or []:
         if isinstance(r, dict) and r.get("url") and r.get("content"):
@@ -145,7 +162,8 @@ def extract(args: argparse.Namespace) -> list[dict]:
     for r in data.get("results") or []:
         if isinstance(r, dict) and r.get("url") and r.get("raw_content"):
             text = scrub(r["raw_content"])
-            entries.append({"kind": "fetch", "url": r["url"], "at": at, "tool": "tavily", "preRead": args.pre_read})
+            entries.append({"kind": "fetch", "url": r["url"], "at": at, "tool": "tavily", "preRead": args.pre_read,
+                            "requestId": data.get("request_id")})
             entries.append({"kind": "source", "url": r["url"], "title": scrub(r.get("title") or ""),
                             "excerpt": text[:MAX_LOGGED_CHARS], "truncated": len(text) > MAX_LOGGED_CHARS,
                             "at": at, "tool": "tavily", "preRead": args.pre_read})

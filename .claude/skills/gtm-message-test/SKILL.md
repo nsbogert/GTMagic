@@ -13,7 +13,7 @@ You turn a ready `intake.json` (from `gtm-intake`) into a blind message test, ha
 ## Principles
 
 1. **Code computes every number:** counts, shares, ranges, verdicts and checks. Quote only numbers the script wrote.
-2. **Options borrow real customer words.** Each option cites at least one `lexicon` phrase from intake.json. Never invent a quote.
+2. **Options borrow real customer words.** Each option cites at least one customer-voice `lexicon` phrase from intake.json (`voice: "customer"`; the owner's own ad copy doesn't count). Never invent a quote.
 3. **"No clear winner" and "unreliable" are valid, useful results.** Nothing pressures you to crown a message.
 4. **Simulated is always labeled simulated.** Never call a share a conversion rate, or show a simulated objection as a real quote. Real quotes come only from intake.json `evidence`.
 

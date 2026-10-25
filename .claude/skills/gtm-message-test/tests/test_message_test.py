@@ -96,6 +96,15 @@ class Build(unittest.TestCase):
         self.assertTrue(any("lex_99" in w for w in warnings))
         self.assertTrue(any("no subheadline" in w for w in warnings))
 
+    def test_owner_voice_phrases_dont_count_as_customer_words(self):
+        intake, drafts = copy.deepcopy(INTAKE), copy.deepcopy(DRAFTS)
+        lex_id = drafts["options"][0]["lexiconIds"][0]
+        next(x for x in intake["lexicon"] if x["id"] == lex_id)["voice"] = "owner"
+        drafts["options"][0]["lexiconIds"] = [lex_id]
+        pos, _, _, warnings = build_test.build(intake, drafts, demo.build_args())
+        self.assertTrue(any(f"'{lex_id}': not tagged customer voice" in w for w in warnings), warnings)
+        self.assertNotIn(drafts["options"][0]["headline"], [h["headline"] for h in pos["hypotheses"]])
+
     def test_lopsided_targeting_is_warned(self):
         drafts = copy.deepcopy(DRAFTS)
         for o in drafts["options"]:

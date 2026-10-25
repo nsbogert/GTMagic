@@ -94,7 +94,8 @@ def build(ds: Dataset, pids: List[str]) -> dict:
                              "title": "Twin-2K-500 self-description", "excerpt": phrase,
                              "segmentIds": [seg], "concernIds": [], "confidence": "high",
                              "limitations": "One survey taker's own words.", "retrievedAt": "2025-05-23"})
-            lexicon.append({"id": lex_id, "phrase": phrase, "segmentIds": [seg], "evidenceId": ev_id})
+            # The twin is the customer, so their own words are customer voice (the only voice the simulation reads).
+            lexicon.append({"id": lex_id, "phrase": phrase, "segmentIds": [seg], "evidenceId": ev_id, "voice": "customer"})
             lex_ids.append(lex_id)
         customers.append({"id": cid, "segmentId": seg, "attributes": attrs, "needs": [], "barriers": [],
                           "decisionCriteria": [], "voiceLexiconIds": lex_ids})

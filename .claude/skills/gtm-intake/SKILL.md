@@ -121,7 +121,7 @@ Verdict: `serviceable`, `marginal`, `not-serviceable` or `insufficient-evidence`
 
 ### Searching with Tavily (Claude Code)
 
-When `TAVILY_API_KEY` is set in the shell, search and read pages through `scripts/tavily_log.py` instead of the built-in web tools. The script writes the research log itself, so every logged excerpt is exactly what the source said, with personal details already replaced by `[removed]`:
+When a Tavily key is available (`TAVILY_API_KEY` in the shell, or the macOS Keychain item `gtmagic-tavily`), search and read pages through `scripts/tavily_log.py` instead of the built-in web tools. The script writes the research log itself, so every logged excerpt is exactly what the source said, with personal details already replaced by `[removed]`:
 
 ```
 python3 scripts/tavily_log.py search "<query>" --log <ws>/research-log.jsonl [--domains apps.apple.com,trustpilot.com [--domains-mode restrict]] [--exact] [--time-range year] [--skeptic]

@@ -17,13 +17,13 @@ DRUG_TERMS = (DRUG_NAMES + r"|\bmedications?\b|\bmeds\b|\bprescri|\binjections?\
 CONDITION_TERMS = DRUG_TERMS + r"|diabet|obes|bariatric"
 MESSAGING_BANNED = {
     "names a medication, drug class or treatment": DRUG_TERMS,
-    "assumes the reader's condition": r"\bare you on\b|\byour (meds|medication|shots?|injections?)\b",
-    "superlative or guarantee": r"\bbest\b|#1|\bnumber one\b|\bguarantee",
-    "medical claim": r"\bcures?\b|\btreats?\b|\btreatment\b|\bprevents?\b|\bdiagnos|\bclinically\b|\bdoctor[- ]approved\b",
+    "assumes the reader's health condition": r"\bare you on\b|\byour (meds|medication|shots?|injections?)\b",
+    "uses a superlative or a guarantee": r"\bbest\b|#1|\bnumber one\b|\bguarantee",
+    "makes a medical claim": r"\bcures?\b|\btreats?\b|\btreatment\b|\bprevents?\b|\bdiagnos|\bclinically\b|\bdoctor[- ]approved\b",
 }
 # ---- end of copy ----
 
-HEALTH_ONLY = {"names a medication, drug class or treatment", "assumes the reader's condition", "medical claim"}
+HEALTH_ONLY = {"names a medication, drug class or treatment", "assumes the reader's health condition", "makes a medical claim"}
 NUM = r"(?:\d+(?:\.\d+)?\+?|a|one|two|three|four|five|six|seven|eight|nine|ten|twelve|fifteen|twenty|thirty|forty|fifty)"
 WEIGHT_UNIT = r"(?:lbs?|pounds?|kgs?|kilos?|kilograms?|stone|(?:dress |clothing )?sizes?|inch(?:es)?|%|percent)"
 LOSS_VERB = r"(?:lose|lost|losing|drop|dropped|shed|cut|melt|burn|down|slim)"
