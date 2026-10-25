@@ -94,3 +94,5 @@ mark { background: #f2d8a0; color: inherit; padding: 0 .125rem; }
 .composer-files { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
 .composer-files .file { display: inline-flex; align-items: center; gap: .375rem; font-size: .875rem; background: #fff; border: 1px solid var(--rule); padding: .125rem .5rem; }
 .turn.bot.ask-cancelled { opacity: .6; }
+.lines.creatives li { grid-template-columns: 3rem 1fr; }
+.lines.creatives li > b { font-size: var(--step0); color: var(--ink-2); }

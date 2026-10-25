@@ -47,4 +47,10 @@ Synthetic customers produce **hypotheses to test**, not proof. Every result is l
 
 ## Running it
 
-_Added when the app is scaffolded at hackathon start._
+GTMagic runs on your own computer. The skills do the work; the web page is a friendlier way to use them.
+
+1. `npm install`, then `npm run dev` and open http://127.0.0.1:3000. You'll see the KeepStrong example (fictional) and any save files in `gtm-workspace/`.
+2. To be interviewed in the page, open Claude Code at this folder and ask for the GTMagic web UI (the `gtm-web` skill). It starts the app if needed and gives you a link.
+3. Prefer the terminal? Ask Claude Code for `gtm-intake` directly; the page is optional.
+
+Checks: `npm test`, `npm run lint`, `npm run typecheck`, `npm run build`.
