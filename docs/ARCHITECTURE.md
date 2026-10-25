@@ -121,7 +121,7 @@ All Claude calls go through one wrapper:
 
 ```
 [protocol + dimension definitions]            ← from ExperimentRequest; identical for every call
-[scenario + stimuli in ordering k]            ← identical per ordering (k = number of options)
+[scenario + stimuli in ordering k]            ← identical per ordering (k = number of orderings: the number of options, ×2 if odd)
 [customer card: attributes, needs, voice]     ← varies per customer
 ```
 
@@ -134,7 +134,7 @@ All Claude calls go through one wrapper:
 
 **DESIGN** (pure code) builds the experiment:
 - **Stimuli:** every option in the same format (headline + ≤30-word subheadline), including the founder's current message if one was given.
-- **Orderings:** a cyclic Latin square, so every option appears in every position equally often across the sample.
+- **Orderings:** a Williams Latin square, counted within each segment, so every option appears in every position and right after every other option about equally often, and every segment sees the orderings about equally (exactly, when a segment's size is a multiple of the number of orderings).
 - **Repeat subset:** ~10 customers, spread across segments, are asked again with their ordering reversed.
 - **Protocol:** the instructions and the dimension definitions. The experimental method lives here, not in the Audience module.
 
