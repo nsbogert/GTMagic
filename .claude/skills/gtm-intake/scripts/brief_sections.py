@@ -18,8 +18,8 @@ READINESS = {
     "no-supported-segment": "No customer group we can stand behind yet. That is a useful answer, not a failure.",
     "needs-more": "Not finished. A few questions still need answers before the next step.",
 }
-EXPERIMENT_VERDICTS = {"worked": "Worked: it beat your target cost per sign-up.",
-                       "didnt-work": "Didn't work: it cost more per sign-up than your target.",
+EXPERIMENT_VERDICTS = {"worked": "Worked: it cost less per sign-up than the most you can spend.",
+                       "didnt-work": "Didn't work: it cost more per sign-up than the most you can spend.",
                        "inconclusive": "Too early to tell."}
 FINDING_KINDS = [("observed", "What we saw directly"),
                  ("estimated", "What we estimated (calculated from other numbers, so treat as rough)"),
@@ -40,7 +40,7 @@ GUESS_STATUS = {"supported": "Supported so far", "weakened": "Weakened by resear
 NOT_DONE = {
     "Owner confirmed": "You haven't confirmed the brief yet",
     "Owner confirmation": "Your confirmation isn't recorded yet",
-    "Today's dimensions": "Your answers aren't all sorted into must-haves and nice-to-haves yet",
+    "Today's targeting dimensions": "We haven't covered where you sell, ages, price, channels, claim limits and interests yet",
     "ICP has": "Your target customer isn't fully described yet (who they are, who fits, who doesn't)",
     "Geography and price": "You haven't told us where you sell and what you charge yet",
     "One primary": "Your best guess, and what would prove it wrong, isn't agreed yet",
@@ -97,8 +97,10 @@ def customer_worth(brief: Json) -> list[str]:
         out.append(f"- Serving a customer costs you about {serve:.0%} of what they pay, so you break even in year one "
                    f"if a new customer costs less than {money(econ['breakEvenCac'], cur, 2)}.")
     margin_share, margin = econ.get("firstYearMarginShare"), econ.get("firstYearMargin")
-    if is_number(margin_share) and margin_share <= 0:
+    if is_number(margin_share) and margin_share < 0:
         out.append("- At these numbers you'd lose money on each new customer in their first year.")
+    elif is_number(margin_share) and margin_share == 0:
+        out.append("- At these numbers each new customer only breaks even in their first year: nothing is left as margin.")
     elif is_number(margin_share) and is_number(serve) and is_number(share):
         dollars = f" ({money(margin, cur, 2)})" if is_number(margin) else ""
         out.append(f"- After serving costs ({serve:.0%}) and what you'll spend to win them ({share:.0%}), about "

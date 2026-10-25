@@ -24,7 +24,11 @@ In demo mode (`mode: "demo"`), the `gtm-intake` skill plays the interviewer and 
 ### Price
 **Owner:** "$14.99 a month. That's not changing, so don't plan around a different price."
 
-→ `business.pricing` (USD 14.99/month, 12 purchases a year); price constraint, **locked**
+**Skill:** "On average, how many payments does a customer make in their first year, counting people who cancel early?"
+
+**Owner:** "About 9. A few drop off after a couple of months."
+
+→ `business.pricing` (USD 14.99/month, 9 payments in the first year on average); price constraint, **locked**
 
 ### Traction
 **Owner:** "We launched in the spring. Around 90 paying subscribers, mostly friends of friends and a couple of Facebook groups."
@@ -45,7 +49,7 @@ In demo mode (`mode: "demo"`), the `gtm-intake` skill plays the interviewer and 
 
 **Owner:** "Honestly, no. I've never worked it out."
 
-**Skill (walk-through):** "Let's back into it. You charge $14.99 a month, 12 times a year if they stay; the script will turn that into a yearly figure. First, what does it cost you to serve a customer: payment fees, hosting and software, support, the coaching content? Roughly what share of what they pay is that?"
+**Skill (walk-through):** "Let's back into it. You charge $14.99 a month and a customer pays about 9 times in their first year; the script will turn that into a yearly figure. First, what does it cost you to serve a customer: payment fees, hosting and software, support, the coaching content? Roughly what share of what they pay is that?"
 
 **Owner:** "Payment fees, hosting and the coach who writes the programs... maybe 30% all in."
 

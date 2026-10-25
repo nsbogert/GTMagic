@@ -10,20 +10,21 @@
       "amount": 14.99,
       "currency": "USD",
       "period": "month",
-      "purchasesPerYear": 12
+      "purchasesPerYear": 9
     },
     "revenueGoal12mo": 180000,
     "costToServeShare": 0.3,
     "acquisitionShare": 0.4,
     "unitEconomics": {
-      "annualRevenuePerCustomer": 179.88,
-      "maxCac": 71.95,
-      "breakEvenCac": 125.92,
+      "annualRevenuePerCustomer": 134.91,
+      "maxCac": 53.96,
+      "breakEvenCac": 94.44,
       "firstYearMarginShare": 0.3,
-      "firstYearMargin": 53.96,
-      "targetCpaUsed": 71.95,
+      "firstYearMargin": 40.47,
+      "targetCpaUsed": 53.96,
       "targetCpaSource": "derived"
-    }
+    },
+    "adoptionRate": 0.01
   },
   "baseline": {
     "ownerFirstDescription": "A fitness app for people on GLP-1s.",
@@ -59,7 +60,8 @@
       },
       "verdict": "worked",
       "sourceFile": "meta-ads.csv",
-      "verdictReason": "cost per sign-up 30.00 within the 71.95 most you can spend, worked out from your numbers"
+      "verdictReason": "cost per sign-up 30.00 within the 53.96 most you can spend, worked out from your numbers",
+      "conversionType": "paying"
     },
     {
       "id": "px_2",
@@ -77,7 +79,8 @@
       },
       "verdict": "inconclusive",
       "sourceFile": "meta-ads.csv",
-      "verdictReason": "fewer than 10 sign-ups"
+      "verdictReason": "fewer than 10 sign-ups",
+      "conversionType": "paying"
     }
   ],
   "constraints": [
@@ -588,9 +591,9 @@
           ]
         },
         "sizeMath": {
-          "customersNeeded": 1001,
+          "customersNeeded": 1335,
           "adoptionRate": 0.01,
-          "minPopulation": 100100
+          "minPopulation": 133500
         },
         "motivation": "Noticing strength loss now, and afraid of regaining weight when they stop the medication.",
         "verdict": "serviceable",
@@ -798,9 +801,9 @@
           ]
         },
         "sizeMath": {
-          "customersNeeded": 1001,
+          "customersNeeded": 1335,
           "adoptionRate": 0.01,
-          "minPopulation": 100100
+          "minPopulation": 133500
         },
         "motivation": "Just started medication and wants a plan, but has quit generic apps before.",
         "verdict": "marginal",
@@ -1394,7 +1397,8 @@
       "result": "nothing-found",
       "evidenceIds": [
         "ev_14"
-      ]
+      ],
+      "kind": "incumbent-gap"
     },
     {
       "claim": "Midlife strength protectors are big enough to support the business",
@@ -1408,7 +1412,8 @@
         "ev_20",
         "ev_21",
         "ev_22"
-      ]
+      ],
+      "kind": "size"
     },
     {
       "claim": "People want to keep muscle, not just lose weight",
@@ -1421,7 +1426,8 @@
         "ev_25",
         "ev_16",
         "ev_19"
-      ]
+      ],
+      "kind": "motivation"
     }
   ],
   "readiness": {
@@ -1465,7 +1471,7 @@
         "pass": true
       },
       {
-        "check": "[script] Skeptic pass covers 3+ key claims (motivation, gap, size), each with queries",
+        "check": "[script] Skeptic pass covers motivation, incumbent gap and size, each with queries and a result",
         "pass": true
       },
       {

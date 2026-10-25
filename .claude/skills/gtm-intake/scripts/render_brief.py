@@ -30,6 +30,7 @@ DRUG_MASK = re.compile(rf"(?:{DRUG_NAMES})\w*", re.IGNORECASE)
 def plain(text: str) -> str:
     """Strip internal IDs like '(ev_15)' or '(see concernBundles)', and speak to the owner directly."""
     text = re.sub(r"\s*\((?:see [A-Za-z]+|(?:ev|seg|con|px|fnd|lex|int)_\w+(?:,\s*\w+)*)\)", "", text)
+    text = re.sub(r"\s*\b(?:ev|seg|con|px|fnd|lex|int|hyp)_\d+\b,?", "", text)  # bare IDs inside longer notes
     text = re.sub(r"\bthe owner's\b", "your", text)
     return re.sub(r"\bThe owner's\b", "Your", text).strip()
 
@@ -127,7 +128,7 @@ def customer_groups(brief: Json) -> list[str]:
             out.append(f"- **How many people:** about {people(pop)}{label}.{how}")
         else:
             out.append("- **How many people:** we couldn't estimate this yet.")
-        # sizeMath is zero until the validator fills it in; only show it once computed.
+        # sizeMath is null until the validator can compute it from the owner's inputs; only show it once computed.
         math: Json = svc.get("sizeMath") or {}
         need, minimum = math.get("customersNeeded") or 0, math.get("minPopulation") or 0
         if need and minimum:
@@ -135,7 +136,7 @@ def customer_groups(brief: Json) -> list[str]:
                                          else " This group may be too small.")
             out.append(f"- **Is it big enough?** To reach the minimum revenue you said you need, you'd need about "
                        f"{need:,.0f} customers, so the group must have at least {minimum:,.0f} people (assuming about "
-                       f"{math.get('adoptionRate') or 0:.0%} of them would buy).{clears}")
+                       f"{math.get('adoptionRate') or 0:.0%} of them would buy, your estimate).{clears}")
         out.append("")
     return out
 
@@ -188,7 +189,7 @@ def tried(brief: Json) -> list[str]:
         goal = f" (most you can spend: {money(econ['targetCpaUsed'], currency, 2)}, worked out from your numbers)"
     else:  # the owner's own target; files from before unitEconomics only carry targetCpa
         target = econ.get("targetCpaUsed") or business.get("targetCpa")
-        goal = f" (your target: {money(target, currency)})" if target else ""
+        goal = f" (your target: {money(target, currency, 2)})" if target else ""
     experiments: list[Json] = brief.get("priorExperiments") or []
     if not experiments:
         return out + ["You didn't share any past ad results.", ""]
@@ -240,7 +241,7 @@ def render(brief: Json, links: bool = True, public: bool = False) -> str:
     for section in (short_version(brief), must_be_true(brief), best_guess(brief), before_after(brief, public),
                     customer_groups(brief), worries(brief, links and not public), tried(brief), how_sure(brief)):
         out += section
-    out += ["## Still open", ""] + ([f"- {q}" for q in brief.get("openQuestions") or []] or ["Nothing open right now."])
+    out += ["## Still open", ""] + ([f"- {plain(q)}" for q in brief.get("openQuestions") or []] or ["Nothing open right now."])
     return "\n".join(out).rstrip() + "\n"
 
 

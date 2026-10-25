@@ -33,11 +33,18 @@ Each topic has:
 - **Good answer:** "At least $180,000 a year. Below that I'd have to go back to consulting."
 - **Fills:** `business.revenueGoal12mo`: the minimum revenue needed in a year to sustain or grow the business (same currency as pricing).
 
-## Goals: price and purchases per year
+## Goals: realistic share of the group
 
-- **Ask:** "What does a customer pay, and how many times a year do they pay it?"
+- **Ask:** "Out of 100 people who fit your customer group, how many do you think you could realistically win in a year?"
+- **If vague:** "Think of your current customers: roughly what share of the people you reached actually signed up?" Don't offer a benchmark; it's their estimate.
+- **Good answer:** "Maybe 1 in 100."
+- **Fills:** `business.adoptionRate` as a fraction (0.01). The script uses it for the size check; without it, size isn't judged.
+
+## Goals: price and payments in the first year
+
+- **Ask:** "What does a customer pay, and on average how many times do they pay in their first year? Count people who cancel early."
 - **If vague:** "What's the price on your checkout page today, and is it monthly, yearly, or one time?"
-- **Good answer:** "$14.99 a month, so 12 payments a year if they stay."
+- **Good answer:** "$14.99 a month. Some cancel, so about 9 payments in the first year on average." (12 is only right if nobody cancels.)
 - **Fills:** `business.pricing` (`amount`, `currency`, `period`, `purchasesPerYear`). The script uses this with the minimum revenue for size math; don't do the math yourself.
 
 ## Target cost per sign-up

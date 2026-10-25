@@ -22,7 +22,7 @@ You interview a small-business owner, research their market in one capped turn, 
 
 - **Evidence records are copied, never written.** Each `evidence[]` entry is one of:
   - `origin: "web"`: copied from a search or fetch result you received in this session. `url` is the page you read. `excerpt` is verbatim text from it, at most 25 words, with personal details (names, usernames, emails, exact locations) replaced by `[removed]`.
-  - `origin: "owner-text"` or `"owner-file"`: the owner's own words in this chat, or text and rows from a file they gave you.
+  - `origin: "owner-text"` or `"owner-file"`: the owner's own words in this chat, or text and rows from a file they gave you. Customer reviews or emails the owner pastes get `sourceType: "review"`; only reviews and forum posts count as customer voices.
 - If you can't point to the tool result or the owner's text, you don't have the evidence. Write an open question or a research task instead.
 - Never invent a URL, quote, rating, review count, survey figure or sample size. A number printed in a source (a rating, a review count, a survey n) may be copied, with that source's evidence ID.
 - **You never type computed numbers:** concern counts, bundle weights, normalized attribute weights or normalized `sampleShare`, `business.unitEconomics` (a customer's yearly revenue, the max cost per sign-up, the target the verdicts use), cost per sign-up, ad verdicts, or `sizeMath`. Leave placeholders (`concernBundles: []`, `sizeMath` zeros, ad `verdict: "inconclusive"`, no `unitEconomics`) and let `validate_intake.py --write` fill them. Don't quote one of these numbers to the owner until the script has produced it.
@@ -75,7 +75,7 @@ Detect where you're running before the first file write.
   - It doesn't assume the reader's condition ("Are you on Ozempic?", "your GLP-1 journey").
   - It makes no medical claims (treats, cures, prevents, clinically proven).
   - It names no medication or drug class (brand or generic). The validator rejects these outright.
-- For demo runs and anything public (such as a demo video), render the brief with `--public`: no source links, so health-related quotes never appear next to them, and medication names masked. Real owners get the default render.
+- For demo runs and anything public (such as a demo video), render the brief with `--public`: no source links, so health-related quotes never appear next to them, and medication names masked in the plain-AI "before" column (research findings and real quotes stay verbatim). Real owners get the default render.
 
 ## Research protocol
 
@@ -98,14 +98,14 @@ Detect where you're running before the first file write.
 - **Incumbents:** name, rating, review count, copied from sources.
 - **Unresolved concerns:** concern IDs that incumbents' reviews show going unaddressed.
 - **Switching or quitting language:** evidence IDs.
-- **Size:** `size.population` as an estimate with logic. The script computes `customersNeeded = revenueGoal12mo ÷ (price × purchasesPerYear)`, where `revenueGoal12mo` is the minimum revenue the owner needs in a year to sustain or grow the business, and `minPopulation = customersNeeded ÷ adoptionRate` (default 1%).
+- **Size:** `size.population` as an estimate with logic. The script computes `customersNeeded = revenueGoal12mo ÷ (price × purchasesPerYear)`, where `revenueGoal12mo` is the minimum revenue the owner needs in a year to sustain or grow the business, and `minPopulation = customersNeeded ÷ business.adoptionRate`: the owner's own estimate of the share of the group they could win in a year (no default; without it, size isn't judged).
 - **Motivation:** why this person buys now (trigger plus job to be done).
 
 Verdict: `serviceable`, `marginal`, `not-serviceable` or `insufficient-evidence`. Write it only after the script has filled `sizeMath`.
 
-**Skeptic pass.** One structured counter-case per key claim (at minimum: the primary motivation, the gap incumbents leave, and size). Run disconfirming queries, log them, and record in `skeptic[]` the claim, the queries actually run, and the result: `unresolved` (cite the counter-evidence), `resolved`, or `nothing-found` ("found nothing against X after queries A, B"). In Claude Code you may run it in a separate subagent given only the claims, so it doesn't rubber-stamp your work; it logs to the same file.
+**Skeptic pass.** One structured counter-case per key claim (at minimum: the primary motivation, the gap incumbents leave, and size). Run disconfirming queries, log them, and record in `skeptic[]` the claim, its `kind` (`motivation`, `incumbent-gap` or `size`; all three are required), the queries actually run, and the result: `unresolved` (cite the counter-evidence), `resolved`, or `nothing-found` ("found nothing against X after queries A, B"). In Claude Code you may run it in a separate subagent given only the claims, so it doesn't rubber-stamp your work; it logs to the same file.
 
-**Prior ad results.** Copy campaign-level metrics into `priorExperiments[]`. Ask the owner whether the export's "sign-ups" are free trials or paying customers; trials make cost per sign-up look cheaper than cost per paying customer. The script computes the verdict and its reason against `business.unitEconomics.targetCpaUsed`: the owner's `targetCpa` if they gave one, otherwise the max it derived from their `acquisitionShare`. `inconclusive` below 100 clicks or 10 conversions, or when there's no target at all.
+**Prior ad results.** Copy campaign-level metrics into `priorExperiments[]`. Ask the owner whether the export's "sign-ups" are free trials or paying customers, and record it as `conversionType` (`paying`, `trial` or `unknown`); only `paying` results are judged. The script computes the verdict and its reason against `business.unitEconomics.targetCpaUsed`: the owner's `targetCpa` if they gave one, otherwise the max it derived from their `acquisitionShare`. `inconclusive` below 100 clicks or 10 conversions, for trials or unknown conversion types, or when there's no target at all.
 
 ### Research log
 
@@ -167,6 +167,6 @@ If the user says "demo":
 - The interview rules still apply (including the scripted vague answers and follow-ups).
 - **Research turn:** don't search live. The evidence is the fictional `evidence[]` already in `fixtures/demo/intake.json` (the cached run). Build `research-log.jsonl` from it: one `source` line per record with a `url` (copy its url, title and excerpt), and one `search` line per `skeptic[].queries` entry, so the validator's log check passes. Never add web evidence beyond the fixture. Owner-text evidence from the script's answers is allowed (the owner's own words, such as why people buy).
 - **Seed with one command, never by hand:** `python3 scripts/demo_seed.py fixtures/demo/intake.json gtm-workspace/keepstrong-demo` appends to the research log (so it's safe after a logged website fetch) and writes `evidence.json` (cached evidence, concerns, skeptic entries). Load those into intake.json with code, not by retyping.
-- **Render** with `render_brief.py --public` (no links, medication names masked).
+- **Render** with `render_brief.py --public` (no links; medication names masked in the plain-AI baseline).
 - Start `readiness.checks` empty. The owner's confirmation is recorded only after the walkthrough, as in a live run.
 - `fixtures/demo/intake.json` is the reference result. Read it, but write your output to the workspace; don't overwrite the fixture.

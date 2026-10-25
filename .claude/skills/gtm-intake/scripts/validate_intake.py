@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import os
 import sys
 from collections import Counter
@@ -19,12 +18,14 @@ from collections import Counter
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # works under python -I too
 from guardrails import check_messaging  # noqa: E402
 from provenance import check_evidence, check_lexicon, load_log, norm  # noqa: E402
+from economics import compute_ads, num, size_math  # noqa: E402
 
 CORE_ATTRIBUTES = ["role", "currentSolution", "priceSensitivity", "urgency", "skepticism", "buyingStage"]
-MIN_CLICKS, MIN_CONVERSIONS = 100, 10
-DEFAULT_ADOPTION, MAX_ADOPTION = 0.01, 0.10
 TODAY_DIMENSIONS = ("geography", "age", "price", "channel", "regulatory", "interest")
 SCRIPT_PREFIX = "[script] "
+BUCKETS = {"locked", "preference", "hypothesis", "unknown"}
+SKEPTIC_KINDS = {"motivation", "incumbent-gap", "size"}
+SKEPTIC_RESULTS = {"unresolved", "resolved", "nothing-found"}
 
 
 class Report:
@@ -38,17 +39,6 @@ class Report:
             self.errors.append(f"{where}: unknown {kind} '{ref_id}'")
 
 
-def num(value: object, r: "Report", field: str) -> float | None:
-    """Parse a number the model or a file supplied; record an error instead of crashing."""
-    if value is None or value == "":
-        return None
-    try:
-        return float(value)  # type: ignore[arg-type]
-    except (TypeError, ValueError):
-        r.errors.append(f"{field}: '{value}' is not a number")
-        return None
-
-
 def ids_of(items: list[dict], label: str, report: Report) -> set[str]:
     seen = [i.get("id") for i in items]
     for dup, n in Counter(seen).items():
@@ -59,10 +49,7 @@ def ids_of(items: list[dict], label: str, report: Report) -> set[str]:
 
 def compute_segments(brief: dict, ev_ids: set, con_ids: set, r: Report) -> None:
     segments = brief.get("segments", [])
-    biz = brief.get("business", {})
-    pricing = biz.get("pricing") or {}
-    goal = num(biz.get("revenueGoal12mo"), r, "revenueGoal12mo")
-    price, per_year = num(pricing.get("amount"), r, "pricing.amount"), num(pricing.get("purchasesPerYear"), r, "purchasesPerYear")
+    sizing = size_math(brief.get("business", {}), r)  # owner inputs only; no default adoption rate
     missing = [s for s in segments if num(s.get("sampleShare"), r, "sampleShare") is None]
     if missing:
         left = 1 - sum(num(s.get("sampleShare"), r, "sampleShare") or 0 for s in segments)
@@ -87,7 +74,7 @@ def compute_segments(brief: dict, ev_ids: set, con_ids: set, r: Report) -> None:
                 v["weight"] = round((num(v.get("weight"), r, "weight") or 0) / sum(weights), 4)
         # Concern bundles: count each excerpt's exact set of concerns for this group.
         tagged = [tuple(sorted(e["concernIds"])) for e in brief.get("evidence", [])
-                  if s.get("id") in e.get("segmentIds", []) and e.get("concernIds") and customer_voice(e)]
+                  if s.get("id") in e.get("segmentIds", []) and e.get("concernIds") and e.get("sourceType") in ("review", "forum-post")]  # customer voices only
         n = len(tagged)
         confidence = "low" if n < 10 else "medium" if n < 30 else "high"
         s["concernBundles"] = [{"concernIds": list(k), "observedCount": c, "weight": round(c / n, 4), "confidence": confidence}
@@ -106,76 +93,12 @@ def compute_segments(brief: dict, ev_ids: set, con_ids: set, r: Report) -> None:
                 r.ref(e in ev_ids, where, e, "evidence")
         for c in sv.get("unresolvedConcernIds", []):
             r.ref(c in con_ids, where, c, "concern")
-        math_ = sv.setdefault("sizeMath", {})
-        if goal and price and per_year:
-            rate = math_.get("adoptionRate") or DEFAULT_ADOPTION
-            if not 0 < rate <= MAX_ADOPTION:  # a high rate would make any group look big enough
-                r.errors.append(f"{where}: adoptionRate {rate} must be > 0 and <= {MAX_ADOPTION} (owner-confirmed only)")
-                rate = DEFAULT_ADOPTION
-            needed = math.ceil(goal / (price * per_year))
-            math_.update(customersNeeded=needed, adoptionRate=rate, minPopulation=math.ceil(needed / rate))
-            pop = sv.get("size", {}).get("population")
-            if pop is not None and pop < math_["minPopulation"] and sv.get("verdict") == "serviceable":
-                r.warnings.append(f"{where}: verdict is serviceable but population {pop:,} < minimum {math_['minPopulation']:,}")
-        else:
-            sv["sizeMath"] = {"customersNeeded": 0, "adoptionRate": DEFAULT_ADOPTION, "minPopulation": 0}
-            r.warnings.append(f"{where}: no price or revenue goal, so size math was skipped")
-
-
-def customer_voice(e: dict) -> bool:
-    return e.get("sourceType") in ("review", "forum-post") or e.get("origin") == "owner-text"
-
-
-def compute_unit_economics(brief: dict, r: Report) -> float | None:
-    """Work out what a customer is worth and the most a sign-up may cost; return the target to judge ads by."""
-    biz = brief.setdefault("business", {})
-    pricing = biz.get("pricing") or {}
-    price, per_year = num(pricing.get("amount"), r, "pricing.amount"), num(pricing.get("purchasesPerYear"), r, "purchasesPerYear")
-    owner_target = num(biz.get("targetCpa"), r, "targetCpa")
-    share = num(biz.get("acquisitionShare"), r, "acquisitionShare")
-    for field in ("acquisitionShare", "costToServeShare"):
-        value = num(biz.get(field), r, field)
-        if value is not None and not 0 < value <= 1:
-            r.errors.append(f"business.{field}: {value} must be a share between 0 and 1")
-    serve = num(biz.get("costToServeShare"), r, "costToServeShare")
-    annual = round(price * per_year, 2) if price and per_year else None
-    max_cac = round(annual * share, 2) if annual and share and 0 < share <= 1 else None
-    # Break-even: the most a customer can cost to win before year one loses money, from the owner's own costs.
-    break_even = round(annual * (1 - serve), 2) if annual and serve is not None and 0 <= serve <= 1 else None
-    margin_share = round(1 - serve - share, 4) if serve is not None and share is not None else None
-    if margin_share is not None and margin_share <= 0:
-        r.warnings.append(f"business: serving costs ({serve:.0%}) plus acquisition ({share:.0%}) leave no first-year margin; "
-                          "each new customer loses money in year one")
-    target = owner_target or max_cac
-    source = "owner" if owner_target else "derived" if max_cac else "none"
-    biz["unitEconomics"] = {"annualRevenuePerCustomer": annual, "maxCac": max_cac, "breakEvenCac": break_even,
-                            "firstYearMarginShare": margin_share,
-                            "firstYearMargin": round(annual * margin_share, 2) if annual and margin_share is not None else None,
-                            "targetCpaUsed": target, "targetCpaSource": source}
-    r.notes.append(f"unit economics: {annual} per customer per year; max cost per sign-up {max_cac}; judging ads by {target} ({source})")
-    return target
-
-
-def compute_ads(brief: dict, r: Report) -> None:
-    target = compute_unit_economics(brief, r)
-    derived = brief["business"]["unitEconomics"]["targetCpaSource"] == "derived"
-    for px in brief.get("priorExperiments", []):
-        m, spend = px.get("metrics") or {}, num(px.get("spend"), r, f"{px.get('id')}.spend")
-        clicks = num(m.get("clicks"), r, f"{px.get('id')}.clicks") or 0
-        conv = num(m.get("conversions"), r, f"{px.get('id')}.conversions") or 0
-        cpa = spend / conv if spend is not None and conv else None
-        # The first blocking reason wins, so the brief explains *why* a result is inconclusive.
-        reason = ("no target cost per sign-up, and not enough numbers to work one out" if not target else
-                  "no spend was recorded" if spend is None else
-                  f"fewer than {MIN_CLICKS} clicks" if clicks < MIN_CLICKS else
-                  f"fewer than {MIN_CONVERSIONS} sign-ups" if conv < MIN_CONVERSIONS else None)
-        if reason:
-            px["verdict"], px["verdictReason"] = "inconclusive", reason
-        else:
-            px["verdict"] = "worked" if cpa <= target else "didnt-work"
-            label = "most you can spend, worked out from your numbers" if derived else "target"
-            px["verdictReason"] = f"cost per sign-up {cpa:.2f} {'within' if cpa <= target else 'above'} the {target:g} {label}"
-        r.notes.append(f"ad {px.get('id')}: {clicks:g} clicks, {conv:g} conversions -> {px['verdict']} ({px['verdictReason']})")
+        sv["sizeMath"] = dict(sizing)
+        pop, minimum = sv.get("size", {}).get("population"), sizing["minPopulation"]
+        if minimum is None:
+            r.warnings.append(f"{where}: size not judged (needs price, minimum revenue and the owner's adoption estimate)")
+        elif pop is not None and pop < minimum and sv.get("verdict") == "serviceable":
+            r.warnings.append(f"{where}: verdict is serviceable but population {pop:,} < minimum {minimum:,}")
 
 
 def check_refs(brief: dict, ev_ids: set, seg_ids: set, r: Report) -> None:
@@ -208,6 +131,9 @@ def check_refs(brief: dict, ev_ids: set, seg_ids: set, r: Report) -> None:
 def readiness(brief: dict, messaging_ok: bool, r: Report) -> None:
     icp, hyps, segs = brief.get("icp"), brief.get("hypotheses", []), brief.get("segments", [])
     bucket = {c.get("dimension"): c.get("bucket") for c in brief.get("constraints", [])}
+    for c in brief.get("constraints", []):
+        if c.get("bucket") not in BUCKETS:
+            r.errors.append(f"constraint {c.get('dimension')}: bucket must be one of {sorted(BUCKETS)}")
     primaries = [h for h in hyps if h.get("kind") == "primary"]
     if len(primaries) != 1 or len(hyps) - len(primaries) > 2:
         r.errors.append("hypotheses: need exactly 1 primary and at most 2 alternates")
@@ -231,8 +157,9 @@ def readiness(brief: dict, messaging_ok: bool, r: Report) -> None:
             3 <= len(brief.get("roughMessaging", [])) <= 5 and messaging_ok,
         "Every finding is typed and cites evidence":
             bool(brief.get("findings")) and all(f.get("kind") and f.get("evidenceIds") for f in brief["findings"]),
-        "Skeptic pass covers 3+ key claims (motivation, gap, size), each with queries":
-            len(brief.get("skeptic", [])) >= 3 and all(s.get("queries") for s in brief["skeptic"]),
+        "Skeptic pass covers motivation, incumbent gap and size, each with queries and a result":
+            SKEPTIC_KINDS <= {s.get("kind") for s in brief.get("skeptic", [])}
+            and all(s.get("queries") and s.get("result") in SKEPTIC_RESULTS for s in brief.get("skeptic", [])),
         "No integrity errors": not r.errors,
     }
     block = brief.setdefault("readiness", {"status": "needs-more", "checks": []})

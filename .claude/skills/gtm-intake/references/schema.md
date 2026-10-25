@@ -13,6 +13,7 @@ interface IntakeBrief {
   business: { name: string; description: string; websiteUrl?: string; stage: "idea" | "launched" | "established";
               pricing?: { amount: number; currency: string; period: "one-time" | "month" | "year"; purchasesPerYear: number };
               revenueGoal12mo?: number;          // minimum revenue needed in a year to sustain or grow the business
+              adoptionRate?: number;             // 0–1, owner's estimate of the share of a group they could win in a year (no default)
               targetCpa?: number;                // owner-stated max cost per paying sign-up; omit if they don't know
               costToServeShare?: number;         // 0–1, owner-confirmed share of a customer's revenue spent serving them; sets the break-even
               acquisitionShare?: number;         // 0–1, owner-confirmed share of first-year revenue they'll spend to win a customer
@@ -33,7 +34,8 @@ interface IntakeBrief {
   lexicon: Array<{ id: string; phrase: string; segmentIds: string[]; evidenceId: string }>;   // phrase verbatim in the excerpt
   evidence: Evidence[];
   findings: Finding[];
-  skeptic: Array<{ claim: string; queries: string[]; result: "unresolved" | "resolved" | "nothing-found"; evidenceIds: string[] }>;
+  skeptic: Array<{ claim: string; kind: "motivation" | "incumbent-gap" | "size" | "other"; queries: string[];
+                   result: "unresolved" | "resolved" | "nothing-found"; evidenceIds: string[] }>;   // all three main kinds required
   readiness: { status: "ready" | "no-supported-segment" | "needs-more"; checks: Array<{ check: string; pass: boolean; note?: string }> };
   openQuestions: string[];
 }
@@ -100,7 +102,7 @@ interface Segment {
     incumbents: Array<{ name: string; rating?: number; reviewCount?: number; evidenceIds: string[] }>;
     unresolvedConcernIds: string[]; switchingEvidenceIds: string[];
     size: { population: number | null; isEstimate: boolean; logic: string; evidenceIds: string[] };
-    sizeMath: { customersNeeded: number; adoptionRate: number; minPopulation: number };   // script-computed
+    sizeMath: { customersNeeded: number | null; adoptionRate: number | null; minPopulation: number | null };   // script-computed; null when an input is missing
     motivation: string;
     verdict: "serviceable" | "marginal" | "not-serviceable" | "insufficient-evidence";
     confidence: Confidence; reasoning: string;
@@ -114,6 +116,7 @@ interface PriorExperiment {
   message: { headline?: string; body?: string };
   spend?: number;
   metrics: { impressions?: number; clicks?: number; conversions?: number };   // cost per sign-up is computed by the script
+  conversionType?: "paying" | "trial" | "unknown";  // ask the owner; only "paying" results are judged
                                         // "sign-ups" in an ad export may be free trials, not paying customers: ask the owner which
   verdict: "worked" | "didnt-work" | "inconclusive";                         // script-computed vs unitEconomics.targetCpaUsed
   verdictReason?: string;                                                    // script-computed: why, in plain words
@@ -130,7 +133,7 @@ interface PriorExperiment {
 | Field | Written by | Notes |
 |---|---|---|
 | `segments[].concernBundles` | Script | Leave `[]`. Counts and weights come from evidence tags. |
-| `segments[].serviceability.sizeMath` | Script | Leave zeros. Uses `revenueGoal12mo` (the minimum revenue needed in a year), `pricing`, adoption rate (default 0.01). |
+| `segments[].serviceability.sizeMath` | Script | Leave it out. Uses `revenueGoal12mo` (the minimum revenue needed in a year), `pricing`, and the owner's `business.adoptionRate`. No defaults: null when an input is missing, and size isn't judged. |
 | `business.unitEconomics` | Script | Leave it out. `annualRevenuePerCustomer` = price × purchases per year; `breakEvenCac` = that × (1 − `costToServeShare`), the most a new customer can cost before year one loses money; `maxCac` = that × `acquisitionShare`; `firstYearMarginShare` = 1 − `costToServeShare` − `acquisitionShare` (and `firstYearMargin` in dollars; the script warns at zero or below); `targetCpaUsed` = the owner's `targetCpa` if stated, else `maxCac`, with `targetCpaSource` saying which. Nulls where an input is missing; never a default. |
 | `priorExperiments[].verdict`, `verdictReason` | Script | Leave `"inconclusive"`. Judged against `unitEconomics.targetCpaUsed`; the reason says why. Ask the owner whether ad "sign-ups" are free trials or paying customers. |
 | `segments[].attributes[].values[].weight` | Script normalizes | You give rough relative weights; the script makes them sum to 1. |
