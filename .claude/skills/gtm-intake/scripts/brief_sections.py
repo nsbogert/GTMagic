@@ -1,7 +1,8 @@
 """Plain-words tables and the owner-input sections of brief.md (used by render_brief.py).
 
 Kept apart from render_brief.py so both files stay small: the enum-to-plain-words tables, the money helpers,
-and the sections built from what the owner told us (must-haves, best guess, what a customer is worth).
+and the sections built from what the owner told us (must-haves, best guess, what a customer is worth, and what
+they've already made).
 """
 from __future__ import annotations
 
@@ -30,7 +31,9 @@ SOURCE_TYPES = {"forum-post": "forum post", "review": "app review", "review-aggr
                 "survey": "survey", "official-stats": "official statistics", "news-report": "news report",
                 "competitor-site": "competitor's website", "first-party": "your own data"}
 CHANNELS = {"meta": "Meta (Facebook/Instagram)", "google": "Google", "reddit": "Reddit",
-            "tiktok": "TikTok", "email": "Email", "other": "Other"}
+            "tiktok": "TikTok", "email": "Email", "website": "Your website", "other": "Other"}
+CREATIVE_STATUS = {"live": "running now", "past": "ran before", "draft": "not used yet"}
+CREATIVE_FORMATS = {"text": "Text", "image": "Image"}
 DIMENSIONS = {"geography": "Where", "age": "Ages", "sex": "Sex", "income": "Income", "lifeStage": "Life stage",
               "healthCondition": "Health", "audienceType": "Who", "price": "Price", "channel": "Channels",
               "language": "Language", "regulatory": "Rules", "ethics": "Ethics", "interest": "Interests"}
@@ -63,6 +66,19 @@ def money(amount: float | None, currency: str, decimals: int = 0) -> str:
 
 def currency_of(brief: Json) -> str:
     return ((brief.get("business") or {}).get("pricing") or {}).get("currency", "USD")
+
+
+def count(value: Any) -> str:
+    """A copied or summed count: "38,000", or "12.5" when a platform shares credit (Google Ads)."""
+    if not is_number(value):
+        return "not recorded" if value is None else str(value)
+    return f"{value:,.10g}" if value % 1 else f"{value:,.0f}"
+
+
+def verdict_text(item: Json) -> str:
+    """A script-computed ad verdict in plain words, with the reason when it's too early to tell."""
+    text = EXPERIMENT_VERDICTS.get(item.get("verdict", ""), "Not judged yet.")
+    return text + (f" ({item['verdictReason']})" if item.get("verdict") == "inconclusive" and item.get("verdictReason") else "")
 
 
 def is_number(value: Any) -> bool:
@@ -156,4 +172,60 @@ def best_guess(brief: Json) -> list[str]:
         out += [f"{label}: **{part['segment']}** will {action} because {part['motivation']}, "
                 f"instead of {part['insteadOf']}, at {part['price']}.", "",
                 f"- We'd be wrong if: {part['wrongIf']}.", f"- Where it stands: {status}.", ""]
+    return out
+
+
+def creative_results(perf: Json, names: dict[str, str], cur: str) -> list[str]:
+    """Script-computed results for one creative, in plain words. Nothing is calculated here."""
+    ctr, cost, signups = perf.get("ctr"), perf.get("costPerSignup"), perf.get("conversions")
+    rate = f" ({ctr:.1%} of the times it was shown)" if is_number(ctr) else ""
+    mixed = perf.get("conversionType") == "mixed"  # paying and trial sign-ups: no count or cost to show
+    shown_signups = "can't be added up (some weren't paying customers)" if mixed else count(signups)
+    per = ("can't be worked out" if mixed else money(cost, cur, 2) if is_number(cost)
+           else "no sign-ups" if signups == 0 else "not recorded")
+    out = [f"- **Spent:** {money(perf.get('spend'), cur)} · **Times shown:** {count(perf.get('impressions'))} "
+           f"· **Clicks:** {count(perf.get('clicks'))}{rate} · **Sign-ups:** {shown_signups}",
+           f"- **Cost per sign-up:** {per}"]
+    others = ", ".join(f"\"{names.get(c, c)}\"" for c in perf.get("sharedWith") or [])
+    if perf.get("basis") == "shared":
+        out.append(f"- **Shared results:** these numbers also cover {others}. They ran together, so they can't be split.")
+    elif perf.get("basis") == "partly-shared":
+        out.append(f"- **Partly shared:** some of these results also cover {others}, so the totals mix this ad's "
+                   "own results with shared ones.")
+    channels = [CHANNELS.get(c, c) for c in perf.get("channels") or []]
+    if len(channels) > 1:
+        out.append(f"- **Across channels:** these totals add up results from {' and '.join(channels)}.")
+    return out + [f"- **Result:** {verdict_text(perf)}"]
+
+
+def made(brief: Json) -> list[str]:
+    """The owner's existing ads, headlines and drafts: their words verbatim, results only where linked."""
+    out = ["## What you've already made", ""]
+    creatives: list[Json] = brief.get("creatives") or []
+    if not creatives and brief.get("priorExperiments"):
+        return out + ["We haven't recorded your ads' wording or images on their own yet. Their results are under "
+                      "\"What you've already tried\".", ""]
+    if not creatives:
+        return out + ["You didn't share any ads, headlines or images you've already made.", ""]
+    cur = currency_of(brief)
+    names = {c.get("id", ""): c.get("headline") or "(no headline)" for c in creatives}
+    for cr in creatives:
+        where = CHANNELS.get(cr.get("channel", ""), "channel not recorded")
+        out += [f"### \"{cr.get('headline') or '(no headline)'}\"", "",
+                f"- **What it is:** {CREATIVE_FORMATS.get(cr.get('format', ''), 'Creative')} · {where} · "
+                f"{CREATIVE_STATUS.get(cr.get('status', ''), 'status not recorded')}"]
+        if cr.get("body"):
+            out.append(f"- **Text:** \"{cr['body']}\"")
+        if cr.get("cta"):
+            out.append(f"- **Button / call to action:** \"{cr['cta']}\"")
+        if cr.get("imageDescription"):
+            file = f" (file: {cr['imageFile']})" if cr.get("imageFile") else ""
+            out.append(f"- **The image, as Claude described it (not your words):** {cr['imageDescription']}{file}")
+        perf: Json | None = cr.get("performance")
+        out += creative_results(perf, names, cur) if perf else [
+            "- **Results:** none recorded. It can still be tested later alongside new message lines."]
+        for flag in cr.get("guardrailFlags") or []:
+            out.append(f"- **Heads-up:** this {flag.replace('image: ', 'image, as described, ')}. Ad platforms may "
+                       "restrict ads like this; it's your call whether to keep using it.")
+        out.append("")
     return out

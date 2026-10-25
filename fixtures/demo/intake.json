@@ -61,7 +61,11 @@
       "verdict": "worked",
       "sourceFile": "meta-ads.csv",
       "verdictReason": "cost per sign-up 30.00 within the 53.96 most you can spend, worked out from your numbers",
-      "conversionType": "paying"
+      "conversionType": "paying",
+      "creativeIds": [
+        "cr_1"
+      ],
+      "source": "file"
     },
     {
       "id": "px_2",
@@ -80,7 +84,89 @@
       "verdict": "inconclusive",
       "sourceFile": "meta-ads.csv",
       "verdictReason": "fewer than 10 sign-ups",
-      "conversionType": "paying"
+      "conversionType": "paying",
+      "creativeIds": [
+        "cr_2"
+      ],
+      "source": "file"
+    }
+  ],
+  "creatives": [
+    {
+      "id": "cr_1",
+      "format": "image",
+      "channel": "meta",
+      "status": "past",
+      "headline": "Lose weight without losing muscle",
+      "cta": "Learn more",
+      "imageFile": "sources/muscle-ad.png",
+      "imageDescription": "Fictional demo image (no real file). A square feed ad: a woman in her late 40s in workout clothes lifts a kettlebell in a bright kitchen. Text across the top reads \"Lose weight without losing muscle\". A \"Learn more\" button sits under the image.",
+      "source": "owner-file",
+      "sourceFile": "meta-ads.csv",
+      "experimentIds": [
+        "px_1"
+      ],
+      "guardrailFlags": [],
+      "performance": {
+        "basis": "own",
+        "sharedWith": [],
+        "channels": [
+          "meta"
+        ],
+        "spend": 420,
+        "impressions": 38000,
+        "clicks": 610,
+        "conversions": 14,
+        "ctr": 0.0161,
+        "costPerSignup": 30.0,
+        "conversionType": "paying",
+        "verdict": "worked",
+        "verdictReason": "cost per sign-up 30.00 within the 53.96 most you can spend, worked out from your numbers"
+      }
+    },
+    {
+      "id": "cr_2",
+      "format": "text",
+      "channel": "meta",
+      "status": "past",
+      "headline": "The fitness app for your GLP-1 journey",
+      "source": "owner-file",
+      "sourceFile": "meta-ads.csv",
+      "experimentIds": [
+        "px_2"
+      ],
+      "guardrailFlags": [
+        "names a medication, drug class or treatment"
+      ],
+      "performance": {
+        "basis": "own",
+        "sharedWith": [],
+        "channels": [
+          "meta"
+        ],
+        "spend": 300,
+        "impressions": 41000,
+        "clicks": 290,
+        "conversions": 3,
+        "ctr": 0.0071,
+        "costPerSignup": 100.0,
+        "conversionType": "paying",
+        "verdict": "inconclusive",
+        "verdictReason": "fewer than 10 sign-ups"
+      }
+    },
+    {
+      "id": "cr_3",
+      "format": "text",
+      "channel": "website",
+      "status": "draft",
+      "headline": "Strength first, scale second",
+      "body": "20-minute strength workouts and a daily protein target, built for the months you're losing weight.",
+      "cta": "Start your first workout",
+      "source": "owner-text",
+      "experimentIds": [],
+      "guardrailFlags": [],
+      "performance": null
     }
   ],
   "constraints": [
@@ -871,7 +957,8 @@
       "segmentIds": [
         "seg_1"
       ],
-      "evidenceId": "ev_1"
+      "evidenceId": "ev_1",
+      "voice": "customer"
     },
     {
       "id": "lex_2",
@@ -879,7 +966,8 @@
       "segmentIds": [
         "seg_1"
       ],
-      "evidenceId": "ev_2"
+      "evidenceId": "ev_2",
+      "voice": "customer"
     },
     {
       "id": "lex_3",
@@ -887,7 +975,8 @@
       "segmentIds": [
         "seg_1"
       ],
-      "evidenceId": "ev_5"
+      "evidenceId": "ev_5",
+      "voice": "customer"
     },
     {
       "id": "lex_4",
@@ -895,7 +984,8 @@
       "segmentIds": [
         "seg_1"
       ],
-      "evidenceId": "ev_8"
+      "evidenceId": "ev_8",
+      "voice": "customer"
     },
     {
       "id": "lex_5",
@@ -903,7 +993,8 @@
       "segmentIds": [
         "seg_1"
       ],
-      "evidenceId": "ev_19"
+      "evidenceId": "ev_19",
+      "voice": "customer"
     },
     {
       "id": "lex_6",
@@ -911,7 +1002,8 @@
       "segmentIds": [
         "seg_1"
       ],
-      "evidenceId": "ev_7"
+      "evidenceId": "ev_7",
+      "voice": "customer"
     },
     {
       "id": "lex_7",
@@ -919,7 +1011,8 @@
       "segmentIds": [
         "seg_2"
       ],
-      "evidenceId": "ev_11"
+      "evidenceId": "ev_11",
+      "voice": "customer"
     }
   ],
   "evidence": [

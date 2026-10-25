@@ -3,9 +3,10 @@
 
 Usage: python3 validate_intake.py <intake.json> [--log research-log.jsonl] [--write]
 
-Computes bundles, size math, ad verdicts, normalized weights/shares and readiness; checks
-references, verbatim quotes, provenance and guardrails. Exits 1 on any integrity error, so a
-broken brief is never handed off. Standard library only (runs in Claude chat's sandbox too).
+Computes bundles, size math, ad verdicts, per-creative results, lexicon voice, normalized
+weights/shares and readiness; checks shapes, references, verbatim quotes, provenance and guardrails.
+Exits 1 on any integrity error, so a broken brief is never handed off. Standard library only
+(runs in Claude chat's sandbox too).
 """
 from __future__ import annotations
 
@@ -19,6 +20,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # works under py
 from guardrails import check_messaging  # noqa: E402
 from provenance import check_evidence, check_lexicon, load_log, norm  # noqa: E402
 from economics import compute_ads, num, size_math  # noqa: E402
+from creatives import check_creatives  # noqa: E402
+from structure import check_structure  # noqa: E402
 
 CORE_ATTRIBUTES = ["role", "currentSolution", "priceSensitivity", "urgency", "skepticism", "buyingStage"]
 TODAY_DIMENSIONS = ("geography", "age", "price", "channel", "regulatory", "interest")
@@ -188,11 +191,18 @@ def main() -> int:
         return 1
 
     r = Report()
+    check_structure(brief, r)
+    if r.errors:  # every later check assumes these shapes; stop here rather than crash or write half a result
+        for item in r.errors:
+            print(f"ERROR {item}")
+        print("readiness: not checked (fix the file's structure first; nothing was written)")
+        return 1
     seg_ids = ids_of(brief.get("segments", []), "segment", r)
     con_ids = ids_of(brief.get("concerns", []), "concern", r)
     ids_of(brief.get("findings", []), "finding", r)
     ids_of(brief.get("hypotheses", []), "hypothesis", r)
     ids_of(brief.get("priorExperiments", []), "prior experiment", r)
+    ids_of(brief.get("creatives") or [], "creative", r)
     log_sources, log_queries = load_log(args.log, r)
     evidence = check_evidence(brief, seg_ids, con_ids, log_sources, bool(args.log), r)
     if args.log:  # the skeptic must have actually run the disconfirming queries it reports
@@ -201,10 +211,12 @@ def main() -> int:
                 if norm(q) not in log_queries:
                     r.errors.append(f"skeptic[{i}]: query not in research log: \"{q}\"")
     ids_of(brief.get("evidence", []), "evidence", r)
-    lex_ids = check_lexicon(brief, evidence, seg_ids, r)
+    lex_voice = check_lexicon(brief, evidence, seg_ids, r)
     compute_segments(brief, set(evidence), con_ids, r)
-    compute_ads(brief, r)
-    messaging_ok = check_messaging(brief, seg_ids, lex_ids, r)
+    target, target_source = compute_ads(brief, r)
+    # imageFile paths are relative to the save file's folder (the workspace), not the shell's cwd.
+    check_creatives(brief, os.path.dirname(os.path.abspath(args.intake)), target, target_source, r)
+    messaging_ok = check_messaging(brief, seg_ids, lex_voice, r)
     check_refs(brief, set(evidence), seg_ids, r)
     readiness(brief, messaging_ok, r)
 
