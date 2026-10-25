@@ -1,0 +1,14 @@
+# GTMagic benchmarks
+
+Which pipeline step each benchmark checks, and against what real data. All reported runs use Claude (see [RUNLOG.md](RUNLOG.md) for exact prompts).
+
+| # | Benchmark | Pipeline step | Real ground truth | ICP / segment info? | Size (train / val / test) | Metric | Status |
+|---|---|---|---|---|---|---|---|
+| 1 | **Upworthy headlines** ([upworthy/](upworthy/)) | Arena: pick the winning messages | Real CTR from 2013–15 headline A/B tests ([OSF](https://osf.io/jd64p/), CC BY 4.0) | **No**: one fixed audience (Upworthy's Facebook readers) | 223 / 231 / 400 tests, 4–8 headlines each | Winner = #1, winner in top 3, CTR gain captured, Kendall τ | Data ready; vanilla run on val |
+| 2 | **Mega-Study infotainment** ([megastudy/](megastudy/)) | Arena **per ICP**: does a segment's synthetic audience prefer what the real segment prefers? | 300 real people's 1–7 share ratings of headline cards, each person also has a 500-question persona ([Twin-2K-500](https://huggingface.co/datasets/LLM-Digital-Twin/Twin-2K-500-Mega-Study), Apache 2.0) | **Yes**: demographics + full persona per person | 120 / 60 / 120 people, 18 cards each, 18 segments | Segment winner accuracy, card correlation, **segment-gap reproduction** (only the partisan gap is real), individual MAE | Data ready; published GPT-4.1 twin baseline extracted |
+| 3 | **Hillstrom e-mail** ([hillstrom/](hillstrom/)) | ICP evaluator: which segment responds to which campaign | 64k customers randomized to men's / women's / no email; visits, conversions | **Yes**: purchase history, recency, channel, area | 43 segments (1,994–32,144 customers) | Uplift rank correlation per email, top-3 targets ("which email wins" is trivial: men's wins everywhere) | Data ready |
+| 4 | **Refactor Fitness known answer** ([../cases/refactor-fitness/](../cases/refactor-fitness/)) | End to end: intake → ICP → message | The founder's real pivot (public site) | Yes (the answer is an ICP) | 1 case, 9 rubric items | Rubric score /18, blind judge with verified quotes | Built; needs a Claude re-run |
+
+**Resources, not benchmarks:** [Nemotron-Personas-USA](https://huggingface.co/datasets/nvidia/Nemotron-Personas-USA) (1M census-grounded synthetic personas, CC BY 4.0) can seed the Bot Cloner; [Trustpilot reviews 123k](https://huggingface.co/datasets/Kerassy/trustpilot-reviews-123k) is real customer wording for the research lexicon. [Olist](https://www.kaggle.com/datasets/olistbr/marketing-funnel-olist) was skipped (no message text).
+
+**Reference results from the literature** (same or similar data): on Upworthy significant pairs, a plain "typical reader" prompt reached Kendall τ 0.36 and a 10-persona panel τ 0.08 ([arXiv 2609.25010](https://arxiv.org/abs/2609.25010)); a trained classifier reached AUC 0.75, against a re-run-the-test ceiling of about 0.94 ([RozaKr](https://github.com/RozaKr/upworthy-headlines-prediction)).

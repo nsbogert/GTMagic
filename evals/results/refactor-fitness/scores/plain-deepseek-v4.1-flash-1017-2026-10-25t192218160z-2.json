@@ -1,0 +1,136 @@
+{
+  "runId": "plain-deepseek-v4.1-flash-1017-2026-10-25t192218160z-2",
+  "caseId": "refactor-fitness",
+  "label": "one prompt · deepseek-v4.1-flash-1017",
+  "judgeModel": "dashscope:deepseek-v4.1-flash-1017 (judge-v1)",
+  "scoredAt": "2026-10-25T19:22:37.294Z",
+  "items": [
+    {
+      "id": "primary-segment",
+      "label": "Who to target first",
+      "judgeScore": 1,
+      "score": 1,
+      "evidence": "Goal: cut while keeping strength, recomp, lean bulk, or break a plateau",
+      "evidenceVerified": true,
+      "reason": "Names cutting lifters who want to keep strength, but only as one of several goals and never mentions GLP-1 users or weight loss as the lead."
+    },
+    {
+      "id": "secondary-segment",
+      "label": "Second segment worth a test",
+      "judgeScore": 0,
+      "score": 0,
+      "evidence": "",
+      "evidenceVerified": true,
+      "reason": "Never names midlife men, home-gym lifters, or time-constrained older adults as a segment."
+    },
+    {
+      "id": "guess-verdict",
+      "label": "Verdict on the founder's starting guess",
+      "judgeScore": 1,
+      "score": 1,
+      "evidence": "your customer guess is directionally right, but too broad",
+      "evidenceVerified": true,
+      "reason": "Calls the guess too broad but keeps dual-tracking lifters as the lead rather than shifting to weight-loss or GLP-1 users."
+    },
+    {
+      "id": "core-message",
+      "label": "What to say",
+      "judgeScore": 1,
+      "score": 1,
+      "evidence": "Lead with integrated insight, not consolidation",
+      "evidenceVerified": true,
+      "reason": "Leads with the combined-log/AI-insight message; muscle preservation appears only as one goal among several."
+    },
+    {
+      "id": "pain-and-trigger",
+      "label": "The pain and the moment people buy",
+      "judgeScore": 1,
+      "score": 1,
+      "evidence": "a cut where strength is dropping",
+      "evidenceVerified": true,
+      "reason": "Names strength loss during a cut and plateau as the trigger, but never covers low protein or suppressed appetite."
+    },
+    {
+      "id": "objections",
+      "label": "Top objections to handle",
+      "judgeScore": 1,
+      "score": 1,
+      "evidence": "AI advice is generic.",
+      "evidenceVerified": true,
+      "reason": "Handles only the trust-in-AI objection; no medical/safety, privacy, or price-versus-alternatives objection."
+    },
+    {
+      "id": "alternatives",
+      "label": "What they use today",
+      "judgeScore": 1,
+      "score": 1,
+      "evidence": "Currently uses two apps—a macro/calorie app plus a strength/workout app",
+      "evidenceVerified": true,
+      "reason": "Describes the two-app split clearly but names no actual competitor or AI/coaching alternative they use today."
+    },
+    {
+      "id": "claim-boundaries",
+      "label": "Claims to avoid",
+      "judgeScore": 1,
+      "score": 1,
+      "evidence": "People needing medical nutrition advice—different trust/regulatory burden",
+      "evidenceVerified": true,
+      "reason": "Alludes to regulatory burden in general terms without saying which claims to avoid."
+    },
+    {
+      "id": "channels",
+      "label": "Where to reach them",
+      "judgeScore": 1,
+      "score": 1,
+      "evidence": "Recruit from Reddit fitness communities, Discord servers, Instagram/TikTok lifters",
+      "evidenceVerified": true,
+      "reason": "Names community and creator channels but no comparison/search pages or YouTube demos, and Reddit is generic fitness rather than lifting or GLP-1."
+    }
+  ],
+  "total": 8,
+  "judgeTotal": 8,
+  "max": 18,
+  "warnings": [],
+  "crossCheck": {
+    "model": "decision-model-preview",
+    "items": [
+      {
+        "id": "primary-segment",
+        "expected": 0.05
+      },
+      {
+        "id": "secondary-segment",
+        "expected": 0.01
+      },
+      {
+        "id": "guess-verdict",
+        "expected": 0.91
+      },
+      {
+        "id": "core-message",
+        "expected": 1.5
+      },
+      {
+        "id": "pain-and-trigger",
+        "expected": 0.49
+      },
+      {
+        "id": "objections",
+        "expected": 0.2
+      },
+      {
+        "id": "alternatives",
+        "expected": 0.32
+      },
+      {
+        "id": "claim-boundaries",
+        "expected": 0.12
+      },
+      {
+        "id": "channels",
+        "expected": 0.19
+      }
+    ],
+    "total": 3.8
+  }
+}

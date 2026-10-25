@@ -1,0 +1,5 @@
+{
+  "_note": "Copy to truth.json (kept by one teammate; never shown to any model). Winner = higher CTR.",
+  "refactor-1": { "image-1": { "impressions": 0, "clicks": 0, "ctr": 0, "cpc": 0 }, "image-2": { "impressions": 0, "clicks": 0, "ctr": 0, "cpc": 0 } },
+  "refactor-2": { "image-1": { "impressions": 0, "clicks": 0, "ctr": 0, "cpc": 0 }, "image-2": { "impressions": 0, "clicks": 0, "ctr": 0, "cpc": 0 } }
+}

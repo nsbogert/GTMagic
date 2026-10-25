@@ -1,0 +1,20 @@
+[
+  {
+    "id": "refactor-1",
+    "request": "Compare these images, which would work better for Refactor Fitness?",
+    "audience": "infer",
+    "candidates": [
+      { "id": "image-1", "imagePath": "images/refactor-1/image-1.png" },
+      { "id": "image-2", "imagePath": "images/refactor-1/image-2.png" }
+    ]
+  },
+  {
+    "id": "refactor-2",
+    "request": "Compare these images, which would work better for Refactor Fitness?",
+    "audience": "infer",
+    "candidates": [
+      { "id": "image-1", "imagePath": "images/refactor-2/image-1.png" },
+      { "id": "image-2", "imagePath": "images/refactor-2/image-2.png" }
+    ]
+  }
+]
