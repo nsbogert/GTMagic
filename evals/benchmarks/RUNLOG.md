@@ -320,3 +320,21 @@ Sonnet-high twins averaged into segments predict each segment's mean rating of 1
 - **Refactor images:** `claude-opus-5.5`, high, 1 agent per test; prompt `refactor-ads/final/refactor-{1,2}-prompt.md` (images + panel file `final/refactor-{1,2}-panel.json`: group rankings, first-place votes, each panelist's ranking and reason); output `predictions/opus-final-v3/refactor-{1,2}.json`. Wrapper: "Strict rules: read ONLY the files named below (the prompt file, the image files and the panel file it lists). … Read …/final/refactor-T-prompt.md and do exactly what it says. Write only the JSON object to …/predictions/opus-final-v3/refactor-T.json. Then reply "done"."
 
 **Result:** pipeline-v3 (Opus decides, panel as a reliability-labeled input) 63/100 [53, 72], against vanilla Opus 68: −5 pts [−13, +2], not significant. Raw-vote synthesis was 55 (−13, significant). Stating the panel's reliability removed most of the harm, but on this wording-only task the panel adds nothing. Refactor: Opus final ranks image-2 first in both tests (same as all other arms); for test 1 it names "best for" groups (image-2 → muscle-conscious lifters, image-3 → maintainers).
+
+## 2026-10-25 ~16:45 · Held-out confirmation: simulated panel vs Opus (high) on concept-level group ratings (Mega-Study TEST, 120 people)
+
+Policy change (Sean): **no pushes to main without asking first.** This entry is local until approved.
+
+- **vanilla-opus-high:** `claude-opus-5.5`, `reasoning_effort: high`, 3 agents × 6 segments; same rendered prompts `megastudy/runs/vanilla-opus/<segment>.md` as the earlier default-effort run; output `predictions/vanilla-opus-high/segments-part-{a,b,c}.json` (merged by code into `segments.json`). Wrapper identical to the earlier vanilla-segment wrapper, with output folder `vanilla-opus-high`.
+- **sonnet-persona-demo (test):** `claude-sonnet-5.5`, high, 12 agents × 10 test people; prompts `megastudy/runs/persona-demo/test-pNNN.md` (Twin-paper template, demographics section only); output `predictions/sonnet-persona-demo/test-1..12.json`. Wrapper identical to the val persona-test wrapper, with ids test-pNNN and `test-N.json`.
+- Scoring (code): segments with n ≥ 25 in the test split; card r, MAE, winner accuracy and real gaps, via `npm run megastudy -- report`.
+
+**Results (held-out TEST, 120 people, 18 segments with n ≥ 25; paired bootstrap over segments, which share people, so the CIs are optimistic):**
+
+| Arm | card r | MAE |
+|---|---|---|
+| Opus high, asked for the group average | 0.831 | 0.326 |
+| Simulated panel (Sonnet high, demographics only, averaged per group) | 0.863 | 0.343 |
+| **Pipeline: 50/50 average of Opus and panel (weight fixed in advance, not tuned)** | **0.871** | **0.274** |
+
+Pipeline − Opus: card r +0.041 [+0.016, +0.068], MAE −0.052 [−0.092, −0.004]; better on 13/18 segments. Panel − Opus: +0.032 [−0.004, +0.070]. Val (7 segments): panel − Opus +0.108 [+0.049, +0.179]; 50/50 − Opus +0.095 [+0.050, +0.148]. Opus high (0.78) ≈ Opus default effort (0.79) on val. The panel exaggerates the real partisan gap 6.7× (Opus high 3.8×).

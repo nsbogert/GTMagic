@@ -24,6 +24,7 @@ Twin-2K-500 Mega-Study `infotainment` (300 US adults rated 18 news-post cards, 1
 | sonnet-persona-full | twins | 100% <sub>[100%, 100%]</sub> | 0.81 | 0.87 <sub>[0.86, 0.89]</sub> | 0.80 <sub>[0.76, 0.83]</sub> | 0.37 <sub>[0.30, 0.44]</sub> | 100% | -0.28 | 0.31 | 0 |
 | sonnet-persona-traits | twins | 100% <sub>[100%, 100%]</sub> | 0.82 | 0.89 <sub>[0.88, 0.90]</sub> | 0.78 <sub>[0.74, 0.82]</sub> | 0.34 <sub>[0.28, 0.40]</sub> | 100% | 0.13 | 0.56 | 0 |
 | vanilla-opus | segment | 100% <sub>[100%, 100%]</sub> | 0.78 | 0.79 <sub>[0.76, 0.82]</sub> | 0.75 <sub>[0.73, 0.76]</sub> | 0.53 <sub>[0.46, 0.60]</sub> | 100% | 0.27 | 0.35 | 0 |
+| vanilla-opus-high | segment | 100% <sub>[100%, 100%]</sub> | 0.77 | 0.78 <sub>[0.72, 0.83]</sub> | 0.70 <sub>[0.66, 0.74]</sub> | 0.52 <sub>[0.47, 0.59]</sub> | 100% | 0.52 | 0.35 | 0 |
 
 Chance winner accuracy: 25%.
 
@@ -48,6 +49,7 @@ Chance winner accuracy: 25%.
 | sonnet-persona-full | +0.18 |
 | sonnet-persona-traits | +0.32 |
 | vanilla-opus | +0.20 |
+| vanilla-opus-high | +0.20 |
 
 ### Individual level (twin task)
 
@@ -84,7 +86,9 @@ Chance winner accuracy: 25%.
 | ref-gpt41-full-persona | twins | 100% <sub>[100%, 100%]</sub> | 0.81 | 0.64 <sub>[0.62, 0.66]</sub> | 0.73 <sub>[0.70, 0.76]</sub> | 0.50 <sub>[0.46, 0.54]</sub> | 100% <sub>[100%, 100%]</sub> | 0.51 | 5.55 | 0 |
 | ref-gpt41-persona-summary | twins | 100% <sub>[100%, 100%]</sub> | 0.87 | 0.73 <sub>[0.68, 0.77]</sub> | 0.75 <sub>[0.70, 0.80]</sub> | 0.46 <sub>[0.39, 0.54]</sub> | 100% <sub>[100%, 100%]</sub> | 0.47 | 10.67 | 0 |
 | ref-gpt5-full-persona | twins | 100% <sub>[100%, 100%]</sub> | 0.60 | 0.52 <sub>[0.49, 0.55]</sub> | 0.56 <sub>[0.52, 0.60]</sub> | 1.18 <sub>[1.11, 1.26]</sub> | 100% <sub>[100%, 100%]</sub> | 0.48 | 4.63 | 0 |
+| sonnet-persona-demo | twins | 100% <sub>[100%, 100%]</sub> | 0.90 | 0.86 <sub>[0.83, 0.89]</sub> | 0.83 <sub>[0.79, 0.87]</sub> | 0.34 <sub>[0.27, 0.43]</sub> | 100% <sub>[100%, 100%]</sub> | 0.40 | 6.66 | 0 |
 | vanilla-opus | segment | 100% <sub>[100%, 100%]</sub> | 0.89 | 0.81 <sub>[0.76, 0.85]</sub> | 0.81 <sub>[0.75, 0.86]</sub> | 0.33 <sub>[0.29, 0.37]</sub> | 100% <sub>[100%, 100%]</sub> | 0.54 | 4.25 | 0 |
+| vanilla-opus-high | segment | 95% <sub>[86%, 100%]</sub> | 0.93 | 0.83 <sub>[0.79, 0.87]</sub> | 0.82 <sub>[0.77, 0.85]</sub> | 0.33 <sub>[0.29, 0.36]</sub> | 100% <sub>[100%, 100%]</sub> | 0.68 | 3.77 | 0 |
 
 Chance winner accuracy: 27%.
 
@@ -104,7 +108,9 @@ Chance winner accuracy: 27%.
 | ref-gpt41-full-persona | -1.59 | -1.67 |
 | ref-gpt41-persona-summary | -3.05 | -3.23 |
 | ref-gpt5-full-persona | -1.33 | -1.39 |
+| sonnet-persona-demo | -1.88 | -2.04 |
 | vanilla-opus | -1.09 | -1.41 |
+| vanilla-opus-high | -0.97 | -1.25 |
 
 ### Individual level (twin task)
 
@@ -119,4 +125,5 @@ Chance winner accuracy: 27%.
 | ref-gpt41-full-persona | 1.53 <sub>[1.43, 1.64]</sub> | 0.26 <sub>[0.21, 0.32]</sub> (n=101) | 0.28 | 0.59 |
 | ref-gpt41-persona-summary | 1.60 <sub>[1.50, 1.71]</sub> | 0.28 <sub>[0.22, 0.34]</sub> (n=101) | 0.23 | 0.61 |
 | ref-gpt5-full-persona | 1.93 <sub>[1.80, 2.06]</sub> | 0.25 <sub>[0.20, 0.30]</sub> (n=101) | 0.21 | 0.79 |
+| sonnet-persona-demo | 1.56 <sub>[1.43, 1.71]</sub> | 0.33 <sub>[0.27, 0.40]</sub> (n=101) | 0.20 | 0.51 |
 
