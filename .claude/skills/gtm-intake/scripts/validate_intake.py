@@ -3,41 +3,27 @@
 
 Usage: python3 validate_intake.py <intake.json> [--log research-log.jsonl] [--write]
 
-Computes: concern bundles, size math, ad verdicts, normalized weights and sample
-shares, and the script-owned readiness checks. Checks every ID reference, the
-verbatim lexicon rule, excerpt length, and the messaging/proxy guardrails.
-Exits 1 when an integrity error is found, so a broken brief is never handed off.
-Standard library only, so it runs in Claude chat's sandbox and locally.
+Computes bundles, size math, ad verdicts, normalized weights/shares and readiness; checks
+references, verbatim quotes, provenance and guardrails. Exits 1 on any integrity error, so a
+broken brief is never handed off. Standard library only (runs in Claude chat's sandbox too).
 """
 from __future__ import annotations
 
 import argparse
 import json
 import math
-import re
+import os
 import sys
 from collections import Counter
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # works under python -I too
+from guardrails import check_messaging  # noqa: E402
+from provenance import check_evidence, check_lexicon, load_log, norm  # noqa: E402
+
 CORE_ATTRIBUTES = ["role", "currentSolution", "priceSensitivity", "urgency", "skepticism", "buyingStage"]
-LEXICON_SOURCE_TYPES = {"review", "forum-post"}
-MAX_EXCERPT_WORDS = 25
 MIN_CLICKS, MIN_CONVERSIONS = 100, 10
-DEFAULT_ADOPTION = 0.01
-DRUG_TERMS = r"ozempic|wegovy|mounjaro|zepbound|semaglutide|tirzepatide|saxenda|liraglutide|glp-?1"
-CONDITION_TERMS = DRUG_TERMS + r"|diabet|obes"
-MESSAGING_BANNED = {
-    "names a medication or drug class": DRUG_TERMS,
-    "assumes the reader's condition": r"\bare you on\b|\byour (meds|medication|shots?|injections?)\b",
-    "superlative or guarantee": r"\bbest\b|#1|\bnumber one\b|\bguarantee",
-    "medical claim": r"\bcures?\b|\btreats?\b|\btreatment\b|\bprevents?\b|\bdiagnos",
-}
+DEFAULT_ADOPTION, MAX_ADOPTION = 0.01, 0.10
 SCRIPT_PREFIX = "[script] "
-
-
-def norm(text: str) -> str:
-    """Lowercase, straighten quotes, collapse whitespace: so real quotes aren't rejected on typography."""
-    text = text.replace("’", "'").replace("‘", "'").replace("“", '"').replace("”", '"')
-    return re.sub(r"\s+", " ", text).strip().lower()
 
 
 class Report:
@@ -51,6 +37,17 @@ class Report:
             self.errors.append(f"{where}: unknown {kind} '{ref_id}'")
 
 
+def num(value: object, r: "Report", field: str) -> float | None:
+    """Parse a number the model or a file supplied; record an error instead of crashing."""
+    if value is None or value == "":
+        return None
+    try:
+        return float(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        r.errors.append(f"{field}: '{value}' is not a number")
+        return None
+
+
 def ids_of(items: list[dict], label: str, report: Report) -> set[str]:
     seen = [i.get("id") for i in items]
     for dup, n in Counter(seen).items():
@@ -59,64 +56,18 @@ def ids_of(items: list[dict], label: str, report: Report) -> set[str]:
     return set(seen)
 
 
-def load_log(path: str | None) -> dict[str, str]:
-    """Map each logged source URL to the text actually read there."""
-    sources: dict[str, str] = {}
-    if not path:
-        return sources
-    with open(path, encoding="utf-8") as f:
-        for line in f:
-            if line.strip():
-                entry = json.loads(line)
-                if entry.get("kind") == "source" and entry.get("url"):
-                    sources[entry["url"]] = sources.get(entry["url"], "") + " " + entry.get("excerpt", "")
-    return sources
-
-
-def check_evidence(brief: dict, seg_ids: set, con_ids: set, log: dict[str, str], has_log: bool, r: Report) -> dict:
-    by_id = {}
-    for ev in brief.get("evidence", []):
-        where = f"evidence {ev.get('id')}"
-        by_id[ev.get("id")] = ev
-        if len(ev.get("excerpt", "").split()) > MAX_EXCERPT_WORDS:
-            r.errors.append(f"{where}: excerpt over {MAX_EXCERPT_WORDS} words")
-        if ev.get("origin") == "web":
-            url = ev.get("url")
-            if not url:
-                r.errors.append(f"{where}: web evidence needs a url")
-            elif has_log and url not in log:
-                r.errors.append(f"{where}: url not in research log (evidence must come from a tool result)")
-            elif has_log and norm(ev.get("excerpt", "")) not in norm(log[url]):
-                r.warnings.append(f"{where}: excerpt not found verbatim in the logged text for its url")
-        for s in ev.get("segmentIds", []):
-            r.ref(s in seg_ids, where, s, "segment")
-        for c in ev.get("concernIds", []):
-            r.ref(c in con_ids, where, c, "concern")
-    return by_id
-
-
-def check_lexicon(brief: dict, evidence: dict, seg_ids: set, r: Report) -> set[str]:
-    for lex in brief.get("lexicon", []):
-        where, ev = f"lexicon {lex.get('id')}", evidence.get(lex.get("evidenceId"))
-        r.ref(ev is not None, where, lex.get("evidenceId"), "evidence")
-        for s in lex.get("segmentIds", []):
-            r.ref(s in seg_ids, where, s, "segment")
-        if len(lex.get("phrase", "").split()) < 3:
-            r.errors.append(f"{where}: phrase must be at least 3 words")
-        if ev and norm(lex.get("phrase", "")) not in norm(ev.get("excerpt", "")):
-            r.errors.append(f"{where}: phrase is not verbatim in {ev.get('id')}'s excerpt")
-        if ev and ev.get("sourceType") not in LEXICON_SOURCE_TYPES and ev.get("origin") != "owner-text":
-            r.errors.append(f"{where}: lexicon must come from a review, forum post, or the owner's own words")
-    return {lex.get("id") for lex in brief.get("lexicon", [])}
-
-
 def compute_segments(brief: dict, ev_ids: set, con_ids: set, r: Report) -> None:
     segments = brief.get("segments", [])
-    pricing, goal = brief.get("business", {}).get("pricing"), brief.get("business", {}).get("revenueGoal12mo")
-    if any(s.get("sampleShare") is None for s in segments):
-        r.notes.append("sampleShare missing on some groups: using equal shares")
-        for s in segments:
-            s["sampleShare"] = 1.0
+    biz = brief.get("business", {})
+    pricing = biz.get("pricing") or {}
+    goal = num(biz.get("revenueGoal12mo"), r, "revenueGoal12mo")
+    price, per_year = num(pricing.get("amount"), r, "pricing.amount"), num(pricing.get("purchasesPerYear"), r, "purchasesPerYear")
+    missing = [s for s in segments if num(s.get("sampleShare"), r, "sampleShare") is None]
+    if missing:
+        left = 1 - sum(num(s.get("sampleShare"), r, "sampleShare") or 0 for s in segments)
+        r.notes.append(f"sampleShare missing on {len(missing)} group(s): giving them the remaining share equally")
+        for s in missing:
+            s["sampleShare"] = left / len(missing) if left > 0 else 1.0 / len(segments)
     total_share = sum(s["sampleShare"] for s in segments) or 1.0
     for s in segments:
         s["sampleShare"] = round(s["sampleShare"] / total_share, 4)
@@ -125,14 +76,14 @@ def compute_segments(brief: dict, ev_ids: set, con_ids: set, r: Report) -> None:
         for missing in [a for a in CORE_ATTRIBUTES if a not in names]:
             r.errors.append(f"{where}: missing core attribute '{missing}'")
         for attr in s.get("attributes", []):
-            weights = [v.get("weight", 0) for v in attr.get("values", [])]
+            weights = [num(v.get("weight"), r, "weight") or 0 for v in attr.get("values", [])]
             if not weights or sum(weights) <= 0:
                 r.errors.append(f"{where}: attribute '{attr.get('name')}' has no positive weights")
                 continue
             if abs(sum(weights) - 1) > 0.05:
                 r.warnings.append(f"{where}: '{attr.get('name')}' weights summed to {sum(weights):.2f}; normalized")
             for v in attr["values"]:
-                v["weight"] = round(v.get("weight", 0) / sum(weights), 4)
+                v["weight"] = round((num(v.get("weight"), r, "weight") or 0) / sum(weights), 4)
         # Concern bundles: count each excerpt's exact set of concerns for this group.
         tagged = [tuple(sorted(e["concernIds"])) for e in brief.get("evidence", [])
                   if s.get("id") in e.get("segmentIds", []) and e.get("concernIds")]
@@ -155,47 +106,39 @@ def compute_segments(brief: dict, ev_ids: set, con_ids: set, r: Report) -> None:
         for c in sv.get("unresolvedConcernIds", []):
             r.ref(c in con_ids, where, c, "concern")
         math_ = sv.setdefault("sizeMath", {})
-        if pricing and goal and pricing.get("amount") and pricing.get("purchasesPerYear"):
+        if goal and price and per_year:
             rate = math_.get("adoptionRate") or DEFAULT_ADOPTION
-            needed = math.ceil(goal / (pricing["amount"] * pricing["purchasesPerYear"]))
+            if not 0 < rate <= MAX_ADOPTION:  # a high rate would make any group look big enough
+                r.errors.append(f"{where}: adoptionRate {rate} must be > 0 and <= {MAX_ADOPTION} (owner-confirmed only)")
+                rate = DEFAULT_ADOPTION
+            needed = math.ceil(goal / (price * per_year))
             math_.update(customersNeeded=needed, adoptionRate=rate, minPopulation=math.ceil(needed / rate))
             pop = sv.get("size", {}).get("population")
             if pop is not None and pop < math_["minPopulation"] and sv.get("verdict") == "serviceable":
                 r.warnings.append(f"{where}: verdict is serviceable but population {pop:,} < minimum {math_['minPopulation']:,}")
         else:
+            sv["sizeMath"] = {"customersNeeded": 0, "adoptionRate": DEFAULT_ADOPTION, "minPopulation": 0}
             r.warnings.append(f"{where}: no price or revenue goal, so size math was skipped")
 
 
 def compute_ads(brief: dict, r: Report) -> None:
-    target = brief.get("business", {}).get("targetCpa")
+    target = num(brief.get("business", {}).get("targetCpa"), r, "targetCpa")
     for px in brief.get("priorExperiments", []):
-        m, spend = px.get("metrics", {}), px.get("spend")
-        clicks, conv = m.get("clicks") or 0, m.get("conversions") or 0
-        if not target or spend is None or clicks < MIN_CLICKS or conv < MIN_CONVERSIONS:
-            px["verdict"] = "inconclusive"
+        m, spend = px.get("metrics") or {}, num(px.get("spend"), r, f"{px.get('id')}.spend")
+        clicks = num(m.get("clicks"), r, f"{px.get('id')}.clicks") or 0
+        conv = num(m.get("conversions"), r, f"{px.get('id')}.conversions") or 0
+        cpa = spend / conv if spend is not None and conv else None
+        # The first blocking reason wins, so the brief explains *why* a result is inconclusive.
+        reason = ("no target cost per sign-up was given" if not target else
+                  "no spend was recorded" if spend is None else
+                  f"fewer than {MIN_CLICKS} clicks" if clicks < MIN_CLICKS else
+                  f"fewer than {MIN_CONVERSIONS} sign-ups" if conv < MIN_CONVERSIONS else None)
+        if reason:
+            px["verdict"], px["verdictReason"] = "inconclusive", reason
         else:
-            px["verdict"] = "worked" if spend / conv <= target else "didnt-work"
-        cpa = f"{spend / conv:.2f}" if spend is not None and conv else "n/a"
-        r.notes.append(f"ad {px.get('id')}: {clicks} clicks, {conv} conversions, CPA {cpa} vs target {target} -> {px['verdict']}")
-
-
-def check_messaging(brief: dict, seg_ids: set, lex_ids: set, r: Report) -> bool:
-    ok = True
-    for i, msg in enumerate(brief.get("roughMessaging", [])):
-        where = f"roughMessaging[{i}]"
-        r.ref(msg.get("segmentId") in seg_ids, where, msg.get("segmentId"), "segment")
-        for lid in msg.get("lexiconIds", []):
-            r.ref(lid in lex_ids, where, lid, "lexicon")
-        text = f"{msg.get('headline', '')} {msg.get('subheadline', '')}"
-        for why, pattern in MESSAGING_BANNED.items():
-            if re.search(pattern, text, re.IGNORECASE):
-                r.errors.append(f"{where}: {why}: \"{text.strip()}\"")
-                ok = False
-    for g in brief.get("interests", []):
-        for proxy in g.get("targetableProxies", []):
-            if re.search(CONDITION_TERMS, proxy, re.IGNORECASE):
-                r.errors.append(f"interest {g.get('id')}: targetable proxy names a health condition: \"{proxy}\"")
-    return ok
+            px["verdict"] = "worked" if cpa <= target else "didnt-work"
+            px["verdictReason"] = f"cost per sign-up {cpa:.2f} {'within' if cpa <= target else 'above'} the {target:g} target"
+        r.notes.append(f"ad {px.get('id')}: {clicks:g} clicks, {conv:g} conversions -> {px['verdict']} ({px['verdictReason']})")
 
 
 def check_refs(brief: dict, ev_ids: set, seg_ids: set, r: Report) -> None:
@@ -231,6 +174,11 @@ def readiness(brief: dict, messaging_ok: bool, r: Report) -> None:
     primaries = [h for h in hyps if h.get("kind") == "primary"]
     if len(primaries) != 1 or len(hyps) - len(primaries) > 2:
         r.errors.append("hypotheses: need exactly 1 primary and at most 2 alternates")
+    verdicts = {s.get("id"): s.get("serviceability", {}).get("verdict") for s in segs}
+    if icp and verdicts.get(icp.get("segmentId")) in ("not-serviceable", "insufficient-evidence"):
+        r.errors.append("icp points at a customer group the research does not support; pick another or set icp to null")
+    if icp is None and "serviceable" in verdicts.values():
+        r.errors.append("icp is null but a customer group is marked serviceable: pick it, or downgrade its verdict")
     checks = {
         "ICP has a statement, 3+ must-haves and 1+ disqualifier":
             icp is None or (bool(icp.get("statement")) and len(icp.get("mustHaves", [])) >= 3 and len(icp.get("disqualifiers", [])) >= 1),
@@ -268,6 +216,9 @@ def main() -> int:
     args = ap.parse_args()
     with open(args.intake, encoding="utf-8") as f:
         brief = json.load(f)
+    if not isinstance(brief, dict):
+        print("ERROR intake file must be a JSON object")
+        return 1
 
     r = Report()
     seg_ids = ids_of(brief.get("segments", []), "segment", r)
@@ -275,7 +226,13 @@ def main() -> int:
     ids_of(brief.get("findings", []), "finding", r)
     ids_of(brief.get("hypotheses", []), "hypothesis", r)
     ids_of(brief.get("priorExperiments", []), "prior experiment", r)
-    evidence = check_evidence(brief, seg_ids, con_ids, load_log(args.log), bool(args.log), r)
+    log_sources, log_queries = load_log(args.log, r)
+    evidence = check_evidence(brief, seg_ids, con_ids, log_sources, bool(args.log), r)
+    if args.log:  # the skeptic must have actually run the disconfirming queries it reports
+        for i, s in enumerate(brief.get("skeptic", [])):
+            for q in s.get("queries", []):
+                if norm(q) not in log_queries:
+                    r.errors.append(f"skeptic[{i}]: query not in research log: \"{q}\"")
     ids_of(brief.get("evidence", []), "evidence", r)
     lex_ids = check_lexicon(brief, evidence, seg_ids, r)
     compute_segments(brief, set(evidence), con_ids, r)
@@ -289,9 +246,11 @@ def main() -> int:
             print(f"{label:5} {item}")
     print(f"readiness: {brief['readiness']['status']}")
     if args.write:
-        with open(args.intake, "w", encoding="utf-8") as f:
+        tmp = args.intake + ".tmp"  # write then rename, so a crash never leaves half a file
+        with open(tmp, "w", encoding="utf-8") as f:
             json.dump(brief, f, indent=2, ensure_ascii=False)
             f.write("\n")
+        os.replace(tmp, args.intake)
         print(f"wrote {args.intake}")
     return 1 if r.errors else 0
 

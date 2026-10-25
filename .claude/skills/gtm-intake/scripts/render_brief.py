@@ -25,7 +25,7 @@ READINESS = {
 }
 EXPERIMENT_VERDICTS = {"worked": "Worked: it beat your target cost per sign-up.",
                        "didnt-work": "Didn't work: it cost more per sign-up than your target.",
-                       "inconclusive": "Too early to tell: not enough clicks or sign-ups to judge."}
+                       "inconclusive": "Too early to tell."}
 FINDING_KINDS = [("observed", "What we saw directly"),
                  ("estimated", "What we estimated (calculated from other numbers, so treat as rough)"),
                  ("inferred", "What we concluded (our reading of the evidence)")]
@@ -79,6 +79,17 @@ def target_message(brief: Json) -> Json | None:
     return next((m for m in lines if m.get("segmentId") == seg_id), lines[0] if lines else None)
 
 
+PLAIN_CHECKS = {"ICP": "Who to target", "customer groups": "customer groups", "Skeptic pass": "Trying to prove it wrong",
+                "integrity errors": "problems in the data"}
+
+
+def plain_check(check: str) -> str:
+    text = check.replace("[script] ", "")
+    for jargon, words in PLAIN_CHECKS.items():
+        text = text.replace(jargon, words)
+    return text
+
+
 def short_version(brief: Json) -> list[str]:
     icp: Json | None = brief.get("icp")
     readiness: Json = brief.get("readiness") or {}
@@ -95,7 +106,8 @@ def short_version(brief: Json) -> list[str]:
     msg = target_message(brief)
     what = f"\"{msg.get('headline', '')}\" — {msg.get('subheadline', '')}" if msg else "No message lines yet."
     out += ["", f"**What to say:** {what}", "", f"**Where things stand:** {READINESS.get(status, status)}"]
-    out += [f"- Not done yet: {c.get('check', '')}" for c in readiness.get("checks", []) if not c.get("pass")]
+    # Script check names are internal; show the owner plain words only.
+    out += [f"- Not done yet: {plain_check(c.get('check', ''))}" for c in readiness.get("checks", []) if not c.get("pass")]
     return out + [""]
 
 
@@ -176,7 +188,7 @@ def worries(brief: Json, links: bool) -> list[str]:
             for cid in b.get("concernIds", []):
                 totals[cid] = totals.get(cid, 0) + b.get("observedCount", 0)
         for cid, n in sorted(totals.items(), key=lambda kv: -kv[1])[:MAX_WORRIES]:
-            out.append(f"- {labels.get(cid, cid)}: in {n} of {posts} posts")
+            out.append(f"- {labels.get(cid, cid)}: mentioned in {n} of {posts} sources")
         combos = [b for b in bundles if len(b.get("concernIds", [])) > 1][:3]
         if combos:
             out.append("- Often raised together: " + "; ".join(
@@ -214,7 +226,8 @@ def tried(brief: Json) -> list[str]:
                 f"- **Spent:** {money(spend, currency)} · **Clicks:** {count(metrics.get('clicks'))} "
                 f"· **Sign-ups:** {count(signups)}",
                 f"- **Cost per sign-up:** {cost}{goal}",
-                f"- **Result:** {EXPERIMENT_VERDICTS.get(px.get('verdict', ''), 'Not judged yet.')}", ""]
+                f"- **Result:** {EXPERIMENT_VERDICTS.get(px.get('verdict', ''), 'Not judged yet.')}"
+                + (f" ({px['verdictReason']})" if px.get("verdict") == "inconclusive" and px.get("verdictReason") else ""), ""]
     return out
 
 

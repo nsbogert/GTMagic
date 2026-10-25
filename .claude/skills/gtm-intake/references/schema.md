@@ -1,6 +1,6 @@
 # Intake Brief schema (`intake.json`, schema v1)
 
-Copied verbatim from `docs/skills/INTAKE.md` (spec v1.1, "Handoff: intake.json"). If the two ever differ, the spec wins; update this copy.
+This is the schema's single source of truth (spec v1.1; `docs/skills/INTAKE.md` links here).
 
 ```ts
 type Bucket = "locked" | "preference" | "hypothesis" | "unknown";
@@ -106,8 +106,9 @@ interface PriorExperiment {
   hypothesis?: string; audience: string;
   message: { headline?: string; body?: string };
   spend?: number;
-  metrics: { impressions?: number; clicks?: number; conversions?: number };   // CTR/CPC/CPA computed by the script
+  metrics: { impressions?: number; clicks?: number; conversions?: number };   // cost per sign-up is computed by the script
   verdict: "worked" | "didnt-work" | "inconclusive";                         // script-computed vs targetCpa
+  verdictReason?: string;                                                    // script-computed: why, in plain words
   sourceFile: string;
 }
 ```
@@ -122,11 +123,11 @@ interface PriorExperiment {
 |---|---|---|
 | `segments[].concernBundles` | Script | Leave `[]`. Counts and weights come from evidence tags. |
 | `segments[].serviceability.sizeMath` | Script | Leave zeros. Uses `revenueGoal12mo`, `pricing`, adoption rate (default 0.01). |
-| `priorExperiments[].verdict` (and CTR/CPC/CPA) | Script | Leave `"inconclusive"`. Judged against `targetCpa`. |
+| `priorExperiments[].verdict`, `verdictReason` | Script | Leave `"inconclusive"`. Judged against `targetCpa`; the reason says why. |
 | `segments[].attributes[].values[].weight` | Script normalizes | You give rough relative weights; the script makes them sum to 1. |
 | `segments[].sampleShare` | Script normalizes | Default equal across segments; the owner's ranking may inform it. |
 | `readiness.checks` | Script + model | The script fills the checks it can compute; you add the rest (including owner confirmation). |
-| `readiness.status` | Model | Set from the checks. Never `ready` while a check fails. |
+| `readiness.status` | Script | Set from all checks. Never `ready` while a check fails or before the owner's confirmation is recorded. |
 | `baseline` | Fixed prompt | Frozen in step 2 from `prompts/baseline.md`; never edited. |
 | `business.*` (name, description, stage, pricing, `revenueGoal12mo`, `targetCpa`, `websiteUrl`) | Owner | Drafted from the pre-read, marked "please confirm". |
 | `constraints[]` (bucket, rule, `pushback.ownerKept`) | Owner | You sort answers into buckets; the owner confirms must-haves and decides on pushback. |

@@ -49,7 +49,8 @@
         "conversions": 14
       },
       "verdict": "worked",
-      "sourceFile": "meta-ads.csv"
+      "sourceFile": "meta-ads.csv",
+      "verdictReason": "cost per sign-up 30.00 within the 40 target"
     },
     {
       "id": "px_2",
@@ -67,7 +68,8 @@
         "conversions": 3
       },
       "verdict": "inconclusive",
-      "sourceFile": "meta-ads.csv"
+      "sourceFile": "meta-ads.csv",
+      "verdictReason": "fewer than 10 sign-ups"
     }
   ],
   "constraints": [
@@ -212,8 +214,8 @@
       "name": "Strength training",
       "researchDefinition": "US adults who lift weights at least weekly",
       "targetableProxies": [
-        "strength training communities",
-        "home gym communities"
+        "strength training communities (verify platform policy before use)",
+        "home gym communities (verify platform policy before use)"
       ],
       "demographics": [
         {
