@@ -4,7 +4,7 @@
 Usage: python3 validate_intake.py <intake.json> [--log research-log.jsonl] [--write]
 
 Computes bundles, size math, ad verdicts, per-creative results, lexicon voice, normalized
-weights/shares and readiness; checks references, verbatim quotes, provenance and guardrails.
+weights/shares and readiness; checks shapes, references, verbatim quotes, provenance and guardrails.
 Exits 1 on any integrity error, so a broken brief is never handed off. Standard library only
 (runs in Claude chat's sandbox too).
 """
@@ -21,6 +21,7 @@ from guardrails import check_messaging  # noqa: E402
 from provenance import check_evidence, check_lexicon, load_log, norm  # noqa: E402
 from economics import compute_ads, num, size_math  # noqa: E402
 from creatives import check_creatives  # noqa: E402
+from structure import check_structure  # noqa: E402
 
 CORE_ATTRIBUTES = ["role", "currentSolution", "priceSensitivity", "urgency", "skepticism", "buyingStage"]
 TODAY_DIMENSIONS = ("geography", "age", "price", "channel", "regulatory", "interest")
@@ -190,6 +191,12 @@ def main() -> int:
         return 1
 
     r = Report()
+    check_structure(brief, r)
+    if r.errors:  # every later check assumes these shapes; stop here rather than crash or write half a result
+        for item in r.errors:
+            print(f"ERROR {item}")
+        print("readiness: not checked (fix the file's structure first; nothing was written)")
+        return 1
     seg_ids = ids_of(brief.get("segments", []), "segment", r)
     con_ids = ids_of(brief.get("concerns", []), "concern", r)
     ids_of(brief.get("findings", []), "finding", r)

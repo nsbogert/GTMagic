@@ -1,17 +1,19 @@
 """The owner's existing creatives: links to results, image files, guardrail flags, per-creative results.
 
-Used by validate_intake.py. Creatives are the owner's own work: guardrail risks become warnings and
-plain-words flags, never errors and never rewrites. Results come only from linked prior experiments and
-are judged with economics.judge_ad, so a creative and its experiment can never disagree.
+Used by validate_intake.py, after structure.py has checked shapes. Creatives are the owner's own work:
+guardrail risks become warnings and plain-words flags, never errors and never rewrites. Results come only
+from linked prior experiments and are judged with economics.judge_ad, so a creative and its experiment can
+never disagree. The owner's copy is never allowed to pass as customer voice.
 """
 from __future__ import annotations
 
 import os
+import re
 from typing import TYPE_CHECKING
 
-from economics import judge_ad, num
+from economics import ad_figures, judge_ad
 from guardrails import banned_reasons
-from provenance import norm
+from provenance import LEXICON_SOURCE_TYPES, norm
 
 if TYPE_CHECKING:  # avoid a runtime import cycle; only the type is needed
     from validate_intake import Report
@@ -22,6 +24,7 @@ STATUSES = {"live", "past", "draft"}
 CREATIVE_SOURCES = {"owner-text", "owner-file", "website"}
 EXPERIMENT_SOURCES = {"file", "manual"}
 CONVERSION_TYPES = {"paying", "trial", "unknown"}
+OWNER_ORIGINS = {"owner-text", "owner-file"}  # typed in chat, or copied from the owner's export or screenshot
 COPY_FIELDS = ("headline", "body", "cta")
 SOURCES_DIR = "sources"
 MIXED_REASON = "these results mix paying customers with free trials or unconfirmed sign-ups, so they can't be added up"
@@ -30,6 +33,12 @@ MIXED_REASON = "these results mix paying customers with free trials or unconfirm
 def copy_text(cr: dict) -> str:
     """The owner's own words on a creative (never the model-written image description)."""
     return " ".join(str(cr.get(f) or "") for f in COPY_FIELDS).strip()
+
+
+def contains_words(text: str, words: str) -> bool:
+    """Whole-word, normalized containment: "the weight" doesn't match inside "the weightlifting"."""
+    needle = norm(words)
+    return bool(needle) and re.search(rf"(?<!\w){re.escape(needle)}(?!\w)", norm(text)) is not None
 
 
 def enum(r: Report, where: str, field: str, value: object, allowed: set, required: bool = True) -> None:
@@ -43,8 +52,9 @@ def check_experiment_side(experiments: list, cr_by_id: dict, r: Report) -> None:
         enum(r, where, "channel", px.get("channel"), CHANNELS)
         enum(r, where, "source", px.get("source"), EXPERIMENT_SOURCES, required=False)
         enum(r, where, "conversionType", px.get("conversionType"), CONVERSION_TYPES, required=False)
-        if px.get("source", "file") == "file" and not px.get("sourceFile"):
-            r.warnings.append(f"{where}: no sourceFile; if the owner typed these numbers, set source to 'manual'")
+        if px.get("source", "file") == "file" and not px.get("sourceFile"):  # provenance: numbers need a file
+            r.errors.append(f"{where}: copied from a file but no sourceFile; name the export, "
+                            "or set source to 'manual' if the owner typed these numbers")
         for cid in px.get("creativeIds") or []:
             cr = cr_by_id.get(cid)
             r.ref(cr is not None, where, cid, "creative")
@@ -66,10 +76,15 @@ def check_image(cr: dict, where: str, base_dir: str, r: Report) -> None:
     if not path:
         r.warnings.append(f"{where}: image creative has no imageFile; keep a copy under {SOURCES_DIR}/")
         return
+    # The saved path must be portable (relative, under sources/), and where it really points (symlinks
+    # resolved) must stay inside the workspace's sources/ folder.
     parts = os.path.normpath(str(path)).split(os.sep)
-    if os.path.isabs(str(path)) or parts[0] != SOURCES_DIR or ".." in parts:
-        r.errors.append(f"{where}: imageFile must be a relative path under {SOURCES_DIR}/ (got '{path}')")
-    elif not os.path.isfile(os.path.join(base_dir, *parts)):
+    root = os.path.realpath(os.path.join(base_dir, SOURCES_DIR))
+    resolved = os.path.realpath(os.path.join(base_dir, str(path)))
+    if (not isinstance(path, str) or os.path.isabs(path) or parts[0] != SOURCES_DIR or ".." in parts
+            or resolved == root or os.path.commonpath([root, resolved]) != root):
+        r.errors.append(f"{where}: imageFile must be a file inside the workspace's {SOURCES_DIR}/ folder (got '{path}')")
+    elif not os.path.isfile(resolved):
         r.warnings.append(f"{where}: image file '{path}' not found; copy the owner's upload there")
 
 
@@ -83,16 +98,13 @@ def flag_guardrails(cr: dict, where: str, r: Report) -> None:
                           "Tell the owner; don't rewrite it")
 
 
-def total(linked: list, key: str) -> float | None:
-    """Sum spend or one metric across linked results; None if any is missing, so a partial sum never flatters a cost.
-
-    Values were already checked by compute_ads, so a bad one counts as missing here rather than as a second error.
-    """
-    values = [num(px.get("spend") if key == "spend" else (px.get("metrics") or {}).get(key), None, key) for px in linked]
+def summed(figures: list, key: str) -> float | None:
+    """One figure across linked results; None if any is missing, so a partial sum never flatters a cost."""
+    values = [f[key] for f in figures]
     if any(v is None for v in values):
         return None
-    summed = sum(v for v in values if v is not None)
-    return int(summed) if summed.is_integer() else round(summed, 2)  # whole counts stay whole in the save file
+    total = sum(values)
+    return int(total) if float(total).is_integer() else round(total, 2)  # whole counts stay whole in the file
 
 
 def performance(cr: dict, linked: list, known: dict, target: float | None, source: str) -> dict | None:
@@ -102,34 +114,51 @@ def performance(cr: dict, linked: list, known: dict, target: float | None, sourc
     """
     if not linked:
         return None
-    spend, impressions = total(linked, "spend"), total(linked, "impressions")
-    clicks, conversions = total(linked, "clicks"), total(linked, "conversions")
+    figures = [ad_figures(px, None) for px in linked]  # already checked and reported by compute_ads
     kinds = {px.get("conversionType") or "unknown" for px in linked}
-    kind = kinds.pop() if len(kinds) == 1 else "mixed"
+    kind = next(iter(kinds)) if len(kinds) == 1 else "mixed"
+    spend, impressions, clicks = summed(figures, "spend"), summed(figures, "impressions"), summed(figures, "clicks")
+    conversions = None if kind == "mixed" else summed(figures, "conversions")  # paying + trial don't add up
     if kind == "mixed":
         verdict, reason = "inconclusive", MIXED_REASON
     else:
-        verdict, reason = judge_ad(spend, clicks or 0, conversions or 0, kind, target, source)
-    shared = sorted({c for px in linked for c in px.get("creativeIds") or [] if c != cr.get("id") and c in known})
-    return {"basis": "shared" if shared else "own", "sharedWith": shared,
+        verdict, reason = judge_ad(spend, clicks, conversions, kind, target, source)
+    others = [[c for c in px.get("creativeIds") or [] if c != cr.get("id") and c in known] for px in linked]
+    shared = sorted({c for group in others for c in group})
+    return {"basis": "own" if not shared else "shared" if all(others) else "partly-shared", "sharedWith": shared,
+            "channels": sorted({str(px["channel"]) for px in linked if px.get("channel")}),
             "spend": spend, "impressions": impressions, "clicks": clicks, "conversions": conversions,
             "ctr": round(clicks / impressions, 4) if clicks is not None and impressions else None,
             "costPerSignup": round(spend / conversions, 2) if spend is not None and conversions else None,
             "conversionType": kind, "verdict": verdict, "verdictReason": reason}
 
 
-def check_creative_evidence(brief: dict, cr_by_id: dict, r: Report) -> None:
-    """Evidence quoting a creative must be the owner's words, copied word for word from it."""
+def check_creative_evidence(brief: dict, creatives: list, cr_by_id: dict, r: Report) -> None:
+    """Evidence quoting a creative is the owner's words, copied word for word; owner copy never poses as a customer."""
     for ev in brief.get("evidence", []):
-        cid = ev.get("creativeId")
-        if not cid:
+        cid, where = ev.get("creativeId"), f"evidence {ev.get('id')}"
+        if cid:
+            cr = cr_by_id.get(cid)
+            r.ref(cr is not None, where, cid, "creative")
+            if ev.get("origin") not in OWNER_ORIGINS or ev.get("sourceType") != "first-party":
+                r.errors.append(f"{where}: a creative's wording is the owner's own: origin 'owner-text' or "
+                                "'owner-file', sourceType 'first-party'")
+            if cr is not None and norm(str(ev.get("excerpt") or "")) not in norm(copy_text(cr)):
+                r.errors.append(f"{where}: excerpt is not word for word in {cid}'s headline, body or CTA")
+        elif ev.get("sourceType") in LEXICON_SOURCE_TYPES:
+            for cr in creatives:
+                if contains_words(copy_text(cr), str(ev.get("excerpt") or "")):
+                    r.errors.append(f"{where}: this '{ev.get('sourceType')}' excerpt is word for word in creative "
+                                    f"{cr.get('id')}'s copy, so it's the owner's words: set creativeId "
+                                    f"'{cr.get('id')}' and sourceType 'first-party'")
+    for lex in brief.get("lexicon", []):
+        if lex.get("voice") != "customer":
             continue
-        where, cr = f"evidence {ev.get('id')}", cr_by_id.get(cid)
-        r.ref(cr is not None, where, cid, "creative")
-        if ev.get("origin") != "owner-text" or ev.get("sourceType") != "first-party":
-            r.errors.append(f"{where}: a creative's wording is the owner's own: origin 'owner-text', sourceType 'first-party'")
-        if cr is not None and norm(str(ev.get("excerpt") or "")) not in norm(copy_text(cr)):
-            r.errors.append(f"{where}: excerpt is not word for word in {cid}'s headline, body or CTA")
+        for cr in creatives:
+            if contains_words(copy_text(cr), str(lex.get("phrase") or "")):
+                r.errors.append(f"lexicon {lex.get('id')}: phrase is word for word in creative {cr.get('id')}'s copy; "
+                                f"cite owner evidence for it (creativeId '{cr.get('id')}', first-party) so it's "
+                                "tagged owner voice, not customer voice")
 
 
 def check_creatives(brief: dict, base_dir: str, target: float | None, source: str, r: Report) -> None:
@@ -166,8 +195,7 @@ def check_creatives(brief: dict, base_dir: str, target: float | None, source: st
             r.warnings.append(f"{where}: marked draft but has results; is it live or past?")
         check_image(cr, where, base_dir, r)
         flag_guardrails(cr, where, r)
-        cr["performance"] = performance(cr, linked, cr_by_id, target, source)
-        perf = cr["performance"]
+        cr["performance"] = perf = performance(cr, linked, cr_by_id, target, source)
         r.notes.append(f"{where}: " + (f"{perf['verdict']} ({perf['verdictReason']}; {perf['basis']} results)"
                                        if perf else "no results linked"))
-    check_creative_evidence(brief, cr_by_id, r)
+    check_creative_evidence(brief, creatives, cr_by_id, r)

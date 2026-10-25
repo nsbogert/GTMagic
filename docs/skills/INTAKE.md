@@ -82,7 +82,7 @@ The first GTMagic skill. It interviews a small-business owner, researches their 
 - **A single post:** low. It counts toward themes, but never stands alone as a claim.
 - **First-party ad results** outrank outside data only when conclusive. A $50 test doesn't beat a CDC survey.
 
-**Prior ad results:** the verdict is computed by the script against the owner's target CPA. It's `inconclusive` below 100 clicks or 10 conversions, or when no target was given.
+**Prior ad results:** the verdict is computed by the script against the owner's target CPA. It's `inconclusive` below 100 clicks or 10 conversions, when clicks or sign-ups weren't recorded, or when no target was given.
 
 **Serviceability** (a reasoned judgment with a confidence, never a formula). The judgment weighs separate indicators, each cited:
 - **Incumbents:** name, rating, review count.
@@ -127,7 +127,7 @@ Checks:
 
 The schema's single source of truth is [`.claude/skills/gtm-intake/references/schema.md`](../../.claude/skills/gtm-intake/references/schema.md), which also says which fields the script computes, the model writes, and the owner confirms. A validated example is [`fixtures/demo/intake.json`](../../fixtures/demo/intake.json).
 
-**The simulation skill reads:** `segments[]` (sampleShare, attributes, needs, barriers, decisionCriteria, concernBundles), `lexicon` (voice), and `constraints` with `appliesTo` targeting or messaging (guardrails). Sampling settings (seed, audience size, version) belong to the simulation skill. This replaces INTAKE + RESEARCH and the `MarketModel` in [CONTRACTS.md](../CONTRACTS.md); that doc gets updated at integration.
+**The simulation skill reads:** `segments[]` (sampleShare, attributes, needs, barriers, decisionCriteria, concernBundles), `lexicon` entries with `voice: "customer"` **only** (how customers talk; `voice: "owner"` entries are the owner's own wording and must never be used as customer voice), and `constraints` with `appliesTo` targeting or messaging (guardrails). `creatives[]` is the owner's existing set, available to evaluate later. Sampling settings (seed, audience size, version) belong to the simulation skill. This replaces INTAKE + RESEARCH and the `MarketModel` in [CONTRACTS.md](../CONTRACTS.md); that doc gets updated at integration.
 
 ## Skill layout (built after "go")
 

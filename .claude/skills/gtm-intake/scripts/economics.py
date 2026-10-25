@@ -14,6 +14,7 @@ if TYPE_CHECKING:  # avoid a runtime import cycle; only the type is needed
 
 # Minimum volume before an ad result means anything: validation thresholds, not business assumptions.
 MIN_CLICKS, MIN_CONVERSIONS = 100, 10
+AD_FIGURES = ("spend", "impressions", "clicks", "conversions")
 
 
 def num(value: object, r: Report | None, field: str) -> float | None:
@@ -24,11 +25,35 @@ def num(value: object, r: Report | None, field: str) -> float | None:
     if value is None or value == "":
         return None
     try:
+        if isinstance(value, bool):  # JSON true/false is not a count; float(True) would quietly give 1
+            raise TypeError
         return float(value)  # type: ignore[arg-type]
     except (TypeError, ValueError):
         if r is not None:
             r.errors.append(f"{field}: '{value}' is not a number")
         return None
+
+
+def ad_figures(px: dict, r: Report | None) -> dict[str, float | None]:
+    """One result's spend and metrics, each checked once: a finite number, zero or more. None = not recorded.
+
+    compute_ads reports problems; creatives re-read with r=None so nothing is reported twice.
+    """
+    pid, metrics = px.get("id"), px.get("metrics")
+    if not isinstance(metrics, dict):
+        if metrics is not None and r is not None:
+            r.errors.append(f"{pid}.metrics: must be an object")
+        metrics = {}
+    out: dict[str, float | None] = {}
+    for key in AD_FIGURES:
+        raw = px.get("spend") if key == "spend" else metrics.get(key)
+        value = num(raw, r, f"{pid}.{key}")
+        if value is not None and (not math.isfinite(value) or value < 0):
+            if r is not None:
+                r.errors.append(f"{pid}.{key}: '{raw}' must be a finite number, zero or more")
+            value = None
+        out[key] = value
+    return out
 
 
 def share(biz: dict, field: str, r: Report) -> float | None:
@@ -86,18 +111,21 @@ def compute_unit_economics(brief: dict, r: Report) -> tuple[float | None, str]:
     return target, source
 
 
-def judge_ad(spend: float | None, clicks: float, conversions: float, kind: str | None,
+def judge_ad(spend: float | None, clicks: float | None, conversions: float | None, kind: str | None,
              target: float | None, source: str) -> tuple[str, str]:
     """One ad result against the owner's target, as (verdict, plain-words reason).
 
     Shared by prior experiments and creatives (via their linked results), so the two can never disagree.
-    The first blocking reason wins, so the brief explains *why* a result is inconclusive.
+    The first blocking reason wins, so the brief explains *why* a result is inconclusive. A figure that
+    wasn't recorded is said so, never treated as zero.
     """
     reason = ("no target cost per sign-up, and not enough numbers to work one out" if target is None else
               "these sign-ups were free trials, not paying customers" if kind == "trial" else
               "we don't know whether these sign-ups were paying customers" if kind != "paying" else
               "no spend was recorded" if spend is None else
+              "clicks weren't recorded" if clicks is None else
               f"fewer than {MIN_CLICKS} clicks" if clicks < MIN_CLICKS else
+              "sign-ups weren't recorded" if conversions is None else
               f"fewer than {MIN_CONVERSIONS} sign-ups" if conversions < MIN_CONVERSIONS else None)
     if reason:
         return "inconclusive", reason
@@ -111,10 +139,9 @@ def compute_ads(brief: dict, r: Report) -> tuple[float | None, str]:
     """Judge every prior experiment; returns the target and its source so creatives are judged the same way."""
     target, source = compute_unit_economics(brief, r)
     for px in brief.get("priorExperiments", []):
-        pid, m = px.get("id"), px.get("metrics") or {}
-        spend = num(px.get("spend"), r, f"{pid}.spend")
-        clicks = num(m.get("clicks"), r, f"{pid}.clicks") or 0
-        conv = num(m.get("conversions"), r, f"{pid}.conversions") or 0
-        px["verdict"], px["verdictReason"] = judge_ad(spend, clicks, conv, px.get("conversionType"), target, source)
-        r.notes.append(f"ad {pid}: {clicks:g} clicks, {conv:g} conversions -> {px['verdict']} ({px['verdictReason']})")
+        fig = ad_figures(px, r)
+        px["verdict"], px["verdictReason"] = judge_ad(fig["spend"], fig["clicks"], fig["conversions"],
+                                                      px.get("conversionType"), target, source)
+        shown = ", ".join(f"{k}={'not recorded' if v is None else f'{v:g}'}" for k, v in fig.items())
+        r.notes.append(f"ad {px.get('id')}: {shown} -> {px['verdict']} ({px['verdictReason']})")
     return target, source

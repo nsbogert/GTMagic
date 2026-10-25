@@ -179,13 +179,22 @@ def creative_results(perf: Json, names: dict[str, str], cur: str) -> list[str]:
     """Script-computed results for one creative, in plain words. Nothing is calculated here."""
     ctr, cost, signups = perf.get("ctr"), perf.get("costPerSignup"), perf.get("conversions")
     rate = f" ({ctr:.1%} of the times it was shown)" if is_number(ctr) else ""
-    per = money(cost, cur, 2) if is_number(cost) else "no sign-ups" if signups == 0 else "not recorded"
+    mixed = perf.get("conversionType") == "mixed"  # paying and trial sign-ups: no count or cost to show
+    shown_signups = "can't be added up (some weren't paying customers)" if mixed else count(signups)
+    per = ("can't be worked out" if mixed else money(cost, cur, 2) if is_number(cost)
+           else "no sign-ups" if signups == 0 else "not recorded")
     out = [f"- **Spent:** {money(perf.get('spend'), cur)} · **Times shown:** {count(perf.get('impressions'))} "
-           f"· **Clicks:** {count(perf.get('clicks'))}{rate} · **Sign-ups:** {count(signups)}",
+           f"· **Clicks:** {count(perf.get('clicks'))}{rate} · **Sign-ups:** {shown_signups}",
            f"- **Cost per sign-up:** {per}"]
+    others = ", ".join(f"\"{names.get(c, c)}\"" for c in perf.get("sharedWith") or [])
     if perf.get("basis") == "shared":
-        others = ", ".join(f"\"{names.get(c, c)}\"" for c in perf.get("sharedWith") or [])
         out.append(f"- **Shared results:** these numbers also cover {others}. They ran together, so they can't be split.")
+    elif perf.get("basis") == "partly-shared":
+        out.append(f"- **Partly shared:** some of these results also cover {others}, so the totals mix this ad's "
+                   "own results with shared ones.")
+    channels = [CHANNELS.get(c, c) for c in perf.get("channels") or []]
+    if len(channels) > 1:
+        out.append(f"- **Across channels:** these totals add up results from {' and '.join(channels)}.")
     return out + [f"- **Result:** {verdict_text(perf)}"]
 
 
@@ -193,6 +202,9 @@ def made(brief: Json) -> list[str]:
     """The owner's existing ads, headlines and drafts: their words verbatim, results only where linked."""
     out = ["## What you've already made", ""]
     creatives: list[Json] = brief.get("creatives") or []
+    if not creatives and brief.get("priorExperiments"):
+        return out + ["We haven't recorded your ads' wording or images on their own yet. Their results are under "
+                      "\"What you've already tried\".", ""]
     if not creatives:
         return out + ["You didn't share any ads, headlines or images you've already made.", ""]
     cur = currency_of(brief)

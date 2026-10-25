@@ -262,6 +262,10 @@ def main() -> int:
     except (OSError, ValueError) as err:  # JSONDecodeError is a ValueError
         print(f"render_brief: failed on {args.intake}: {err}", file=sys.stderr)
         return 1
+    except (AttributeError, KeyError, TypeError) as err:  # a malformed file: the validator names the problem
+        print(f"render_brief: {args.intake} isn't shaped as expected ({err}); run validate_intake.py on it first",
+              file=sys.stderr)
+        return 1
     print(f"render_brief: wrote {args.output}", file=sys.stderr)
     return 0
 

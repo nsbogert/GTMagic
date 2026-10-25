@@ -110,6 +110,9 @@
       "performance": {
         "basis": "own",
         "sharedWith": [],
+        "channels": [
+          "meta"
+        ],
         "spend": 420,
         "impressions": 38000,
         "clicks": 610,
@@ -138,6 +141,9 @@
       "performance": {
         "basis": "own",
         "sharedWith": [],
+        "channels": [
+          "meta"
+        ],
         "spend": 300,
         "impressions": 41000,
         "clicks": 290,
