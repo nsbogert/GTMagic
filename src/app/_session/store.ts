@@ -10,7 +10,7 @@ import { parseTranscript, type TranscriptEvent } from "./events";
 
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 const ALLOWED_EXT = new Set([".csv", ".xlsx", ".txt", ".pdf", ".png", ".jpg", ".jpeg", ".webp"]);
-export const SessionMetaSchema = z.looseObject({ id: z.string(), business: z.string().nullable().optional(), pid: z.number().optional() });
+export const SessionMetaSchema = z.looseObject({ id: z.string(), createdAt: z.string().optional(), business: z.string().nullable().optional(), pid: z.number().optional() });
 export type SessionMeta = z.infer<typeof SessionMetaSchema>;
 
 export type SessionView = {
@@ -34,9 +34,17 @@ export function createSession(): string {
 
 export function readMeta(id: string): SessionMeta | null {
   const dir = sessionDir(id);
-  if (!dir) return null;
-  const r = SessionMetaSchema.safeParse(JSON.parse(readFileSync(join(dir, "session.json"), "utf8")));
-  return r.success ? r.data : null;
+  return dir ? metaAt(dir) : null;
+}
+
+// session.json is rewritten by `ui link`; a read can land mid-write, so tolerate it.
+function metaAt(dir: string): SessionMeta | null {
+  try {
+    const r = SessionMetaSchema.safeParse(JSON.parse(readFileSync(join(dir, "session.json"), "utf8")));
+    return r.success ? r.data : null;
+  } catch {
+    return null;
+  }
 }
 
 export function writeMeta(id: string, meta: SessionMeta): void {
@@ -72,16 +80,16 @@ function openAskOf(events: TranscriptEvent[]): string | null {
 export async function readSession(id: string): Promise<SessionView | null> {
   const dir = sessionDir(id);
   if (!dir) return null;
-  const meta = SessionMetaSchema.safeParse(JSON.parse(readFileSync(join(dir, "session.json"), "utf8")));
+  const meta = metaAt(dir);
   const events = readEvents(dir);
   const linked = [...events].reverse().find((e) => e.kind === "link");
   const t = await stat(join(dir, "transcript.jsonl")).catch(() => null);
   return {
     id,
-    business: (linked?.kind === "link" ? linked.business : null) ?? (meta.success ? meta.data.business ?? null : null),
+    business: (linked?.kind === "link" ? linked.business : null) ?? meta?.business ?? null,
     events,
     openAsk: openAskOf(events),
-    lastEventAt: events.at(-1)?.at ?? null,
+    lastEventAt: events.at(-1)?.at ?? meta?.createdAt ?? null,
     transcriptUpdatedAt: t ? t.mtime.toISOString() : null,
   };
 }
@@ -99,7 +107,8 @@ export async function listSessions(): Promise<Array<{ id: string; business: stri
 }
 
 function nextId(events: TranscriptEvent[]): string {
-  return `ev-${events.reduce((m, e) => Math.max(m, Number(e.id.slice(3)) || 0), 0) + 1}`;
+  const n = events.reduce((m, e) => Math.max(m, parseInt(e.id.slice(3), 10) || 0), 0) + 1;
+  return `ev-${n}-${randomBytes(2).toString("hex")}`;
 }
 
 export function askIsOpen(id: string, askId: string): boolean {

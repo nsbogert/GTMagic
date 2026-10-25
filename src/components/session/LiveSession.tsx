@@ -1,10 +1,11 @@
 "use client";
 /* A live gtm-web session: renders the transcript and cards, and sends the owner's answers.
    Re-fetches the session whenever the server-sent stream reports a change. */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { IntakeBriefSchema } from "@/app/_intake/schema";
 import { TranscriptEventSchema } from "@/app/_session/events";
+import { postAnswer } from "@/app/_session/post-answer";
 import { buildThread, isDisconnected } from "@/app/_session/thread";
 import { Plate } from "../plates/Plate";
 import { Composer } from "../shell/Composer";
@@ -52,6 +53,7 @@ export function LiveSession({ id, hideLinks }: { id: string; hideLinks: boolean 
   useEffect(() => {
     const es = new EventSource(`/api/sessions/${id}/stream`);
     es.addEventListener("update", () => void load());
+    es.onerror = () => setLoadError("Can't reach the GTMagic app. Is it still running? (Start it with npm run dev.)");
     const clock = setInterval(() => setNow(new Date()), 5000);
     return () => { es.close(); clearInterval(clock); };
   }, [id, load]);
@@ -60,17 +62,17 @@ export function LiveSession({ id, hideLinks }: { id: string; hideLinks: boolean 
   const quiet = isDisconnected(s?.lastEventAt ?? null, now, t.openAsk !== null) && !t.finished;
   const canAnswer = t.openAsk !== null && t.mode === "live";
 
-  async function answer(text: string, files: File[]) {
-    if (!t.openAsk) return;
-    const form = new FormData();
-    form.set("askId", t.openAsk.askId);
-    form.set("text", text);
-    for (const f of files) form.append("files", f);
-    const r = await fetch(`/api/sessions/${id}/answer`, { method: "POST", body: form });
-    const body = (await r.json().catch(() => ({}))) as { error?: string };
-    setSendError(r.ok ? null : body.error ?? "That didn't send. Try again.");
+  async function answer(text: string, files: File[]): Promise<boolean> {
+    if (!t.openAsk) return false;
+    const r = await postAnswer(id, t.openAsk.askId, text, files);
+    setSendError(r.ok ? null : r.error);
     await load();
+    return r.ok;
   }
+
+  const end = useRef<HTMLDivElement>(null);
+  const itemCount = t.items.length;
+  useEffect(() => { end.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [itemCount]);
 
   async function stop() {
     await fetch(`/api/sessions/${id}/stop`, { method: "POST" });
@@ -111,6 +113,7 @@ export function LiveSession({ id, hideLinks }: { id: string; hideLinks: boolean 
           {quiet ? <Notice title="Claude Code hasn't sent anything for a while." tone="error">Check the terminal where it&apos;s running.</Notice> : null}
           {sendError ? <Notice title={sendError} tone="error" /> : null}
           {t.finished ? <BotTurn text="That's the end of this session. Your save file is in gtm-workspace." /> : null}
+          <div ref={end} />
         </div>
         <Composer disabled={!canAnswer} onSubmit={answer}
           placeholder={t.mode === "scripted" ? "The demo owner answers on their own" : canAnswer ? "Your answer" : "Waiting for the next question"} />

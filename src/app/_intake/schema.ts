@@ -172,7 +172,7 @@ export type Creative = IntakeBrief["creatives"][number];
 export type PriorExperiment = IntakeBrief["priorExperiments"][number];
 export type Business = IntakeBrief["business"];
 
-export type ParseResult = { ok: true; brief: IntakeBrief } | { ok: false; issues: string[] };
+export type ParseResult = { ok: true; brief: IntakeBrief } | { ok: false; reason: "json" | "schema"; issues: string[] };
 
 /** Parse a raw intake.json string; failures come back as up to five plain-word issues. */
 export function parseIntake(raw: string): ParseResult {
@@ -180,11 +180,12 @@ export function parseIntake(raw: string): ParseResult {
   try {
     r = IntakeBriefSchema.safeParse(JSON.parse(raw));
   } catch (err) {
-    return { ok: false, issues: [`The save file isn't valid JSON (${err instanceof Error ? err.message : "parse error"}).`] };
+    return { ok: false, reason: "json", issues: [`The save file isn't valid JSON (${err instanceof Error ? err.message : "parse error"}).`] };
   }
   if (r.success) return { ok: true, brief: r.data };
   return {
     ok: false,
+    reason: "schema",
     issues: r.error.issues.slice(0, 5).map((i) => `${i.path.join(".") || "(top level)"}: ${i.message}`),
   };
 }

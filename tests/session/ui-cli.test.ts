@@ -60,8 +60,8 @@ describe("ui CLI", () => {
     const child = spawn("node", [CLI, "ask", id, "--q", "Price?", "--wait", "--timeout", "10"], { env: { ...process.env, GTM_ROOT: root } });
     let out = "";
     child.stdout.on("data", (d: Buffer) => { out += d.toString(); });
-    while (!/ASK (ev-\d+)/.test(out)) await new Promise((r) => setTimeout(r, 50));
-    const askId = /ASK (ev-\d+)/.exec(out)?.[1];
+    while (!/ASK (\S+)\n/.test(out)) await new Promise((r) => setTimeout(r, 50));
+    const askId = /ASK (\S+)\n/.exec(out)?.[1];
     appendFileSync(transcriptPath(id), JSON.stringify({ id: "ev-99", at: new Date().toISOString(), kind: "answer", askId, text: "$14.99", from: "page" }) + "\n");
     const code = await new Promise<number | null>((r) => child.on("close", r));
     expect(code).toBe(0);

@@ -5,7 +5,7 @@ import { Icon } from "../figures";
 
 export const ACCEPT = ".csv,.xlsx,.txt,.pdf,.png,.jpg,.jpeg,.webp";
 
-type Props = { disabled: boolean; placeholder: string; allowFiles?: boolean; onSubmit: (text: string, files: File[]) => Promise<void> | void };
+type Props = { disabled: boolean; placeholder: string; allowFiles?: boolean; onSubmit: (text: string, files: File[]) => Promise<boolean | void> | boolean | void };
 
 export function Composer({ disabled, placeholder, allowFiles = true, onSubmit }: Props) {
   const [text, setText] = useState("");
@@ -18,9 +18,11 @@ export function Composer({ disabled, placeholder, allowFiles = true, onSubmit }:
     if (disabled || busy || (!text.trim() && files.length === 0)) return;
     setBusy(true);
     try {
-      await onSubmit(text.trim(), files);
-      setText("");
-      setFiles([]);
+      // Keep what the owner typed unless the send succeeded.
+      if ((await onSubmit(text.trim(), files)) !== false) {
+        setText("");
+        setFiles([]);
+      }
     } finally {
       setBusy(false);
     }

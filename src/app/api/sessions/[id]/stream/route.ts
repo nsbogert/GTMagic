@@ -22,7 +22,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     start(controller) {
       let last = "";
       let sincePing = 0;
-      const send = (event: string, data: string) => controller.enqueue(enc.encode(`event: ${event}\ndata: ${data}\n\n`));
+      let closed = false;
+      const send = (event: string, data: string) => {
+        if (!closed) controller.enqueue(enc.encode(`event: ${event}\ndata: ${data}\n\n`));
+      };
       const tick = async () => {
         const s = await readSession(id);
         const key = `${await mtimeOf(join(dir, "transcript.jsonl"))}:${await mtimeOf(s?.business ? intakePath(s.business) : null)}`;
@@ -36,11 +39,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
           send("ping", "{}");
         }
       };
-      void tick();
+      void tick().catch(() => undefined);
       timer = setInterval(() => void tick().catch(() => undefined), POLL_MS);
       req.signal.addEventListener("abort", () => {
         clearInterval(timer);
-        controller.close();
+        if (closed) return;
+        closed = true;
+        try { controller.close(); } catch { /* the client already went away */ }
       });
     },
     cancel() {

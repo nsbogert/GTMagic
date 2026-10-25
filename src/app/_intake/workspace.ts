@@ -59,7 +59,10 @@ async function readAt(path: string): Promise<BusinessRead | null> {
   }
   const parsed = parseIntake(raw);
   if (!parsed.ok) {
-    return lastGood.get(path) ?? { error: "This save file can't be read yet.", issues: parsed.issues };
+    // Half-written JSON is a read that landed mid-write: keep the last good version.
+    // A complete file that fails the schema is a real problem: say so, never show stale cards.
+    const good = parsed.reason === "json" ? lastGood.get(path) : undefined;
+    return good ?? { error: "This save file can't be read.", issues: parsed.issues };
   }
   const { brief, warnings } = cleanIntake(parsed.brief);
   const good = { brief, warnings, rawPath: path, updatedAt: mtime.toISOString() };

@@ -30,6 +30,8 @@ Below, `ui` means `node .claude/skills/gtm-web/scripts/ui.ts` and `<id>` is the 
 
 - `ask --wait` prints `ASK <askId>`, then `ANSWER {"text":…,"from":…,"files":[…]}` when the owner answers (exit 0). Use the text as the owner's answer.
 - Exit 3 means no answer yet: run `ui wait <id> <askId>` (never re-ask; that would post the question twice). Keep re-running it; the owner may be thinking or away.
+- If the Bash call itself times out, the question is still open: run `ui wait`, never `ui ask` again.
+- Run `ui` commands one at a time, not in parallel.
 - `files` are paths inside the session folder, `gtm-workspace/.sessions/<id>/uploads/…`. Read them there and copy them into the business's `sources/` as gtm-intake says.
 - Asking a new question closes any earlier open one, so the page never shows two.
 - Never answer for the owner in a live session.
@@ -60,7 +62,7 @@ ui start [--port 3000]
 ui say <id> <text>
 ui status <id> <step> [detail]
 ui plate <id> <plate>
-ui ask <id> --q <text> [--q <text>…] [--chip <text>…] [--wait] [--timeout <seconds, default 540>]
+ui ask <id> --q <text> [--q <text>…] [--chip <text>…] [--wait] [--timeout <seconds, default 100>]
 ui wait <id> <askId> [--timeout <seconds>]
 ui answer <id> <askId> --from terminal|scripted <text>
 ui cancel <id> <askId>

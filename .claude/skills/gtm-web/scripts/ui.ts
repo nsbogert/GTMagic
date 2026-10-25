@@ -19,6 +19,8 @@ const BUSINESS_RE = /^[a-z0-9][a-z0-9-]{0,63}$/;
 const REPO = resolve(import.meta.dirname, "..", "..", "..", "..");
 const ROOT = process.env.GTM_ROOT ?? process.cwd();
 const SESSIONS = join(ROOT, "gtm-workspace", ".sessions");
+// Under Claude Code's default 2-minute Bash limit, so a wait ends with exit 3 rather than being killed.
+const DEFAULT_WAIT_S = 100;
 
 function fail(msg: string): never {
   process.stderr.write(`ui: ${msg}\n`);
@@ -54,8 +56,9 @@ function events(id: string): Ev[] {
 }
 
 function append(id: string, ev: Record<string, string | string[] | undefined>): string {
-  const n = events(id).reduce((m, e) => Math.max(m, Number(e.id.slice(3)) || 0), 0) + 1;
-  const full = { id: `ev-${n}`, at: new Date().toISOString(), ...ev };
+  const n = events(id).reduce((m, e) => Math.max(m, parseInt(String(e.id).slice(3), 10) || 0), 0) + 1;
+  // The random suffix keeps ids unique when several ui commands run at once.
+  const full = { id: `ev-${n}-${randomBytes(2).toString("hex")}`, at: new Date().toISOString(), ...ev };
   appendFileSync(join(dir(id), "transcript.jsonl"), JSON.stringify(full) + "\n");
   return full.id;
 }
@@ -116,7 +119,7 @@ async function waitFor(id: string, askId: string, timeoutS: number): Promise<nev
 async function main() {
   const { pos, flags } = parseArgs(process.argv.slice(2));
   const [cmd, id = "", ...rest] = pos;
-  const timeout = Number(flags.timeout ?? 540);
+  const timeout = Number(flags.timeout ?? DEFAULT_WAIT_S) || DEFAULT_WAIT_S;
   switch (cmd) {
     case "start": {
       const sid = randomBytes(6).toString("hex");
