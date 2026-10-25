@@ -8,6 +8,7 @@ Twin-2K-500 Mega-Study `infotainment` (300 US adults rated 18 news-post cards, 1
 
 | Arm | Source | Winner acc. (real) | Overall ρ | Card r | Card ρ | Mean MAE | Gap sign (real) | Gap r (key) | Gap scale | Missing |
 |---|---|---|---|---|---|---|---|---|---|---|
+| haiku-twin | twins | 86% <sub>[57%, 100%]</sub> | 0.25 | 0.23 <sub>[0.20, 0.25]</sub> | 0.28 <sub>[0.25, 0.31]</sub> | 0.92 <sub>[0.85, 1.00]</sub> | 100% | 0.00 | 0.62 | 0 |
 | null-train-mean | segment | 100% <sub>[100%, 100%]</sub> | 0.87 | 0.94 <sub>[0.92, 0.95]</sub> | 0.86 <sub>[0.82, 0.89]</sub> | 0.30 <sub>[0.24, 0.37]</sub> | 0% | – | 0.00 | 0 |
 | oracle-segment | segment | 100% <sub>[100%, 100%]</sub> | 1.00 | 1.00 <sub>[1.00, 1.00]</sub> | 1.00 <sub>[1.00, 1.00]</sub> | 0.00 <sub>[0.00, 0.00]</sub> | 100% | 1.00 | 1.00 | 0 |
 | oracle-twin | twins | 100% <sub>[100%, 100%]</sub> | 1.00 | 1.00 <sub>[1.00, 1.00]</sub> | 1.00 <sub>[1.00, 1.00]</sub> | 0.00 <sub>[0.00, 0.00]</sub> | 100% | 1.00 | 1.00 | 0 |
@@ -19,6 +20,7 @@ Twin-2K-500 Mega-Study `infotainment` (300 US adults rated 18 news-post cards, 1
 | ref-gpt41-full-persona | twins | 100% <sub>[100%, 100%]</sub> | 0.64 | 0.57 <sub>[0.52, 0.62]</sub> | 0.61 <sub>[0.57, 0.66]</sub> | 0.61 <sub>[0.54, 0.69]</sub> | 100% | 0.68 | 0.73 | 0 |
 | ref-gpt41-persona-summary | twins | 100% <sub>[100%, 100%]</sub> | 0.71 | 0.71 <sub>[0.69, 0.73]</sub> | 0.72 <sub>[0.69, 0.76]</sub> | 0.54 <sub>[0.48, 0.61]</sub> | 100% | 0.48 | 1.15 | 0 |
 | ref-gpt5-full-persona | twins | 100% <sub>[100%, 100%]</sub> | 0.32 | 0.40 <sub>[0.37, 0.42]</sub> | 0.35 <sub>[0.30, 0.40]</sub> | 1.26 <sub>[1.18, 1.37]</sub> | 100% | -0.14 | 0.26 | 0 |
+| vanilla-opus | segment | 100% <sub>[100%, 100%]</sub> | 0.78 | 0.79 <sub>[0.76, 0.82]</sub> | 0.75 <sub>[0.73, 0.76]</sub> | 0.53 <sub>[0.46, 0.60]</sub> | 100% | 0.27 | 0.35 | 0 |
 
 Chance winner accuracy: 25%.
 
@@ -27,6 +29,7 @@ Chance winner accuracy: 25%.
 | Arm | edu-degree − edu-nodegree contrast:lean:liberal-conservative |
 |---|---|
 | *truth* | +0.57 <sub>[+0.15, +1.05]</sub> |
+| haiku-twin | +0.35 |
 | null-train-mean | +0.00 |
 | oracle-segment | +0.57 |
 | oracle-twin | +0.57 |
@@ -38,11 +41,13 @@ Chance winner accuracy: 25%.
 | ref-gpt41-full-persona | +0.41 |
 | ref-gpt41-persona-summary | +0.66 |
 | ref-gpt5-full-persona | +0.15 |
+| vanilla-opus | +0.20 |
 
 ### Individual level (twin task)
 
 | Arm | MAE | Within-person r | Pooled r | SD ratio (pred/true) |
 |---|---|---|---|---|
+| haiku-twin | 1.89 <sub>[1.73, 2.04]</sub> | 0.15 <sub>[0.07, 0.22]</sub> (n=50) | 0.08 | 0.71 |
 | null-train-mean | 1.52 <sub>[1.39, 1.65]</sub> | 0.48 <sub>[0.37, 0.58]</sub> (n=50) | 0.34 | 0.26 |
 | oracle-twin | 0.00 <sub>[0.00, 0.00]</sub> | 1.00 <sub>[1.00, 1.00]</sub> (n=50) | 1.00 | 1.00 |
 | random-twin | 2.49 <sub>[2.36, 2.62]</sub> | -0.00 <sub>[-0.07, 0.06]</sub> (n=50) | -0.01 | 1.04 |
@@ -70,6 +75,7 @@ Chance winner accuracy: 25%.
 | ref-gpt41-full-persona | twins | 100% <sub>[100%, 100%]</sub> | 0.81 | 0.64 <sub>[0.62, 0.66]</sub> | 0.73 <sub>[0.70, 0.76]</sub> | 0.50 <sub>[0.46, 0.54]</sub> | 100% <sub>[100%, 100%]</sub> | 0.51 | 5.55 | 0 |
 | ref-gpt41-persona-summary | twins | 100% <sub>[100%, 100%]</sub> | 0.87 | 0.73 <sub>[0.68, 0.77]</sub> | 0.75 <sub>[0.70, 0.80]</sub> | 0.46 <sub>[0.39, 0.54]</sub> | 100% <sub>[100%, 100%]</sub> | 0.47 | 10.67 | 0 |
 | ref-gpt5-full-persona | twins | 100% <sub>[100%, 100%]</sub> | 0.60 | 0.52 <sub>[0.49, 0.55]</sub> | 0.56 <sub>[0.52, 0.60]</sub> | 1.18 <sub>[1.11, 1.26]</sub> | 100% <sub>[100%, 100%]</sub> | 0.48 | 4.63 | 0 |
+| vanilla-opus | segment | 100% <sub>[100%, 100%]</sub> | 0.89 | 0.81 <sub>[0.76, 0.85]</sub> | 0.81 <sub>[0.75, 0.86]</sub> | 0.33 <sub>[0.29, 0.37]</sub> | 100% <sub>[100%, 100%]</sub> | 0.54 | 4.25 | 0 |
 
 Chance winner accuracy: 27%.
 
@@ -89,6 +95,7 @@ Chance winner accuracy: 27%.
 | ref-gpt41-full-persona | -1.59 | -1.67 |
 | ref-gpt41-persona-summary | -3.05 | -3.23 |
 | ref-gpt5-full-persona | -1.33 | -1.39 |
+| vanilla-opus | -1.09 | -1.41 |
 
 ### Individual level (twin task)
 

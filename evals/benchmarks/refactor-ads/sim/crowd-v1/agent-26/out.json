@@ -1,0 +1,1 @@
+{"refactor-1": {"ratings": {"o1": 5, "o2": 4, "o3": 3, "o4": 3, "o5": 5, "o6": 6}, "click": {"o1": true, "o2": false, "o3": false, "o4": false, "o5": true, "o6": true}, "pick": "o6"}, "refactor-2": {"ratings": {"o1": 2, "o2": 3}, "click": {"o1": false, "o2": false}, "pick": "none"}}

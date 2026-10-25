@@ -161,3 +161,53 @@ Val Kendall τ: (a) S4 screen only 0.250; (b) crowd only (pipeline-v1) −0.027;
 | paired diff (v2 − vanilla) | +1.8 [−3.3, +6.8] | +0.0 [−3.5, +3.8] | +1.2 [−5.1, +7.6] | −1.6 [−9.0, +6.2] | +0.008 [−0.033, +0.047] |
 
 **Conclusion:** pipeline-v2 is not significantly better than vanilla Opus on held-out tests. The val advantage (+6.5 pts on winner = #1) did not replicate: picking the best of three rules on val inflated it, and vanilla scored higher on test (45.3%) than on val (38.1%). Both are far above chance. pipeline-v1 (persona crowd) was at chance on val and was not run on test.
+
+## 2026-10-25 ~15:30 · Refactor ad images (2 tests: 6 images, 2 images) · vanilla, web research, crowd
+
+Input = the owner's request only: "Compare these images, which would work better for Refactor Fitness?" plus the images, copied under shuffled neutral names (`refactor-ads/images/`; private map `refactor-ads/image-map.json`, never shown to models). Truth (impressions, clicks, CTR, CPC) is held by Sean and added only at scoring time.
+
+| Arm | Model | Rendered prompt(s) | Output |
+|---|---|---|---|
+| vanilla-opus | `claude-opus-5.5`, 1 agent per test | `refactor-ads/runs/vanilla-v1-refactor-{1,2}.md` (template `prompts/vanilla-v1.md`) | `predictions/vanilla-opus/refactor-{1,2}.json` |
+| web-opus | `claude-opus-5.5` + web search/fetch, 1 agent per test | `refactor-ads/runs/web-research-v1-refactor-{1,2}.md` | `predictions/web-opus/refactor-{1,2}.json` + `.research-log.txt` (audited: no Refactor Fitness pages, per agent self-report) |
+| crowd-v1 | ICP: `claude-opus-5.5` (`sim/crowd-v1/icp-prompt.rendered.md` → `icp.json`, 5 segments / 30 personas); crowd: 30 × `claude-haiku-5.5` | `sim/crowd-v1/agent-KK/prompt.md` (persona + per-agent shuffled `oN` image links; maps `map-agent-KK.json`) | `sim/crowd-v1/agent-KK/out.json` |
+
+Wrappers (verbatim templates; `T` = 1/2, `KK` = 01–30):
+
+```
+[vanilla] Strict rules: read ONLY the files named below (the prompt file and the image files it lists). Do not open any other file, do not list directories, do not search the web, do not run code, and do not start sub-agents or delegate.
+
+Read /home/sean/Documents/claude-hacathon/GTMagic/evals/benchmarks/refactor-ads/runs/vanilla-v1-refactor-T.md and do exactly what it says. Write only the JSON object it asks for to this new file with the create tool:
+/home/sean/Documents/claude-hacathon/GTMagic/evals/benchmarks/refactor-ads/predictions/vanilla-opus/refactor-T.json
+Then reply "done".
+
+[web] Strict rules: read ONLY the files named below (the prompt file and the image files it lists). Do not open any other local file, do not list directories, do not run code, and do not start sub-agents or delegate. You may use web search and web fetch, following the rules in the prompt file exactly.
+
+Read /home/sean/Documents/claude-hacathon/GTMagic/evals/benchmarks/refactor-ads/runs/web-research-v1-refactor-T.md and do exactly what it says.
+- Research log (every search query and every URL opened, one per line): /home/sean/Documents/claude-hacathon/GTMagic/evals/benchmarks/refactor-ads/predictions/web-opus/refactor-T.research-log.txt
+- Answer (only the JSON object): /home/sean/Documents/claude-hacathon/GTMagic/evals/benchmarks/refactor-ads/predictions/web-opus/refactor-T.json
+Create both with the create tool. Then reply "done" with the number of searches and pages opened.
+
+[icp] Strict rules: read ONLY the files named below (the prompt file and the image files it lists). Do not open any other file, do not list directories, do not search the web, do not run code, and do not start sub-agents or delegate.
+
+Read /home/sean/Documents/claude-hacathon/GTMagic/evals/benchmarks/refactor-ads/sim/crowd-v1/icp-prompt.rendered.md and do exactly what it says. Write only the JSON object to this new file with the create tool:
+/home/sean/Documents/claude-hacathon/GTMagic/evals/benchmarks/refactor-ads/sim/crowd-v1/icp.json
+Then reply "done" with the number of segments and personas.
+
+[crowd] Strict rules: read ONLY the files named below (your prompt file and the image files it lists). Do not open any other file, do not list directories, do not search the web, do not run code, do not start sub-agents or delegate, and do not try to look anything up. Answer only as the person described in your prompt.
+
+Read /home/sean/Documents/claude-hacathon/GTMagic/evals/benchmarks/refactor-ads/sim/crowd-v1/agent-KK/prompt.md, open every image it lists, and do exactly what it says. Write only the JSON object to this new file with the create tool:
+/home/sean/Documents/claude-hacathon/GTMagic/evals/benchmarks/refactor-ads/sim/crowd-v1/agent-KK/out.json
+Then reply "done".
+```
+
+## 2026-10-25 ~15:30 · Mega-Study infotainment · val · vanilla-opus (segments) and haiku-twin (persona twins)
+
+- **vanilla-opus:** `claude-opus-5.5`, 3 agents × 6 segments. Rendered prompts `megastudy/runs/vanilla-opus/<segment>.md` (template `prompts/vanilla-segment-v1.md`). Parts in `predictions/vanilla-opus/parts/`, merged by code into `segments.json`. Caveat: one agent answered 6 segments in one context (told to treat each independently).
+- **haiku-twin:** `claude-haiku-5.5`, 3 agents × 20 val people. Rendered prompts `megastudy/runs/haiku-twin/<id>.md` (template `prompts/vanilla-twin-v1.md`, Twin-2K-500 persona summary). Output `predictions/haiku-twin/val-{1,2,3}.json`. Same caveat (20 people per context).
+- Wrappers: "Strict rules: read ONLY the files named below. … Treat each prompt file as a separate, independent question … For each segment id below, read …/megastudy/runs/vanilla-opus/<id>.md and answer it exactly as it asks. Segment ids: … Write one JSON object … mapping each segment id to the JSON object you returned for it: …/segments-part-{a,b,c}.json". Twins: the same, with "Each file describes a different person: answer each one only as that person, independently of the others", ids val-p001–020 / 021–040 / 041–060 → `val-{1,2,3}.json`.
+- **Result (val, 60 people, 7 scored segments):** vanilla-opus card r 0.79, overall ρ 0.78, mean MAE 0.53, gap scale 0.35. haiku-twin card r 0.23, ρ 0.25, MAE 0.92, gap scale 0.62; individual within-person r 0.15. Train-split average for everyone: card r 0.94. Published GPT-4.1 persona-summary twins: card r 0.71. Full table: `megastudy/RESULTS.md`.
+
+## 2026-10-25 ~15:35 · main's gtm-message-test scoring on the Upworthy crowd (code only, no model calls)
+
+`python3 scripts/upworthy_message_test_verdicts.py` runs main's `evaluate.py` unchanged on pipeline-v1's val answers (adapter choices in the script). Its `winner` check (top beats runner-up in ≥97.5% of reshuffles) passed on 78/231 tests, but the crowd's winner was the real winner in only 24.4% of those (chance 22.4%). A statistically clear simulated winner was not more likely to be right. Output: `upworthy/message-test-verdicts.md`.
