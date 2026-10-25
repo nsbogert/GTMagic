@@ -6,7 +6,7 @@ GTMagic helps small businesses and founders work out who to sell to and what to 
 
 ![The original whiteboard sketch](docs/sketch.webp)
 
-## Status: the skills work today; the web app isn't built yet
+## Status: the skills work today, with a local web app
 
 GTMagic runs today as a set of skills inside Claude Code. To try them, see [Getting started](#getting-started).
 
@@ -16,10 +16,11 @@ GTMagic runs today as a set of skills inside Claude Code. To try them, see [Gett
 | `gtm-message-test` | Tests competing messages on simulated customers and reports which message, and which customer group, responded best |
 | `gtm-ad-wording` | Writes and compares ad wording, and screens your own variants before you spend money |
 | `gtm-evaluate` | Ranks ads you already run, using simulated customers (needs a separate paid Anthropic API key) |
+| `gtm-web` | Runs the `gtm-intake` interview in a local web page instead of the terminal |
 
 - **In progress:** deeper research (`gtm-research`; the spec is in [docs/skills/RESEARCH.md](docs/skills/RESEARCH.md)) and draft ads (`gtm-creatives`).
-- **Not built yet:** the web app described in "How one run works" below. `src/` holds only each module's plan.
-- **Also in the repo:** `prototype/` (a clickable demo of the interface that replays a scripted, fictional intake) and `evals/` (checks whether GTMagic reaches the conclusions real founders reached).
+- **Web app (local):** `npm install`, then `npm run dev`, open http://127.0.0.1:3000 and click **Start a new session** (it runs Claude Code in the background with your login) or **Try the example**. The hosted version in "How one run works" isn't built.
+- **Also in the repo:** `evals/` (checks whether GTMagic reaches the conclusions real founders reached).
 
 ### Planned before the event
 
