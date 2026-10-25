@@ -1,0 +1,50 @@
+{
+ "_note": "Real Meta ad results from the owner's dashboard screenshots (truth-screenshot-*.png). null = no impressions (02_strength_not_scale never delivered).",
+ "refactor-1": {
+  "image-1": {
+   "impressions": 2837,
+   "clicks": 13,
+   "ctr": 0.004582305252026789,
+   "cpc": 1.46
+  },
+  "image-2": {
+   "impressions": 1989,
+   "clicks": 10,
+   "ctr": 0.005027652086475616,
+   "cpc": 1.26
+  },
+  "image-3": {
+   "impressions": 3512,
+   "clicks": 21,
+   "ctr": 0.005979498861047836,
+   "cpc": 1.37
+  },
+  "image-4": null,
+  "image-5": {
+   "impressions": 2669,
+   "clicks": 15,
+   "ctr": 0.005620082427875608,
+   "cpc": 1.37
+  },
+  "image-6": {
+   "impressions": 2236,
+   "clicks": 22,
+   "ctr": 0.009838998211091235,
+   "cpc": 1.39
+  }
+ },
+ "refactor-2": {
+  "image-1": {
+   "impressions": 863,
+   "clicks": 4,
+   "ctr": 0.004634994206257242,
+   "cpc": 1.49
+  },
+  "image-2": {
+   "impressions": 2252,
+   "clicks": 15,
+   "ctr": 0.0066607460035523975,
+   "cpc": 1.08
+  }
+ }
+}

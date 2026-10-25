@@ -338,3 +338,7 @@ Policy change (Sean): **no pushes to main without asking first.** This entry is 
 | **Pipeline: 50/50 average of Opus and panel (weight fixed in advance, not tuned)** | **0.871** | **0.274** |
 
 Pipeline − Opus: card r +0.041 [+0.016, +0.068], MAE −0.052 [−0.092, −0.004]; better on 13/18 segments. Panel − Opus: +0.032 [−0.004, +0.070]. Val (7 segments): panel − Opus +0.108 [+0.049, +0.179]; 50/50 − Opus +0.095 [+0.050, +0.148]. Opus high (0.78) ≈ Opus default effort (0.79) on val. The panel exaggerates the real partisan gap 6.7× (Opus high 3.8×).
+
+## 2026-10-25 ~16:52 · Refactor Fitness scored against the owner's real Meta results
+
+Truth: `refactor-ads/truth.json` (from `truth-screenshot-1.png`, `truth-screenshot-2.png`). Test 1 real order: 08 (0.98%) > 01 (0.60%) > 10 (0.56%) > 09 (0.50%) > 05 (0.46%); 02 had no impressions (excluded). Test 2: c2610d 0.67% > c2610e 0.46%. All six arms (plain Opus, + ICP line, + web research, Haiku crowd v1, Sonnet panel v2, Opus-decides v3) ranked 09 first in test 1 (real winner 08 ranked 2nd by plain Opus, web research and the v2 panel; Kendall τ +0.40) and c2610d first in test 2 (correct). The v2 panel's "data-driven self-trackers" group ranked 08 first. Neither test's winner is significant (z ≈ 1.7, 0.7).
