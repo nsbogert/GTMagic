@@ -6,9 +6,22 @@ GTMagic helps small businesses and founders work out who to sell to and what to 
 
 ![The original whiteboard sketch](docs/sketch.webp)
 
-## Status: planning, no code yet
+## Status: the skills work today; the web app isn't built yet
 
-The repo holds the plan and the folder layout. Code starts when the team says go; the kickoff steps are in the Day-0 checklist in [docs/COLLABORATION.md](docs/COLLABORATION.md).
+GTMagic runs today as a set of skills inside Claude Code. To try them, see [Getting started](#getting-started).
+
+| Skill | What it does |
+|---|---|
+| `gtm-intake` | Interviews you and researches your market, then works out who to target and your first messaging lines |
+| `gtm-message-test` | Tests competing messages on simulated customers and reports which message, and which customer group, responded best |
+| `gtm-ad-wording` | Writes and compares ad wording, and screens your own variants before you spend money |
+| `gtm-evaluate` | Ranks ads you already run, using simulated customers (needs a separate paid Anthropic API key) |
+
+- **In progress:** deeper research (`gtm-research`; the spec is in [docs/skills/RESEARCH.md](docs/skills/RESEARCH.md)) and draft ads (`gtm-creatives`).
+- **Not built yet:** the web app described in "How one run works" below. `src/` holds only each module's plan.
+- **Also in the repo:**
+  - `prototype/` is a clickable demo of the interface that replays a scripted, fictional intake.
+  - `evals/` checks whether GTMagic reaches the conclusions real founders reached.
 
 ### Planned before the event
 
