@@ -51,7 +51,7 @@ This guide assumes you've never used a terminal or GitHub. It takes about 30 min
 
 - **A Mac.** (On Windows or Linux, see [docs/KEYS.md](docs/KEYS.md#not-on-a-mac).)
 - **A paid Claude plan** (Pro or higher). The free plan doesn't include Claude Code, the app that runs GTMagic.
-- **A card for OpenRouter credits**, only if you'll make draft ads (step 5). A few dollars is plenty.
+- **A card for OpenRouter credits**, only if you'll make draft ads (Option B, step 5). A few dollars is plenty.
 
 There are two ways to set up. In **Option A**, Claude does most of the work and tells you when it needs you. In **Option B**, you do every step yourself. Both end in the same place.
 
@@ -84,7 +84,7 @@ Rules:
 
 Claude stops and hands things back to you whenever only you should do them:
 
-- **Approving commands.** Claude asks before it runs each command. Click **Allow** for commands about GTMagic setup (like `git`, `xcode-select` or `scripts/check-keys.sh`), and **Deny** anything else.
+- **Approving commands.** Claude may ask before it runs a command. Click **Allow** for commands about GTMagic setup (like `git`, `xcode-select` or `scripts/check-keys.sh`), and **Deny** anything else.
 - **Clicking Install** in Apple's developer-tools window.
 - **Signing up on Tavily** in your own browser.
 - **Pasting your key into Terminal**, never into the chat.
