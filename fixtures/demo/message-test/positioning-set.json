@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "round": 1,
+  "hypotheses": [
+    {
+      "id": "hyp_1",
+      "round": 1,
+      "source": "generated",
+      "angle": "Keep your strength",
+      "targetSegmentIds": [
+        "seg_1"
+      ],
+      "headline": "Keep your strength while the weight comes off",
+      "subheadline": "Short strength sessions and protein help, built to protect muscle as you lose weight.",
+      "valueProposition": "Protect muscle and strength during weight loss with short sessions and simple protein targets.",
+      "differentiator": "Built for strength during weight loss, not for eating less.",
+      "callToAction": "Start free",
+      "assumptions": [
+        "Fear of losing strength is what makes people act."
+      ],
+      "evidenceIds": [
+        "ev_19",
+        "ev_2"
+      ],
+      "lexiconIds": [
+        "lex_5",
+        "lex_2"
+      ]
+    },
+    {
+      "id": "hyp_2",
+      "round": 1,
+      "source": "generated",
+      "angle": "Habits that last",
+      "targetSegmentIds": [
+        "seg_1",
+        "seg_2"
+      ],
+      "headline": "Build habits that actually last",
+      "subheadline": "A strength routine you can keep long after the weight is gone.",
+      "valueProposition": "A routine that keeps working after the weight-loss phase ends.",
+      "differentiator": "Plans for maintenance, not just the first months.",
+      "callToAction": "Build my routine",
+      "assumptions": [
+        "People worry about regaining weight later."
+      ],
+      "evidenceIds": [
+        "ev_5"
+      ],
+      "lexiconIds": [
+        "lex_3"
+      ]
+    },
+    {
+      "id": "hyp_3",
+      "round": 1,
+      "source": "generated",
+      "angle": "Tell me what to do",
+      "targetSegmentIds": [
+        "seg_2"
+      ],
+      "headline": "A plan that tells you exactly what to do",
+      "subheadline": "Twenty-minute strength sessions laid out day by day, for people new to the weight room.",
+      "valueProposition": "Clear daily sessions for beginners.",
+      "differentiator": "No guesswork about what to lift.",
+      "callToAction": "Start day one",
+      "assumptions": [
+        "Beginners are put off by not knowing what to do."
+      ],
+      "evidenceIds": [
+        "ev_11"
+      ],
+      "lexiconIds": [
+        "lex_7"
+      ]
+    },
+    {
+      "id": "hyp_4",
+      "round": 1,
+      "source": "generated",
+      "angle": "Low-appetite friendly",
+      "targetSegmentIds": [
+        "seg_1"
+      ],
+      "headline": "Protein help for the days you're not hungry",
+      "subheadline": "Simple targets and easy ideas when eating feels like a chore.",
+      "valueProposition": "Hit protein targets even with little appetite.",
+      "differentiator": "Never tells you to eat less.",
+      "callToAction": "Get my targets",
+      "assumptions": [
+        "Low appetite makes protein the hardest part."
+      ],
+      "evidenceIds": [
+        "ev_2",
+        "ev_7"
+      ],
+      "lexiconIds": [
+        "lex_2",
+        "lex_6"
+      ]
+    },
+    {
+      "id": "hyp_5",
+      "round": 1,
+      "source": "founder-current",
+      "angle": "Your current message",
+      "targetSegmentIds": [],
+      "valueProposition": "",
+      "differentiator": "",
+      "callToAction": "",
+      "assumptions": [],
+      "evidenceIds": [],
+      "lexiconIds": [],
+      "headline": "Lose weight without losing muscle",
+      "subheadline": "Short strength sessions built for people losing weight."
+    },
+    {
+      "id": "hyp_6",
+      "round": 1,
+      "source": "decoy",
+      "angle": "Generic decoy (control)",
+      "targetSegmentIds": [],
+      "valueProposition": "",
+      "differentiator": "",
+      "callToAction": "",
+      "assumptions": [],
+      "evidenceIds": [],
+      "lexiconIds": [],
+      "headline": "The fitness app for everyone",
+      "subheadline": "Everything you need, all in one place."
+    }
+  ],
+  "warnings": [
+    "No audience sample given (--audience), so repeatCustomerIds is empty; the simulation should repeat 10 customers spread across segments."
+  ]
+}

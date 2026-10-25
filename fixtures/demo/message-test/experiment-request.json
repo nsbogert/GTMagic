@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "id": "exp_1",
+  "round": 1,
+  "scenario": {
+    "context": "You're looking at a landing page for a fitness app.",
+    "decision": "Which of these would make you most likely to sign up? You can pick none.",
+    "channel": "landing-page"
+  },
+  "stimuli": [
+    {
+      "label": "A",
+      "candidateId": "hyp_5",
+      "text": "Lose weight without losing muscle. Short strength sessions built for people losing weight."
+    },
+    {
+      "label": "B",
+      "candidateId": "hyp_1",
+      "text": "Keep your strength while the weight comes off. Short strength sessions and protein help, built to protect muscle as you lose weight."
+    },
+    {
+      "label": "C",
+      "candidateId": "hyp_3",
+      "text": "A plan that tells you exactly what to do. Twenty-minute strength sessions laid out day by day, for people new to the weight room."
+    },
+    {
+      "label": "D",
+      "candidateId": "hyp_4",
+      "text": "Protein help for the days you're not hungry. Simple targets and easy ideas when eating feels like a chore."
+    },
+    {
+      "label": "E",
+      "candidateId": "hyp_2",
+      "text": "Build habits that actually last. A strength routine you can keep long after the weight is gone."
+    },
+    {
+      "label": "F",
+      "candidateId": "hyp_6",
+      "text": "The fitness app for everyone. Everything you need, all in one place."
+    }
+  ],
+  "orderings": [
+    [
+      "A",
+      "B",
+      "F",
+      "C",
+      "E",
+      "D"
+    ],
+    [
+      "B",
+      "C",
+      "A",
+      "D",
+      "F",
+      "E"
+    ],
+    [
+      "C",
+      "D",
+      "B",
+      "E",
+      "A",
+      "F"
+    ],
+    [
+      "D",
+      "E",
+      "C",
+      "F",
+      "B",
+      "A"
+    ],
+    [
+      "E",
+      "F",
+      "D",
+      "A",
+      "C",
+      "B"
+    ],
+    [
+      "F",
+      "A",
+      "E",
+      "B",
+      "D",
+      "C"
+    ]
+  ],
+  "repeatCustomerIds": [],
+  "protocol": {
+    "version": "protocol-v1",
+    "instructions": "You're shown several short messages for the same kind of product, labeled with letters. Answer as yourself, using only your own situation as described. Pick the one message that would make you most likely to act, or \"none\" if none would. Rate every message from 1 (not at all) to 5 (very) on each dimension. For any message you have a doubt about, give one short objection in your own words. Don't assume anything about the company beyond the message itself.",
+    "dimensionDefinitions": {
+      "relevance": "How much this speaks to your situation and what you care about right now.",
+      "credibility": "How believable it is, coming from a company you don't know yet.",
+      "differentiation": "How different it sounds from what you use or have seen before.",
+      "clarity": "How quickly you understand what's offered and who it's for.",
+      "actionIntent": "How likely you'd be to click or sign up after seeing it."
+    }
+  }
+}
