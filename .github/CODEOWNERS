@@ -1,0 +1,6 @@
+# Only contract changes require a code-owner review; everything else needs passing CI only
+# (see docs/COLLABORATION.md). Any listed owner other than the PR author can approve.
+# Replace the placeholder handles at kickoff.
+
+/src/contracts/   @nsbogert @MARKET-INTEL-HANDLE @AUDIENCE-HANDLE @POSITIONING-HANDLE @FOUNDER-EXPERIENCE-HANDLE
+/docs/CONTRACTS.md @nsbogert @MARKET-INTEL-HANDLE @AUDIENCE-HANDLE @POSITIONING-HANDLE @FOUNDER-EXPERIENCE-HANDLE
