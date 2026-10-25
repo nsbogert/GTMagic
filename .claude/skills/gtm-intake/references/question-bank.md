@@ -26,26 +26,34 @@ Each topic has:
 - **Good answer:** "About 120 subscribers. Most of the recent ones came from a Facebook group post and two from a podcast mention."
 - **Fills:** `business.stage`, owner-text evidence, `segments[].channels` leads.
 
-## Goals: revenue
+## Goals: minimum revenue
 
-- **Ask:** "What revenue would make the next 12 months a success?"
-- **If vague:** "If you had to write one dollar figure on a sticky note for next year, what would it be?"
-- **Good answer:** "$180,000 in the next 12 months."
-- **Fills:** `business.revenueGoal12mo` (same currency as pricing).
+- **Ask:** "What is the minimum level of revenue to successfully sustain or grow your business?"
+- **If vague:** "What's the least you'd need coming in over the next 12 months to keep the business going? One dollar figure is fine."
+- **Good answer:** "At least $180,000 a year. Below that I'd have to go back to consulting."
+- **Fills:** `business.revenueGoal12mo`: the minimum revenue needed in a year to sustain or grow the business (same currency as pricing).
 
 ## Goals: price and purchases per year
 
 - **Ask:** "What does a customer pay, and how many times a year do they pay it?"
 - **If vague:** "What's the price on your checkout page today, and is it monthly, yearly, or one time?"
 - **Good answer:** "$14.99 a month, so 12 payments a year if they stay."
-- **Fills:** `business.pricing` (`amount`, `currency`, `period`, `purchasesPerYear`). The script uses this with the revenue goal for size math; don't do the math yourself.
+- **Fills:** `business.pricing` (`amount`, `currency`, `period`, `purchasesPerYear`). The script uses this with the minimum revenue for size math; don't do the math yourself.
 
 ## Target cost per sign-up
 
-- **Ask:** "What's the most you'd happily pay in ads to get one new customer?"
-- **If vague:** "If an ad brought you one paying customer for $20, would you be happy? What about $60?"
-- **Good answer:** "Up to $40 per paying sign-up."
-- **Fills:** `business.targetCpa`. Without it, the script marks every ad result inconclusive.
+Many owners don't know this number. Don't treat "I don't know" as the end here: help them back into it.
+
+- **Ask:** "Do you know the most you can spend on ads to win one new paying customer?"
+- **If they give a number:** take it. That's `business.targetCpa`.
+- **If they don't know, or the answer is vague,** walk them through it. Cost to serve comes first, because it sets what's sustainable:
+  1. **What a customer pays in a year.** You already have the price and purchases per year. The script turns those into a yearly figure; don't work it out in the chat.
+  2. **Cost to serve.** "Of what a customer pays you, roughly what share goes to serving them?" If they don't know, help them estimate it from their actual cost lines per customer per month: payment fees, hosting and software, support time, content or coaching, materials or shipping, refunds. Add them up with code, not in your head. Still unknown → leave `costToServeShare` empty and say the break-even can't be worked out yet.
+  3. **Show the break-even.** Run the validator. It writes `unitEconomics.breakEvenCac`: the most a new customer can cost to win before their first year loses money. Quote that figure, from the script.
+  4. **Acquisition share.** "Knowing that, what share of a customer's first-year revenue do you want to spend to win them, keeping some margin for yourself?"
+- **Never offer a benchmark or rule of thumb** for these shares. If the owner asks what's normal, say there's no reliable figure for their business without research; if it matters, add it as a research question with sources.
+- **Good answer:** "I don't know a number. Payment fees, hosting and the coach who writes programs come to about 30% of what a customer pays. Knowing the break-even, I'll spend up to 40% of their first year to win one."
+- **Fills:** `business.targetCpa` only when the owner states one. Otherwise `business.costToServeShare` (step 2) and `business.acquisitionShare` (step 4), as fractions (0.3, 0.4). The script computes `business.unitEconomics` (yearly value, break-even, max cost per sign-up, leftover first-year margin) and warns when serving costs plus acquisition leave no margin. With no owner target, ad verdicts use the max it derives. With no target and no acquisition share, every ad result is inconclusive.
 
 ## What's been tried
 
@@ -60,6 +68,13 @@ Each topic has:
 - **If vague:** "Name one app, product, person or habit a customer told you they stopped using when they started with you."
 - **Good answer:** "Mostly a big calorie-tracking app. A few had a personal trainer they couldn't afford anymore."
 - **Fills:** `hypotheses[].insteadOf`, `serviceability.incumbents` leads (verify in research), `currentSolution` attribute.
+
+## Who it's for
+
+- **Ask:** "Who is it for? Describe the customer you have in mind."
+- **If vague:** "If you could only reach one group of people next month, who would it be, and what are they doing today?"
+- **Good answer:** "People in their 40s and 50s who've just started losing weight and have never followed a strength plan. Today they walk or watch free videos."
+- **Fills:** the owner's-guess hypothesis and its segment (`isOwnerGuess: true`), plus research questions to test it. It's a guess, not a must-have, unless the owner says "only".
 
 ## Why people buy
 

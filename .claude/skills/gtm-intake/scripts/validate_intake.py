@@ -23,6 +23,7 @@ from provenance import check_evidence, check_lexicon, load_log, norm  # noqa: E4
 CORE_ATTRIBUTES = ["role", "currentSolution", "priceSensitivity", "urgency", "skepticism", "buyingStage"]
 MIN_CLICKS, MIN_CONVERSIONS = 100, 10
 DEFAULT_ADOPTION, MAX_ADOPTION = 0.01, 0.10
+TODAY_DIMENSIONS = ("geography", "age", "price", "channel", "regulatory", "interest")
 SCRIPT_PREFIX = "[script] "
 
 
@@ -86,7 +87,7 @@ def compute_segments(brief: dict, ev_ids: set, con_ids: set, r: Report) -> None:
                 v["weight"] = round((num(v.get("weight"), r, "weight") or 0) / sum(weights), 4)
         # Concern bundles: count each excerpt's exact set of concerns for this group.
         tagged = [tuple(sorted(e["concernIds"])) for e in brief.get("evidence", [])
-                  if s.get("id") in e.get("segmentIds", []) and e.get("concernIds")]
+                  if s.get("id") in e.get("segmentIds", []) and e.get("concernIds") and customer_voice(e)]
         n = len(tagged)
         confidence = "low" if n < 10 else "medium" if n < 30 else "high"
         s["concernBundles"] = [{"concernIds": list(k), "observedCount": c, "weight": round(c / n, 4), "confidence": confidence}
@@ -121,15 +122,50 @@ def compute_segments(brief: dict, ev_ids: set, con_ids: set, r: Report) -> None:
             r.warnings.append(f"{where}: no price or revenue goal, so size math was skipped")
 
 
+def customer_voice(e: dict) -> bool:
+    return e.get("sourceType") in ("review", "forum-post") or e.get("origin") == "owner-text"
+
+
+def compute_unit_economics(brief: dict, r: Report) -> float | None:
+    """Work out what a customer is worth and the most a sign-up may cost; return the target to judge ads by."""
+    biz = brief.setdefault("business", {})
+    pricing = biz.get("pricing") or {}
+    price, per_year = num(pricing.get("amount"), r, "pricing.amount"), num(pricing.get("purchasesPerYear"), r, "purchasesPerYear")
+    owner_target = num(biz.get("targetCpa"), r, "targetCpa")
+    share = num(biz.get("acquisitionShare"), r, "acquisitionShare")
+    for field in ("acquisitionShare", "costToServeShare"):
+        value = num(biz.get(field), r, field)
+        if value is not None and not 0 < value <= 1:
+            r.errors.append(f"business.{field}: {value} must be a share between 0 and 1")
+    serve = num(biz.get("costToServeShare"), r, "costToServeShare")
+    annual = round(price * per_year, 2) if price and per_year else None
+    max_cac = round(annual * share, 2) if annual and share and 0 < share <= 1 else None
+    # Break-even: the most a customer can cost to win before year one loses money, from the owner's own costs.
+    break_even = round(annual * (1 - serve), 2) if annual and serve is not None and 0 <= serve <= 1 else None
+    margin_share = round(1 - serve - share, 4) if serve is not None and share is not None else None
+    if margin_share is not None and margin_share <= 0:
+        r.warnings.append(f"business: serving costs ({serve:.0%}) plus acquisition ({share:.0%}) leave no first-year margin; "
+                          "each new customer loses money in year one")
+    target = owner_target or max_cac
+    source = "owner" if owner_target else "derived" if max_cac else "none"
+    biz["unitEconomics"] = {"annualRevenuePerCustomer": annual, "maxCac": max_cac, "breakEvenCac": break_even,
+                            "firstYearMarginShare": margin_share,
+                            "firstYearMargin": round(annual * margin_share, 2) if annual and margin_share is not None else None,
+                            "targetCpaUsed": target, "targetCpaSource": source}
+    r.notes.append(f"unit economics: {annual} per customer per year; max cost per sign-up {max_cac}; judging ads by {target} ({source})")
+    return target
+
+
 def compute_ads(brief: dict, r: Report) -> None:
-    target = num(brief.get("business", {}).get("targetCpa"), r, "targetCpa")
+    target = compute_unit_economics(brief, r)
+    derived = brief["business"]["unitEconomics"]["targetCpaSource"] == "derived"
     for px in brief.get("priorExperiments", []):
         m, spend = px.get("metrics") or {}, num(px.get("spend"), r, f"{px.get('id')}.spend")
         clicks = num(m.get("clicks"), r, f"{px.get('id')}.clicks") or 0
         conv = num(m.get("conversions"), r, f"{px.get('id')}.conversions") or 0
         cpa = spend / conv if spend is not None and conv else None
         # The first blocking reason wins, so the brief explains *why* a result is inconclusive.
-        reason = ("no target cost per sign-up was given" if not target else
+        reason = ("no target cost per sign-up, and not enough numbers to work one out" if not target else
                   "no spend was recorded" if spend is None else
                   f"fewer than {MIN_CLICKS} clicks" if clicks < MIN_CLICKS else
                   f"fewer than {MIN_CONVERSIONS} sign-ups" if conv < MIN_CONVERSIONS else None)
@@ -137,7 +173,8 @@ def compute_ads(brief: dict, r: Report) -> None:
             px["verdict"], px["verdictReason"] = "inconclusive", reason
         else:
             px["verdict"] = "worked" if cpa <= target else "didnt-work"
-            px["verdictReason"] = f"cost per sign-up {cpa:.2f} {'within' if cpa <= target else 'above'} the {target:g} target"
+            label = "most you can spend, worked out from your numbers" if derived else "target"
+            px["verdictReason"] = f"cost per sign-up {cpa:.2f} {'within' if cpa <= target else 'above'} the {target:g} {label}"
         r.notes.append(f"ad {px.get('id')}: {clicks:g} clicks, {conv:g} conversions -> {px['verdict']} ({px['verdictReason']})")
 
 
@@ -182,6 +219,8 @@ def readiness(brief: dict, messaging_ok: bool, r: Report) -> None:
     checks = {
         "ICP has a statement, 3+ must-haves and 1+ disqualifier":
             icp is None or (bool(icp.get("statement")) and len(icp.get("mustHaves", [])) >= 3 and len(icp.get("disqualifiers", [])) >= 1),
+        "Today's targeting dimensions all recorded (geography, age, price, channel, regulatory, interests)":
+            all(d in bucket for d in TODAY_DIMENSIONS),
         "Geography and price are set (not unknown)":
             all(bucket.get(d) not in (None, "unknown") for d in ("geography", "price")),
         "One primary hypothesis with 'wrong if'": len(primaries) == 1 and bool(primaries[0].get("wrongIf")),
@@ -192,7 +231,8 @@ def readiness(brief: dict, messaging_ok: bool, r: Report) -> None:
             3 <= len(brief.get("roughMessaging", [])) <= 5 and messaging_ok,
         "Every finding is typed and cites evidence":
             bool(brief.get("findings")) and all(f.get("kind") and f.get("evidenceIds") for f in brief["findings"]),
-        "Skeptic pass logged with queries": bool(brief.get("skeptic")) and all(s.get("queries") for s in brief["skeptic"]),
+        "Skeptic pass covers 3+ key claims (motivation, gap, size), each with queries":
+            len(brief.get("skeptic", [])) >= 3 and all(s.get("queries") for s in brief["skeptic"]),
         "No integrity errors": not r.errors,
     }
     block = brief.setdefault("readiness", {"status": "needs-more", "checks": []})

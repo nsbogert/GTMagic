@@ -13,11 +13,21 @@
       "purchasesPerYear": 12
     },
     "revenueGoal12mo": 180000,
-    "targetCpa": 40
+    "costToServeShare": 0.3,
+    "acquisitionShare": 0.4,
+    "unitEconomics": {
+      "annualRevenuePerCustomer": 179.88,
+      "maxCac": 71.95,
+      "breakEvenCac": 125.92,
+      "firstYearMarginShare": 0.3,
+      "firstYearMargin": 53.96,
+      "targetCpaUsed": 71.95,
+      "targetCpaSource": "derived"
+    }
   },
   "baseline": {
     "ownerFirstDescription": "A fitness app for people on GLP-1s.",
-    "promptVersion": "baseline-v1",
+    "promptVersion": "recorded-plain-claude-2026-10-25",
     "icps": [
       "Starter Sarah, 38: just started a GLP-1 medication and is new to the gym",
       "Midlife Maria, 52: wants to stay strong as she loses weight",
@@ -39,8 +49,7 @@
       "hypothesis": "Women 35-54 interested in weight loss will sign up for a muscle-focused message",
       "audience": "US, women 35-54, interests: weight loss, strength training",
       "message": {
-        "headline": "Lose weight without losing muscle",
-        "body": "Short strength sessions built for people losing weight."
+        "headline": "Lose weight without losing muscle"
       },
       "spend": 420,
       "metrics": {
@@ -50,7 +59,7 @@
       },
       "verdict": "worked",
       "sourceFile": "meta-ads.csv",
-      "verdictReason": "cost per sign-up 30.00 within the 40 target"
+      "verdictReason": "cost per sign-up 30.00 within the 71.95 most you can spend, worked out from your numbers"
     },
     {
       "id": "px_2",
@@ -58,8 +67,7 @@
       "hypothesis": "Anyone on a GLP-1 medication wants a fitness app",
       "audience": "US, adults 25-64, interests: fitness apps",
       "message": {
-        "headline": "The fitness app for your GLP-1 journey",
-        "body": "Workouts and tracking in one place."
+        "headline": "The fitness app for your GLP-1 journey"
       },
       "spend": 300,
       "metrics": {
@@ -97,7 +105,7 @@
       "source": "stated",
       "pushback": {
         "evidenceIds": [
-          "ev_15"
+          "ev_21"
         ],
         "ownerKept": true
       }
@@ -112,7 +120,7 @@
         ]
       },
       "appliesTo": "all",
-      "source": "website"
+      "source": "stated"
     },
     {
       "dimension": "healthCondition",
@@ -202,10 +210,10 @@
             }
           ],
           "evidenceIds": [
-            "ev_15"
+            "ev_21"
           ],
           "isEstimate": true,
-          "logic": "Demo values; a live run cites survey cross-tabs."
+          "logic": "Shares copied from ev_21, which covers users aged 25-64 who have ever used a GLP-1 medication; applied to current users, so treat as an estimate."
         }
       ]
     },
@@ -247,19 +255,19 @@
         "int_1",
         "int_2"
       ],
-      "summary": "The overlap concentrates in adults 40-54 who are already active and worried about losing muscle.",
+      "summary": "The overlap most likely concentrates in adults 40-54, though younger lifters (25-39) come close.",
       "strongest": [
         {
           "attribute": "age",
           "value": "40-54",
-          "shareLow": 0.28,
-          "shareHigh": 0.4
+          "shareLow": 0.35,
+          "shareHigh": 0.43
         }
       ],
       "isEstimate": true,
-      "logic": "Each group's age distribution, compared cell by cell; the 40-54 cell is the largest in both. No source publishes the joint number, so this is a range.",
+      "logic": "Share of the overlap aged 40-54. 40-54 is the largest cell for medication users (int_1: 0.40, ev_21) but not for weekly lifters (int_2: 0.35; their largest is 25-39 at 0.45). Low 0.35 = the smaller of the two groups' own 40-54 shares (no concentration effect). High 0.43 = product rule: 0.40x0.35 / (0.25x0.45 + 0.40x0.35 + 0.35x0.20) = 0.14/0.3225, assuming medication use and lifting are independent within each age band and bands are equal size. Weighting bands by width (15/15/10 years) gives 0.39, inside the range. Under the product rule 40-54 is the overlap's largest cell (0.43 vs 0.35 for 25-39). No source publishes the joint number; int_2's shares are uncited demo values.",
       "evidenceIds": [
-        "ev_15"
+        "ev_21"
       ]
     }
   ],
@@ -272,7 +280,7 @@
       "motivation": "they are afraid of losing muscle and regaining the weight",
       "insteadOf": "a general calorie-tracking app",
       "price": "USD 14.99/month",
-      "wrongIf": "Muscle or strength rarely appears in this group's concerns, or a muscle-focused ad can't beat a USD 40 cost per sign-up",
+      "wrongIf": "Muscle or strength rarely appears in this group's concerns, or a muscle-focused ad costs more per sign-up than the most you can spend to win a customer, worked out from your numbers",
       "confidence": 4,
       "status": "supported",
       "evidenceIds": [
@@ -296,7 +304,8 @@
       "evidenceIds": [
         "ev_11",
         "ev_17",
-        "ev_18"
+        "ev_18",
+        "ev_23"
       ]
     }
   ],
@@ -474,8 +483,8 @@
           "concernIds": [
             "con_muscle"
           ],
-          "observedCount": 5,
-          "weight": 0.3571,
+          "observedCount": 4,
+          "weight": 0.3077,
           "confidence": "medium"
         },
         {
@@ -483,7 +492,7 @@
             "con_appetite"
           ],
           "observedCount": 2,
-          "weight": 0.1429,
+          "weight": 0.1538,
           "confidence": "medium"
         },
         {
@@ -492,7 +501,7 @@
             "con_muscle"
           ],
           "observedCount": 1,
-          "weight": 0.0714,
+          "weight": 0.0769,
           "confidence": "medium"
         },
         {
@@ -500,7 +509,7 @@
             "con_rebound"
           ],
           "observedCount": 1,
-          "weight": 0.0714,
+          "weight": 0.0769,
           "confidence": "medium"
         },
         {
@@ -508,7 +517,7 @@
             "con_cost"
           ],
           "observedCount": 1,
-          "weight": 0.0714,
+          "weight": 0.0769,
           "confidence": "medium"
         },
         {
@@ -517,7 +526,7 @@
             "con_energy"
           ],
           "observedCount": 1,
-          "weight": 0.0714,
+          "weight": 0.0769,
           "confidence": "medium"
         },
         {
@@ -526,7 +535,7 @@
             "con_rebound"
           ],
           "observedCount": 1,
-          "weight": 0.0714,
+          "weight": 0.0769,
           "confidence": "medium"
         },
         {
@@ -534,7 +543,7 @@
             "con_trust"
           ],
           "observedCount": 1,
-          "weight": 0.0714,
+          "weight": 0.0769,
           "confidence": "medium"
         },
         {
@@ -543,7 +552,7 @@
             "con_muscle"
           ],
           "observedCount": 1,
-          "weight": 0.0714,
+          "weight": 0.0769,
           "confidence": "medium"
         }
       ],
@@ -568,11 +577,14 @@
           "ev_19"
         ],
         "size": {
-          "population": 1800000,
+          "population": 1810000,
           "isEstimate": true,
-          "logic": "Demo value: GLP-1 users (ev_15) x share aged 40-60 x share already exercising; a live run shows each input.",
+          "logic": "US adults 25-64: 170M (ev_20) x GLP-1 use 1/8 (ev_15) = 21.25M users. x share aged 40-60: 0.40 (40-54) + 0.35 x 6/10 (40-60's part of 55-64, assuming an even spread) = 0.61 (ev_21) -> 12.96M. x 14% who strength-train weekly at 40-60 (ev_22, assumed the same for medication users) = 1,814,750, rounded to 1.81M.",
           "evidenceIds": [
-            "ev_15"
+            "ev_20",
+            "ev_15",
+            "ev_21",
+            "ev_22"
           ]
         },
         "sizeMath": {
@@ -757,6 +769,14 @@
             "evidenceIds": [
               "ev_14"
             ]
+          },
+          {
+            "name": "FreeFit (fictional free workout app)",
+            "rating": 4.6,
+            "reviewCount": 850000,
+            "evidenceIds": [
+              "ev_23"
+            ]
           }
         ],
         "unresolvedConcernIds": [
@@ -766,11 +786,15 @@
           "ev_18"
         ],
         "size": {
-          "population": 2500000,
+          "population": 2360000,
           "isEstimate": true,
-          "logic": "Demo value: GLP-1 users (ev_15) x share with no training history.",
+          "logic": "US adults 25-64: 170M (ev_20) x GLP-1 use 1/8 (ev_15) = 21.25M users. x share aged 35-64, the ad range: 0.25 x 5/15 (35-39's part of 25-39, even spread assumed) + 0.40 + 0.35 = 0.833 (ev_21) -> 17.71M. x 1/3 who started within the past year (ev_24) -> 5.90M. x 40% who never followed a workout plan (ev_22, a 40-60 figure applied to 35-64) = 2,361,111, rounded to 2.36M.",
           "evidenceIds": [
-            "ev_15"
+            "ev_20",
+            "ev_15",
+            "ev_21",
+            "ev_24",
+            "ev_22"
           ]
         },
         "sizeMath": {
@@ -781,7 +805,7 @@
         "motivation": "Just started medication and wants a plan, but has quit generic apps before.",
         "verdict": "marginal",
         "confidence": "low",
-        "reasoning": "Large group, but evidence is thin (few excerpts), the owner's broad 'GLP-1' ad was inconclusive, and many free beginner options exist."
+        "reasoning": "Large group, but evidence is thin (few excerpts), the owner's broad 'GLP-1' ad was inconclusive, and free beginner options are already well rated (FreeFit, 850K ratings, ev_23)."
       }
     }
   ],
@@ -1203,6 +1227,89 @@
       "confidence": "low",
       "limitations": "Fictional demo data",
       "retrievedAt": "2026-10-25T13:00:00-07:00"
+    },
+    {
+      "id": "ev_20",
+      "origin": "web",
+      "sourceType": "official-stats",
+      "url": "https://example.com/demo/census",
+      "title": "Demo census table (fictional)",
+      "excerpt": "Demo census table: about 260 million US adults, of whom about 170 million are aged 25 to 64.",
+      "segmentIds": [],
+      "concernIds": [],
+      "confidence": "high",
+      "limitations": "Fictional demo data",
+      "retrievedAt": "2026-10-25T13:00:00-07:00"
+    },
+    {
+      "id": "ev_21",
+      "origin": "web",
+      "sourceType": "survey",
+      "url": "https://example.com/demo/survey/glp1-users",
+      "title": "Demo survey of 1,000 US adults who have used a GLP-1 medication (fictional)",
+      "excerpt": "Of US adults aged 25 to 64 who have used a GLP-1 medication, about 25% are 25-39, 40% are 40-54 and 35% are 55-64.",
+      "sampleSize": 1000,
+      "segmentIds": [],
+      "concernIds": [],
+      "confidence": "medium",
+      "limitations": "Fictional demo data",
+      "retrievedAt": "2026-10-25T13:00:00-07:00"
+    },
+    {
+      "id": "ev_22",
+      "origin": "web",
+      "sourceType": "survey",
+      "url": "https://example.com/demo/survey/activity",
+      "title": "Demo activity survey of 2,000 US adults aged 40 to 60 (fictional)",
+      "excerpt": "Among US adults aged 40 to 60, 14% strength-train at least weekly and 40% have never followed a workout plan.",
+      "sampleSize": 2000,
+      "segmentIds": [],
+      "concernIds": [],
+      "confidence": "medium",
+      "limitations": "Fictional demo data",
+      "retrievedAt": "2026-10-25T13:00:00-07:00"
+    },
+    {
+      "id": "ev_23",
+      "origin": "web",
+      "sourceType": "review-aggregate",
+      "url": "https://example.com/demo/freefit",
+      "title": "FreeFit app listing (fictional)",
+      "excerpt": "FreeFit: free beginner workouts, no subscription. 4.6 stars from 850K ratings.",
+      "sampleSize": 850000,
+      "segmentIds": [
+        "seg_2"
+      ],
+      "concernIds": [],
+      "confidence": "medium",
+      "limitations": "Fictional demo data",
+      "retrievedAt": "2026-10-25T13:00:00-07:00"
+    },
+    {
+      "id": "ev_24",
+      "origin": "web",
+      "sourceType": "survey",
+      "url": "https://example.com/demo/survey/glp1-users",
+      "title": "Demo survey of 1,000 US adults who have used a GLP-1 medication (fictional)",
+      "excerpt": "About 1 in 3 US adults who have used a GLP-1 medication started it within the past year.",
+      "sampleSize": 1000,
+      "segmentIds": [],
+      "concernIds": [],
+      "confidence": "medium",
+      "limitations": "Fictional demo data",
+      "retrievedAt": "2026-10-25T13:00:00-07:00"
+    },
+    {
+      "id": "ev_25",
+      "origin": "web",
+      "sourceType": "forum-post",
+      "url": "https://example.com/demo/forum/125",
+      "excerpt": "Honestly I don't care about muscle right now. I just want the scale to keep moving.",
+      "segmentIds": [],
+      "concernIds": [],
+      "confidence": "low",
+      "limitations": "Fictional demo data; skeptic counter-case",
+      "retrievedAt": "2026-10-25T13:00:00-07:00"
     }
   ],
   "findings": [
@@ -1225,9 +1332,9 @@
     },
     {
       "id": "fnd_2",
-      "claim": "The muscle-focused Meta ad beat the target cost per sign-up; the broad 'GLP-1 journey' ad was inconclusive.",
+      "claim": "The muscle-focused Meta ad cost less per sign-up than the most you can spend to win a customer; the broad 'GLP-1 journey' ad was inconclusive.",
       "kind": "observed",
-      "derivation": "Script-computed verdicts from meta-ads.csv against the USD 40 target.",
+      "derivation": "Script-computed verdicts from meta-ads.csv, judged against the most you can spend to win a customer, worked out from your numbers (price, purchases per year, acquisition share).",
       "evidenceIds": [
         "ev_16"
       ],
@@ -1252,20 +1359,24 @@
       "claim": "Midlife strength protectors number about 1.8M US adults, well above the minimum this business needs.",
       "segmentId": "seg_1",
       "kind": "estimated",
-      "derivation": "GLP-1 users x share aged 40-60 x share already exercising; compared with the script's minPopulation.",
+      "derivation": "170M US adults 25-64 (ev_20) x 1/8 GLP-1 use (ev_15) x 0.61 aged 40-60 (ev_21) x 14% weekly strength training (ev_22) = 1.81M; compared with the script's minPopulation.",
       "evidenceIds": [
-        "ev_15"
+        "ev_20",
+        "ev_15",
+        "ev_21",
+        "ev_22"
       ],
       "confidence": "low",
-      "limitations": "Demo inputs"
+      "limitations": "Fictional demo inputs; ev_15 counts anyone who has ever used the medication, and the exercise rate is for all adults 40-60, not medication users"
     },
     {
       "id": "fnd_5",
       "claim": "The owner's original broad group ('people on GLP-1s, new to fitness') is crowded with free options and its evidence is thin.",
       "segmentId": "seg_2",
       "kind": "inferred",
-      "derivation": "Few excerpts, an inconclusive broad ad, and switching-away language about generic apps.",
+      "derivation": "A free beginner app rated 4.6 from 850K ratings (ev_23), few excerpts for this group, an inconclusive broad ad, and switching-away language about generic apps.",
       "evidenceIds": [
+        "ev_23",
         "ev_11",
         "ev_17",
         "ev_18"
@@ -1293,7 +1404,23 @@
       ],
       "result": "resolved",
       "evidenceIds": [
-        "ev_15"
+        "ev_15",
+        "ev_20",
+        "ev_21",
+        "ev_22"
+      ]
+    },
+    {
+      "claim": "People want to keep muscle, not just lose weight",
+      "queries": [
+        "GLP-1 just want to lose weight don't care about muscle",
+        "GLP-1 muscle loss worry overblown"
+      ],
+      "result": "resolved",
+      "evidenceIds": [
+        "ev_25",
+        "ev_16",
+        "ev_19"
       ]
     }
   ],
@@ -1307,6 +1434,10 @@
       },
       {
         "check": "[script] ICP has a statement, 3+ must-haves and 1+ disqualifier",
+        "pass": true
+      },
+      {
+        "check": "[script] Today's targeting dimensions all recorded (geography, age, price, channel, regulatory, interests)",
         "pass": true
       },
       {
@@ -1334,7 +1465,7 @@
         "pass": true
       },
       {
-        "check": "[script] Skeptic pass logged with queries",
+        "check": "[script] Skeptic pass covers 3+ key claims (motivation, gap, size), each with queries",
         "pass": true
       },
       {
@@ -1349,6 +1480,6 @@
   },
   "openQuestions": [
     "DEMO FIXTURE: the business, people, sources and numbers are all fictional.",
-    "Is 'sex' worth locking? Most evidence comes from women, but men were never excluded."
+    "Not asked yet: should ads target women, men or both? The one muscle ad that worked ran to women 35-54 only (ev_16), so men are untested."
   ]
 }

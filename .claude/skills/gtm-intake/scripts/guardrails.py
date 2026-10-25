@@ -12,8 +12,11 @@ if TYPE_CHECKING:  # avoid a runtime import cycle; only the type is needed
     from validate_intake import Report
 
 # Brand and generic names, plus "GLP-1" however it is hyphenated or spaced.
-DRUG_TERMS = (r"ozempic|wegovy|mounjaro|zepbound|semaglutide|tirzepatide|saxenda|liraglutide|glp[\s\-\u2010-\u2015]?1"
-              r"|\bmedications?\b|\bmeds\b|\bprescri|\binjections?\b|\bjabs?\b|weight[- ]loss (shots?|drugs?)")
+# DRUG_NAMES: exact names only (used to mask a public render). DRUG_TERMS adds generic medication
+# words, which ad copy and targeting must also avoid.
+DRUG_NAMES = r"ozempic|wegovy|mounjaro|zepbound|semaglutide|tirzepatide|saxenda|liraglutide|glp[\s\-\u2010-\u2015]?1"
+DRUG_TERMS = (DRUG_NAMES + r"|\bmedications?\b|\bmeds\b|\bprescri|\binjections?\b|\bjabs?\b"
+              r"|weight[- ]loss (shots?|drugs?)")
 CONDITION_TERMS = DRUG_TERMS + r"|diabet|obes|bariatric"
 MESSAGING_BANNED = {
     "names a medication, drug class or treatment": DRUG_TERMS,
