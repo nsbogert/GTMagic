@@ -25,9 +25,9 @@ flowchart LR
   D -.-> B3
 
   W1["Pipeline beats Claude Opus (high)<br/>at predicting each group's ratings:<br/>error 0.274 vs 0.326 (−16%),<br/>corr 0.871 vs 0.831, 13/18 groups"]:::win
-  W2["Our panel beats published digital twins<br/>(same data): corr 0.86 vs GPT-4.1 0.73,<br/>Gemini 3 Pro 0.82"]:::win
+  W2["Tops every published model result<br/>on the Twin-2K-500 Mega-Study benchmark<br/>(corr 0.87 vs best published 0.82;<br/>error 0.27 vs best published 0.46)"]:::win
   W3["Decision step picks the higher-CTR<br/>headline 68% vs 50% chance"]:::win
-  W4["Picked the real winner in test 2;<br/>panel surfaced test 1's winner (08) as #1<br/>for the 'data-driven trackers' group"]:::win
+  W4["Real-business demo: real Meta CTR,<br/>per-group view (test 1's winner was #1<br/>for the 'data-driven trackers' group)"]:::bench
   B1 --> W1
   B1 --> W2
   B2 --> W3
@@ -38,10 +38,10 @@ flowchart LR
 
 | Benchmark | Real ground truth | What it tests | Headline result |
 |---|---|---|---|
-| **Mega-Study** (Twin-2K-500, Apache 2.0) | 300 real US adults' 1–7 ratings of 18 news-post concepts, by demographic group | Panel + decision: how each audience rates different concepts | **Opus + panel beats Opus (high) on the held-out test: MAE −16%, 13/18 groups.** Panel beats published GPT-4.1 and Gemini twins |
+| **Mega-Study** (Twin-2K-500, Apache 2.0) | 300 real US adults' 1–7 ratings of 18 news-post concepts, by demographic group | Panel + decision: how each audience rates different concepts | **Opus + panel beats Opus (high) on the held-out test: MAE −16%, 13/18 groups. Tops all 6 published model results** (re-scored with the same metric) |
 | **Upworthy A/B pairs** (OSF, CC BY 4.0) | 100 real headline A/B tests, real CTR | Decision: "which of my two ads?" | Opus decision step 68% vs 50% chance |
 | **Upworthy multi-headline** | 400 held-out tests, 4–8 headlines | Decision: rank many ads | Winner in the top 3 picks 86% vs 67% chance |
-| **Refactor Fitness Meta ads** | Owner's real impressions, clicks, CTR | End to end on a real small business | Test 2 winner correct; panel names test 1's winner as #1 for one customer group |
+| **Refactor Fitness Meta ads** | Owner's real impressions, clicks, CTR | End to end on a real small business | Demo: same picks as plain Opus (test 2 correct, test 1 not); the panel's per-group view names test 1's winner for one group |
 | Hillstrom e-mail | 64k customers, randomized campaigns | Segment targeting | Data ready, not run |
 
 ## Refactor Fitness real results (Meta, owner's dashboard)
