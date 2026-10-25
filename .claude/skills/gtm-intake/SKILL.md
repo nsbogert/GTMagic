@@ -119,6 +119,22 @@ Verdict: `serviceable`, `marginal`, `not-serviceable` or `insufficient-evidence`
 
 **Prior ad results.** Copy campaign- or ad-level metrics into `priorExperiments[]` from Meta, Google Ads, Reddit, TikTok or email exports (`references/imports.md`), or as the owner states them (`source: "manual"`). Ask the owner whether the export's "sign-ups" are free trials or paying customers, and record it as `conversionType` (`paying`, `trial` or `unknown`); only `paying` results are judged. The script computes the verdict and its reason against `business.unitEconomics.targetCpaUsed`: the owner's `targetCpa` if they gave one, otherwise the max it derived from their `acquisitionShare`. `inconclusive` below 100 clicks or 10 conversions, when spend, clicks or sign-ups weren't recorded (never read as 0), for trials or unknown conversion types, or when there's no target at all. Spend and metrics must be numbers of zero or more; a file result needs its `sourceFile`.
 
+### Searching with Tavily (Claude Code)
+
+When `TAVILY_API_KEY` is set in the shell, search and read pages through `scripts/tavily_log.py` instead of the built-in web tools. The script writes the research log itself, so every logged excerpt is exactly what the source said, with personal details already replaced by `[removed]`:
+
+```
+python3 scripts/tavily_log.py search "<query>" --log <ws>/research-log.jsonl [--domains apps.apple.com,trustpilot.com [--domains-mode restrict]] [--exact] [--time-range year] [--skeptic]
+python3 scripts/tavily_log.py extract <url> --log <ws>/research-log.jsonl [--pre-read]
+python3 scripts/tavily_log.py budget --log <ws>/research-log.jsonl
+```
+
+- It prints numbered sources to choose from. Copy each evidence `excerpt` (at most 25 words) word for word out of what it printed or logged; never retype or tidy it.
+- It counts searches and fetches against the cap of 15 and refuses anything that would go past it. Reading the owner's own website (`extract --pre-read`) doesn't count.
+- It never extracts Reddit pages (Reddit doesn't allow scraping), and keeps only one short snippet from each Reddit search result. Quote it briefly, with the link.
+- Use `--exact` with quoted phrases for switching language (`"switched from <competitor>"`, `"<competitor> alternative"`); `--skeptic` marks skeptic-pass queries.
+- Without a key (or in Claude chat), use the web tools or the Tavily connector and append log lines yourself, as below.
+
 ### Research log
 
 During the research turn (and for pre-read fetches), append one JSON object per line to `research-log.jsonl` in the working folder, **as each event happens**, so a context loss can't erase evidence:
