@@ -23,9 +23,13 @@ describe("claudeArgs", () => {
       "Bash(python3 .claude/skills/gtm-intake/scripts/*)",
       "Bash(cp gtm-workspace/*)",
       "Bash(mkdir -p gtm-workspace/*)",
-      "Read", "Glob", "Grep", "Write(gtm-workspace/**)", "Edit(gtm-workspace/**)", "WebSearch", "WebFetch", "Skill",
+      "Read", "Glob", "Grep", "Edit(gtm-workspace/**)", "WebSearch", "WebFetch", "Skill",
     ]) expect(ALLOWED_TOOLS).toContain(t);
     expect(allowed).toBe(ALLOWED_TOOLS.join(","));
+  });
+
+  it("uses Edit rules for file paths (Claude Code ignores Write(path) rules)", () => {
+    expect(ALLOWED_TOOLS.some((t) => t.startsWith("Write("))).toBe(false);
   });
 
   it("never allows arbitrary shell commands", () => {

@@ -11,7 +11,7 @@ export const ALLOWED_TOOLS = [
   "Bash(cp gtm-workspace/*)",
   "Bash(mkdir -p gtm-workspace/*)",
   "Read", "Glob", "Grep",
-  "Write(gtm-workspace/**)", "Edit(gtm-workspace/**)",
+  "Edit(gtm-workspace/**)", // Edit rules cover every file-writing tool; Write(path) rules are ignored
   "WebSearch", "WebFetch", "Skill",
 ];
 
