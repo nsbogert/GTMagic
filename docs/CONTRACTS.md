@@ -150,7 +150,9 @@ interface AudienceSample {
 interface PositioningHypothesis {
   id: string;                        // hyp_
   round: 1 | 2;
-  source: "generated" | "founder-current" | "refined";
+  source: "generated" | "founder-current" | "refined" | "decoy";
+                                     // decoy: a deliberately generic baseline built by code (POSITION) from a 1–3 word
+                                     // category for the business ("fitness app"); never isControl, never recommended
   parentId?: string;                 // refined from this hypothesis
   isControl?: boolean;               // round-2 copy of the round-1 winner (new ID)
   angle: string;                     // "Confidence", "Speed", "Your current message"…
@@ -165,7 +167,7 @@ interface PositioningHypothesis {
 
 interface PositioningSet {
   round: 1 | 2;
-  hypotheses: PositioningHypothesis[];   // target 4–6 generated, + founder's current message if given
+  hypotheses: PositioningHypothesis[];   // target 4–6 generated, + founder's current message if given, + one decoy (round 1)
 }
 ```
 
@@ -181,9 +183,14 @@ interface ExperimentRequest {
   round: 1 | 2;
   scenario: { context: string; decision: string; channel: "landing-page" | "ad" | "email" };
   stimuli: Stimulus[];               // same format for every option (headline + subheadline)
-  orderings: string[][];             // cyclic Latin square of labels; customer i sees orderings[i % k]
+  orderings: string[][];             // Williams Latin square of labels; k = orderings.length (the number of options, or twice
+                                     // that for an odd count). Within each segment, the j-th customer (j from 0, in
+                                     // AudienceSample.customers order) sees orderings[j % k]. Repeats don't advance j: they
+                                     // keep the same orderingIndex and see that ordering reversed
   repeatCustomerIds: string[];       // ~10 customers asked again with their ordering reversed
   protocol: { version: string; instructions: string; dimensionDefinitions: Record<Dimension, string> };
+  fingerprint?: string;              // opaque hash of everything else in the request, by code; compare, never recompute.
+                                     // For skill files, which have no envelope; in the pipeline, inputArtifactIds does this
 }
 
 interface CustomerResponse {
@@ -202,9 +209,16 @@ interface CustomerResponse {
   promptVersion: string;
 }
 
-interface CustomerResponses { experimentId: string; responses: CustomerResponse[] }
+interface CustomerResponses {
+  experimentId: string;
+  requestFingerprint?: string;       // copied from ExperimentRequest.fingerprint (skill files; see there)
+  responses: CustomerResponse[];
+}
 
 type IcpVerdict = "guess-holds" | "different-segment" | "too-close-to-call" | "no-guess";
+type MessageVerdict = "clear-winner" | "no-clear-winner" | "unreliable";   // unreliable: the decoy did too well
+type MessageCheckId =
+  | "decoy" | "winner" | "current-message" | "interest" | "consistency" | "sample-size" | "customer-group";
 
 interface ExperimentResults {
   experimentId: string; protocolVersion: string;
@@ -213,13 +227,17 @@ interface ExperimentResults {
     candidateId: string;
     choiceCount: number;
     preferenceShare: number;         // "simulated preference", 0–1
+    preferenceRange?: [number, number];   // [low, high]: 90% Wilson interval for preferenceShare over `answered` ("none"
+                                     // included): how far it could move with new simulated customers. Says nothing about
+                                     // real customers, and isn't the verdict's test (a 97.5% bootstrap bar)
     dimensionMeans: Record<Dimension, number>;
     segmentBreakdown: Array<{ segmentId: string; choiceCount: number; n: number }>;
   }>;
   noneCount: number;
   segmentRanking: Array<{            // computed in code; drives the recommendation
     segmentId: string; n: number; noneShare: number;
-    bestCandidateId: string; bestShare: number; actionIntent: number; score: number;
+    bestCandidateId: string;         // "none" when nobody in the segment chose a message
+    bestShare: number; actionIntent: number; score: number;
   }>;
   icpVerdict: IcpVerdict;
   stability: { bootstrapWinnerRate: number; repeatConsistency: number | null; modelAgreement?: number };
@@ -228,6 +246,14 @@ interface ExperimentResults {
   objectionThemes: Array<{ theme: string; count: number; candidateIds: string[]; simulatedQuotes: string[] }>;
   roundComparison?: { controlId: string; controlShare: number; bestRefinedId: string; bestRefinedShare: number; held: boolean };
   limitations: string[];
+  messageVerdict?: MessageVerdict;   // computed in code. clear-winner: the decoy didn't fail; winner, current-message and
+                                     // consistency pass; no interest or sample-size warning. A decoy or customer-group
+                                     // warning doesn't block it. unreliable: the decoy failed. Otherwise no-clear-winner
+  recommendedCandidateId?: string | null;   // absent: not computed; null: no clear winner. Never "validated"
+  checks?: Array<{ id: MessageCheckId; status: "pass" | "warn" | "fail"; detail: string }>;
+                                     // a check is listed only when it applies (interest and sample-size only as warnings;
+                                     // only decoy can fail). detail: plain words written by code, about simulated customers;
+                                     // the UI shows checks under a "simulated" label, never styled as quotes
 }
 ```
 
@@ -242,7 +268,7 @@ interface GTMReport {
     recommendedSegmentId: string;    // top of segmentRanking
     explanation: string;
   };
-  currentMessageResult?: { rank: number; of: number; beatenByIds: string[] };
+  currentMessageResult?: { rank: number; of: number; beatenByIds: string[] };   // among all options shown, decoy included
   recommendedPositioning: Array<{
     hypothesisId: string; rationale: string; confidence: "exploratory" | "research-backed"; evidenceIds: string[];
   }>;
@@ -296,5 +322,7 @@ interface Run {
 4. A round-2 experiment uses an audience sample with `role: "holdout"`.
 5. `Evidence` only comes from citation objects or founder text (checked by `origin`).
 6. SIMULATE fails if fewer than 80% of calls are answered; above that, skipped calls are noted in `limitations`.
+7. When both are present, EVALUATE refuses `CustomerResponses` whose `requestFingerprint` differs from the request's `fingerprint` (answers to an older build: re-run SIMULATE). It warns when only the request has one.
+8. `recommendedCandidateId` is set if and only if `messageVerdict` is `clear-winner`, and is never the decoy. `recommendedPositioning` never cites the decoy.
 
-**Quality (adds a warning; the run continues):** fewer than 3 segments · fewer than 10 lexicon entries per segment · a segment with fewer than 2 evidence items (→ `evidenceStrength: "thin"`) · fewer than 4 hypotheses or duplicate angles · attribute weights off by more than 0.05 before normalizing.
+**Quality (adds a warning; the run continues):** fewer than 3 segments · fewer than 10 lexicon entries per segment · a segment with fewer than 2 evidence items (→ `evidenceStrength: "thin"`) · fewer than 4 `generated` hypotheses or duplicate angles · attribute weights off by more than 0.05 before normalizing.

@@ -1,0 +1,13 @@
+SEARCH: Reddit: best app that tracks both workouts and nutrition/macros in one place, lifters complaints about using MyFitnessPal plus Strong separately
+SEARCH: Lifters worried about losing strength and muscle while cutting — what do people on Reddit r/fitness say they want to track during a cut
+SEARCH: How do MacroFactor, Hevy, Strong, and Fitbod market themselves; taglines and positioning of workout and macro tracking apps 2025
+SEARCH: In one paragraph: what do r/fitness users say is the main sign they are losing muscle during a cut (strength dropping)?
+SEARCH: In one short paragraph: what is MacroFactor's main marketing tagline and positioning?
+SEARCH: In one short paragraph: how does Hevy workout app pitch itself in ads and app store (tagline, free, social)?
+OPEN: https://btrapp.com/blog/best-all-in-one-fitness-and-nutrition-app/
+SEARCH: In one short paragraph: what do fitness app users complain about with paywalls, subscriptions, and free trials requiring a credit card (MyFitnessPal premium barcode scanner)?
+SEARCH: In one short paragraph: what ad creative styles perform best for fitness app paid social ads on Meta (benefit headline, app screenshots, outcome-focused, free trial CTA)?
+OPEN: https://www.magier.com/blog/meta-ads-creative-best-practices-for-health-and-fitness-brands
+OPEN: https://www.bodyspec.com/blog/post/am_i_losing_muscle_7_signs_and_fixes
+SEARCH: In one short paragraph: are GLP-1 / Ozempic users worried about losing muscle, and are fitness apps marketing protein and strength tracking to them?
+OPEN: https://www.magier.com/blog/meta-ads-creative-best-practices-for-health-and-fitness-brands (start_index=5000)

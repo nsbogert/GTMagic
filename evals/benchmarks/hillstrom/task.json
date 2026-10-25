@@ -1,0 +1,233 @@
+{
+ "benchmark": "hillstrom-segments-v1",
+ "business": "We are a retailer selling men's and women's merchandise. Customers buy from us by phone, on our website, or both. We emailed customers who had bought from us in the last 12 months and tracked who visited our website in the following two weeks.",
+ "outcome": "Lift = the share of customers who visited our website in the two weeks after the email, minus the share among similar customers who got no email (customers were split at random into Men's email, Women's email and no email).",
+ "limitation": "The campaign descriptions are paraphrases: the dataset records only which email a customer was sent (\"Mens E-Mail\" or \"Womens E-Mail\"), not the subject line, copy, offer or images. Predictions can only use the merchandise focus of each email.",
+ "campaigns": [
+  {
+   "id": "mens",
+   "description": "An email featuring our men's merchandise."
+  },
+  {
+   "id": "womens",
+   "description": "An email featuring our women's merchandise."
+  }
+ ],
+ "segments": [
+  {
+   "id": "S01",
+   "description": "Customers who bought only men's merchandise from us in the past year",
+   "customers": 28818
+  },
+  {
+   "id": "S02",
+   "description": "Customers who bought only women's merchandise from us in the past year",
+   "customers": 28734
+  },
+  {
+   "id": "S03",
+   "description": "Customers who bought both men's and women's merchandise from us in the past year",
+   "customers": 6448
+  },
+  {
+   "id": "S04",
+   "description": "Customers who are new (first purchase from us within the past 12 months)",
+   "customers": 32144
+  },
+  {
+   "id": "S05",
+   "description": "Customers who have been our customers for more than 12 months",
+   "customers": 31856
+  },
+  {
+   "id": "S06",
+   "description": "Customers who last bought from us 1–3 months ago",
+   "customers": 22393
+  },
+  {
+   "id": "S07",
+   "description": "Customers who last bought from us 4–6 months ago",
+   "customers": 14192
+  },
+  {
+   "id": "S08",
+   "description": "Customers who last bought from us 7–9 months ago",
+   "customers": 14014
+  },
+  {
+   "id": "S09",
+   "description": "Customers who last bought from us 10–12 months ago",
+   "customers": 13401
+  },
+  {
+   "id": "S10",
+   "description": "Customers who bought from us only by phone in the past year",
+   "customers": 28021
+  },
+  {
+   "id": "S11",
+   "description": "Customers who bought from us only on our website in the past year",
+   "customers": 28217
+  },
+  {
+   "id": "S12",
+   "description": "Customers who bought from us both by phone and on our website in the past year",
+   "customers": 7762
+  },
+  {
+   "id": "S13",
+   "description": "Customers who live in an urban area",
+   "customers": 25661
+  },
+  {
+   "id": "S14",
+   "description": "Customers who live in a suburban area",
+   "customers": 28776
+  },
+  {
+   "id": "S15",
+   "description": "Customers who live in a rural area",
+   "customers": 9563
+  },
+  {
+   "id": "S16",
+   "description": "Customers who spent under $100 with us in the past year",
+   "customers": 22970
+  },
+  {
+   "id": "S17",
+   "description": "Customers who spent $100–$200 with us in the past year",
+   "customers": 14254
+  },
+  {
+   "id": "S18",
+   "description": "Customers who spent $200–$350 with us in the past year",
+   "customers": 12289
+  },
+  {
+   "id": "S19",
+   "description": "Customers who spent $350–$750 with us in the past year",
+   "customers": 11320
+  },
+  {
+   "id": "S20",
+   "description": "Customers who spent $750 or more with us in the past year",
+   "customers": 3167
+  },
+  {
+   "id": "S21",
+   "description": "Customers who bought only men's merchandise from us in the past year and are new (first purchase from us within the past 12 months)",
+   "customers": 14134
+  },
+  {
+   "id": "S22",
+   "description": "Customers who bought only men's merchandise from us in the past year and have been our customers for more than 12 months",
+   "customers": 14684
+  },
+  {
+   "id": "S23",
+   "description": "Customers who bought only women's merchandise from us in the past year and are new (first purchase from us within the past 12 months)",
+   "customers": 14099
+  },
+  {
+   "id": "S24",
+   "description": "Customers who bought only women's merchandise from us in the past year and have been our customers for more than 12 months",
+   "customers": 14635
+  },
+  {
+   "id": "S25",
+   "description": "Customers who bought both men's and women's merchandise from us in the past year and are new (first purchase from us within the past 12 months)",
+   "customers": 3911
+  },
+  {
+   "id": "S26",
+   "description": "Customers who bought both men's and women's merchandise from us in the past year and have been our customers for more than 12 months",
+   "customers": 2537
+  },
+  {
+   "id": "S27",
+   "description": "Customers who bought only men's merchandise from us in the past year and bought from us only by phone in the past year",
+   "customers": 12919
+  },
+  {
+   "id": "S28",
+   "description": "Customers who bought only men's merchandise from us in the past year and bought from us only on our website in the past year",
+   "customers": 12982
+  },
+  {
+   "id": "S29",
+   "description": "Customers who bought only men's merchandise from us in the past year and bought from us both by phone and on our website in the past year",
+   "customers": 2917
+  },
+  {
+   "id": "S30",
+   "description": "Customers who bought only women's merchandise from us in the past year and bought from us only by phone in the past year",
+   "customers": 12912
+  },
+  {
+   "id": "S31",
+   "description": "Customers who bought only women's merchandise from us in the past year and bought from us only on our website in the past year",
+   "customers": 12971
+  },
+  {
+   "id": "S32",
+   "description": "Customers who bought only women's merchandise from us in the past year and bought from us both by phone and on our website in the past year",
+   "customers": 2851
+  },
+  {
+   "id": "S33",
+   "description": "Customers who bought both men's and women's merchandise from us in the past year and bought from us only by phone in the past year",
+   "customers": 2190
+  },
+  {
+   "id": "S34",
+   "description": "Customers who bought both men's and women's merchandise from us in the past year and bought from us only on our website in the past year",
+   "customers": 2264
+  },
+  {
+   "id": "S35",
+   "description": "Customers who bought both men's and women's merchandise from us in the past year and bought from us both by phone and on our website in the past year",
+   "customers": 1994
+  },
+  {
+   "id": "S36",
+   "description": "Customers who are new (first purchase from us within the past 12 months) and last bought from us 1–3 months ago",
+   "customers": 12036
+  },
+  {
+   "id": "S37",
+   "description": "Customers who are new (first purchase from us within the past 12 months) and last bought from us 4–6 months ago",
+   "customers": 6998
+  },
+  {
+   "id": "S38",
+   "description": "Customers who are new (first purchase from us within the past 12 months) and last bought from us 7–9 months ago",
+   "customers": 6730
+  },
+  {
+   "id": "S39",
+   "description": "Customers who are new (first purchase from us within the past 12 months) and last bought from us 10–12 months ago",
+   "customers": 6380
+  },
+  {
+   "id": "S40",
+   "description": "Customers who have been our customers for more than 12 months and last bought from us 1–3 months ago",
+   "customers": 10357
+  },
+  {
+   "id": "S41",
+   "description": "Customers who have been our customers for more than 12 months and last bought from us 4–6 months ago",
+   "customers": 7194
+  },
+  {
+   "id": "S42",
+   "description": "Customers who have been our customers for more than 12 months and last bought from us 7–9 months ago",
+   "customers": 7284
+  },
+  {
+   "id": "S43",
+   "description": "Customers who have been our customers for more than 12 months and last bought from us 10–12 months ago",
+   "customers": 7021
+  }
+ ]
+}

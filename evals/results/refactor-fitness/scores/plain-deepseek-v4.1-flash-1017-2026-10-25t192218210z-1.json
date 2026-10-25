@@ -1,0 +1,136 @@
+{
+  "runId": "plain-deepseek-v4.1-flash-1017-2026-10-25t192218210z-1",
+  "caseId": "refactor-fitness",
+  "label": "one prompt · deepseek-v4.1-flash-1017",
+  "judgeModel": "dashscope:deepseek-v4.1-flash-1017 (judge-v1)",
+  "scoredAt": "2026-10-25T19:22:55.695Z",
+  "items": [
+    {
+      "id": "primary-segment",
+      "label": "Who to target first",
+      "judgeScore": 0,
+      "score": 0,
+      "evidence": "",
+      "evidenceVerified": true,
+      "reason": "Targets plateaued dual-trackers, not weight-loss or GLP-1 users focused on preserving muscle."
+    },
+    {
+      "id": "secondary-segment",
+      "label": "Second segment worth a test",
+      "judgeScore": 0,
+      "score": 0,
+      "evidence": "",
+      "evidenceVerified": true,
+      "reason": "Does not name midlife/over-40 adults, men, home-gym users, or limited-time lifters as a distinct segment."
+    },
+    {
+      "id": "guess-verdict",
+      "label": "Verdict on the founder's starting guess",
+      "judgeScore": 1,
+      "score": 1,
+      "evidence": "Your guess is directionally right, but too broad.",
+      "evidenceVerified": true,
+      "reason": "It narrows the founder's lifter guess but keeps lifters as the lead audience, not weight-loss/GLP-1 users."
+    },
+    {
+      "id": "core-message",
+      "label": "What to say",
+      "judgeScore": 1,
+      "score": 1,
+      "evidence": "One app for your meals and lifts. An AI coach that reads both — and gives you one next adjustment.",
+      "evidenceVerified": true,
+      "reason": "Leads with combined logs and AI coaching, not keeping muscle or strength while losing weight."
+    },
+    {
+      "id": "pain-and-trigger",
+      "label": "The pain and the moment people buy",
+      "judgeScore": 1,
+      "score": 1,
+      "evidence": "tired of juggling two apps and guessing what to change",
+      "evidenceVerified": true,
+      "reason": "Names a generic dual-app/decision pain, not muscle loss, low protein/appetite suppression, or the listed buying triggers."
+    },
+    {
+      "id": "objections",
+      "label": "Top objections to handle",
+      "judgeScore": 2,
+      "score": 2,
+      "evidence": "AI suggests. You approve or dismiss. Free logging, paid coaching.",
+      "evidenceVerified": true,
+      "reason": "Addresses trust/control over AI suggestions and price/free-vs-paid objections."
+    },
+    {
+      "id": "alternatives",
+      "label": "What they use today",
+      "judgeScore": 2,
+      "score": 2,
+      "evidence": "already log meals and workouts in separate apps",
+      "evidenceVerified": true,
+      "reason": "Describes split nutrition/workout apps and also references ChatGPT and coaches/templates as alternatives."
+    },
+    {
+      "id": "claim-boundaries",
+      "label": "Claims to avoid",
+      "judgeScore": 0,
+      "score": 0,
+      "evidence": "",
+      "evidenceVerified": true,
+      "reason": "Does not discuss medical claims, GLP-1 safety boundaries, guarantees, or fitness-vs-medical positioning."
+    },
+    {
+      "id": "channels",
+      "label": "Where to reach them",
+      "judgeScore": 1,
+      "score": 1,
+      "evidence": "Build a list of 50 people from Reddit, Discord, Instagram/TikTok comments, and fitness communities",
+      "evidenceVerified": true,
+      "reason": "Names Reddit/communities and paid ads but not comparison/search content or YouTube."
+    }
+  ],
+  "total": 8,
+  "judgeTotal": 8,
+  "max": 18,
+  "warnings": [],
+  "crossCheck": {
+    "model": "decision-model-preview",
+    "items": [
+      {
+        "id": "primary-segment",
+        "expected": 0.09
+      },
+      {
+        "id": "secondary-segment",
+        "expected": 0.06
+      },
+      {
+        "id": "guess-verdict",
+        "expected": 0.91
+      },
+      {
+        "id": "core-message",
+        "expected": 0.8
+      },
+      {
+        "id": "pain-and-trigger",
+        "expected": 0.9
+      },
+      {
+        "id": "objections",
+        "expected": 0.61
+      },
+      {
+        "id": "alternatives",
+        "expected": 0.85
+      },
+      {
+        "id": "claim-boundaries",
+        "expected": 0.37
+      },
+      {
+        "id": "channels",
+        "expected": 0.14
+      }
+    ],
+    "total": 4.7
+  }
+}
