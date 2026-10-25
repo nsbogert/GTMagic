@@ -44,6 +44,7 @@ class TavilyLog(unittest.TestCase):
     def run_script(self, *args: str, key: bool = False) -> subprocess.CompletedProcess:
         env = {k: v for k, v in os.environ.items() if k != "TAVILY_API_KEY"}
         env["TAVILY_NO_KEYCHAIN"] = "1"  # never pick up a real key from this machine's Keychain
+        env["TAVILY_LOG_REPLAY"] = "1"   # these tests replay saved responses
         if key:
             env["TAVILY_API_KEY"] = "tvly-test"
         return subprocess.run([sys.executable, "-I", str(SCRIPTS / "tavily_log.py"), *args, "--log", str(self.log)],
@@ -121,6 +122,34 @@ class TavilyLog(unittest.TestCase):
         source = [e for e in self.lines() if e["kind"] == "source"][0]
         self.assertLessEqual(len(source["excerpt"]), 400)
         self.assertNotIn("second chunk", source["excerpt"])
+
+    def test_reddit_without_https_redirects_and_profiles_are_kept_out(self):
+        self.assertEqual(self.run_script("extract", "www.reddit.com/r/x", "--replay", str(self.ws / "extract.json")).returncode, 1)
+        redirect = {"results": [{"url": "https://www.reddit.com/r/x/comments/1/", "title": "t", "raw_content": "whole thread " * 50}]}
+        (self.ws / "redirect.json").write_text(json.dumps(redirect))
+        out = self.run_script("extract", "https://short.example/abc", "--replay", str(self.ws / "redirect.json"))
+        self.assertIn("skipped https://www.reddit.com", out.stdout)
+        profile = {"results": [{"title": "t", "url": "https://www.reddit.com/user/someone/", "content": "a profile"}]}
+        (self.ws / "profile.json").write_text(json.dumps(profile))
+        self.run_script("search", "q", "--replay", str(self.ws / "profile.json"))
+        self.assertEqual([e for e in self.lines() if e["kind"] == "source"], [])
+
+    def test_pre_read_is_one_site_and_cap_cant_be_raised(self):
+        pre = lambda url: self.run_script("extract", url, "--pre-read", "--replay", str(self.ws / "extract.json"))  # noqa: E731
+        self.assertEqual(pre("https://example.com/keepstrong").returncode, 0)
+        self.assertEqual(pre("https://competitor.example/pricing").returncode, 1)  # another site isn't the owner's website
+        for _ in range(15):
+            self.search()
+        self.assertIn("past the research cap", self.search("--cap", "999").stdout)
+
+    def test_replay_is_marked_and_needs_the_test_switch(self):
+        self.search()
+        self.assertTrue(all(e.get("replay") for e in self.lines()))
+        env = {k: v for k, v in os.environ.items() if k not in ("TAVILY_API_KEY", "TAVILY_LOG_REPLAY")}
+        out = subprocess.run([sys.executable, "-I", str(SCRIPTS / "tavily_log.py"), "search", "q", "--replay", str(self.ws / "search.json"),
+                              "--log", str(self.ws / "other.jsonl")], capture_output=True, text=True, env=env)
+        self.assertNotEqual(out.returncode, 0)
+        self.assertFalse((self.ws / "other.jsonl").exists())
 
     def test_search_has_no_pre_read_bypass(self):
         out = self.search("--pre-read")

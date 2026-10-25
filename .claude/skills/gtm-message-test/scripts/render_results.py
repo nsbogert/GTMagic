@@ -21,8 +21,13 @@ FLAGS = {
     "thin-evidence": "Some customer groups rest on fewer than 10 tagged real quotes, so their simulated customers are thinly grounded.",
     "many-skipped": "More than 1 in 10 simulated customers didn't give a usable answer.",
 }
-KIND = {"founder-current": "your current message", "decoy": "decoy (deliberately generic)", "generated": "new"}
+KIND = {"founder-current": "your current message", "decoy": "decoy (deliberately generic)", "generated": "new (draft)"}  # generated copy is always labeled a draft (CLAUDE.md)
 STATUS = {"pass": "Pass", "warn": "Check", "fail": "Fail"}
+
+
+def cell(s: str) -> str:
+    """A headline inside a table cell, so a "|" in it can't break the table."""
+    return s.replace("|", "\\|")
 
 
 def icp_sentence(res: dict, intake: dict, seg: dict) -> str:
@@ -62,12 +67,12 @@ def render(res: dict, positioning: dict, intake: dict) -> str:
             f"**Customer groups:** {icp_sentence(res, intake, seg)}", ""]
 
     out += ["## Which message they chose", "", f"{n} simulated customers answered; {res['skipped']} were skipped. "
-            "The range shows how much the count could move if these same simulated customers were asked again (90% interval). "
+            "The range is a 90% interval: how much each count could move with a fresh set of simulated customers from the same groups. "
             "It says nothing about real customers.", "",
             "| Message | Type | Chosen by | Range | Would act (1–5) |", "|---|---|---|---|---|"]
     for c in sorted(res["candidates"], key=lambda c: -c["choiceCount"]):
         lo, hi = c.get("preferenceRange", [0, 0])
-        out.append(f"| \"{hyp[c['candidateId']]['headline']}\" | {KIND.get(hyp[c['candidateId']].get('source'), '')} | "
+        out.append(f"| \"{cell(hyp[c['candidateId']]['headline'])}\" | {KIND.get(hyp[c['candidateId']].get('source'), '')} | "
                    f"{c['choiceCount']} of {n} | {round(lo * n)}–{round(hi * n)} | {c['dimensionMeans']['actionIntent'] or '–'} |")
     out += [f"| None of these | | {res['noneCount']} of {n} | | |", ""]
 
@@ -75,7 +80,7 @@ def render(res: dict, positioning: dict, intake: dict) -> str:
             "| Group | n | Chose none | Favourite | Score |", "|---|---|---|---|---|"]
     for row in res["segmentRanking"]:
         best = hyp.get(row["bestCandidateId"], {}).get("headline", "none")
-        out.append(f"| {seg.get(row['segmentId'], row['segmentId'])} | {row['n']} | {round(row['noneShare'] * row['n'])} | \"{best}\" | {row['score']:.2f} |")
+        out.append(f"| {seg.get(row['segmentId'], row['segmentId'])} | {row['n']} | {round(row['noneShare'] * row['n'])} | \"{cell(best)}\" | {row['score']:.2f} |")
     out += [""]
 
     out += ["## Can you trust this?", ""]

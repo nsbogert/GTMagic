@@ -98,10 +98,13 @@ def pricing(ds: Dataset, pids: List[str], recs: Dict[str, dict], seed: int) -> d
     answered = [p for p in pids if p in recs]
     buy_sim, buy_human = [], []
     for col in PRICING_COLUMNS:
-        s = [sim(p, col) == 0 for p in answered if sim(p, col) is not None]
-        h = [_human(ds, p, col, "wave4") == 0 for p in answered if _human(ds, p, col, "wave4") is not None]
-        buy_sim.append(sum(s) / len(s) if s else 0.0)
-        buy_human.append(sum(h) / len(h) if h else 0.0)
+        # Only people with both a simulated and a real answer, so both rates cover the same people.
+        pairs = [(s, h) for s, h in ((sim(p, col), _human(ds, p, col, "wave4")) for p in answered)
+                 if s is not None and h is not None]
+        if not pairs:
+            continue   # nothing to compare: leave the product out rather than score it 0%
+        buy_sim.append(sum(s == 0 for s, _ in pairs) / len(pairs))
+        buy_human.append(sum(h == 0 for _, h in pairs) / len(pairs))
     totals_sim, totals_human = [], []
     for p in answered:
         s = [sim(p, c) for c in PRICING_COLUMNS if sim(p, c) is not None]
@@ -110,15 +113,17 @@ def pricing(ds: Dataset, pids: List[str], recs: Dict[str, dict], seed: int) -> d
             totals_sim.append(sum(v == 0 for v in s))
             totals_human.append(sum(v == 0 for v in h))
     sd = lambda xs: round(statistics.pstdev(xs), 2) if xs else None   # noqa: E731
+    mean = lambda xs: round(statistics.fmean(xs), 4) if xs else None   # noqa: E731
     corr_products = pearson(buy_sim, buy_human)
     corr_people = pearson(totals_sim, totals_human)
     return {
         "individual": match_rate(ds, answered, PRICING_COLUMNS, sim, seed),
         "productBuyShare": {
-            "meanAbsError": round(statistics.fmean(abs(a - b) for a, b in zip(buy_sim, buy_human)), 4),
+            "products": len(buy_sim),
+            "meanAbsError": mean([abs(a - b) for a, b in zip(buy_sim, buy_human)]),
             "correlation": None if corr_products is None else round(corr_products, 3),
-            "simulatedOverall": round(statistics.fmean(buy_sim), 4),
-            "humanOverall": round(statistics.fmean(buy_human), 4),
+            "simulatedOverall": mean(buy_sim),
+            "humanOverall": mean(buy_human),
         },
         "productsBoughtPerPerson": {
             "people": len(totals_sim),
@@ -175,7 +180,7 @@ def framing(ds: Dataset, pids: List[str], recs: Dict[str, dict]) -> dict:
             agree += same
             h_effects.append(h_eff)
             s_effects.append(s_eff)
-            contrasts.append({"vs": f"{c['label']} vs {base['label']}",
+            contrasts.append({"vs": f"{c['label']} vs {base['label']}", "condition": c["label"],
                               "humanEffect": round(h_eff, 3), "simulatedEffect": round(s_eff, 3),
                               "direction": "matches" if same else ("too small" if not callable_ else "wrong")})
         rows.append({"key": exp.key, "title": exp.title, "stat": exp.stat, "meaning": exp.meaning,

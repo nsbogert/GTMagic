@@ -1,4 +1,5 @@
 """python3 -m unittest discover -s tests   (from twin-eval/; no API key or network needed)"""
+import copy
 import json
 import sys
 import tempfile
@@ -8,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from twin_eval import metrics, realism  # noqa: E402
+from twin_eval import metrics, realism, report  # noqa: E402
 from twin_eval.__main__ import main  # noqa: E402
 from twin_eval.data import load, sample_pids  # noqa: E402
 from twin_eval.personas import ARMS, persona_card, user_prompt  # noqa: E402
@@ -16,6 +17,8 @@ from twin_eval.tasks import (EXPERIMENTS, PRICING_COLUMNS, encode_label,  # noqa
                              encode_model_value, experiment_questions)
 
 FIXTURES = ROOT / "tests" / "fixtures"
+RUN_INFO = {"mock": True, "model": "mock", "effort": "low", "seed": 1, "promptVersion": "test",
+            "datasetRevision": "0123456789abcdef", "finishedAt": "now"}
 
 
 class TestEncoding(unittest.TestCase):
@@ -111,6 +114,39 @@ class TestScoring(unittest.TestCase):
         recs = {p: {"answers": {c: 0.0 for c in PRICING_COLUMNS}} for p in self.pids}
         self.assertEqual(realism.spread(self.ds, self.pids, recs)["medianRatio"], 0.0)
 
+    def test_product_nobody_answered_is_left_out_not_scored_zero(self):
+        recs = _oracle(self.ds, self.pids, "wave4")
+        for rec in recs.values():
+            rec["answers"].pop(PRICING_COLUMNS[0])
+        b = metrics.pricing(self.ds, self.pids, recs, 1)["productBuyShare"]
+        self.assertEqual(b["products"], len(PRICING_COLUMNS) - 1)
+        self.assertAlmostEqual(b["correlation"], 1.0)
+        self.assertAlmostEqual(b["meanAbsError"], 0.0)
+
+    def test_arm_with_no_answers_reports_na_not_zero_percent(self):
+        b = metrics.pricing(self.ds, self.pids, {}, 1)["productBuyShare"]
+        self.assertEqual(b, {"products": 0, "meanAbsError": None, "correlation": None,
+                             "simulatedOverall": None, "humanOverall": None})
+        md = report.render(report.build(self.ds, self.pids, {"vanilla": {}}, RUN_INFO, 1))
+        self.assertIn("| Plain Claude, no persona | n/a | n/a | n/a | n/a | n/a / n/a |", md)
+
+    def test_framing_table_joins_contrasts_by_identity_not_position(self):
+        full = _oracle(self.ds, self.pids, "wave4")
+        partial = copy.deepcopy(full)
+        for rec in partial.values():
+            rec["answers"].pop("QID172", None)   # this arm has no "or lose 5 cents" answers
+        rep = report.build(self.ds, self.pids, {"vanilla": full, "voice": partial}, RUN_INFO, 1)
+        rows = {}
+        for line in report._framing_table(rep):
+            cells = [c.strip() for c in line.strip("|").split("|")]
+            if cells[0] == "Gamble with nothing vs. a small loss":
+                rows[cells[1]] = cells
+        five = rows["or lose 5 cents vs win $9 or nothing"]
+        quarter = rows["or lose 25 cents vs win $9 or nothing"]
+        self.assertNotEqual(five[3], "n/a")
+        self.assertEqual(five[4], "n/a")
+        self.assertEqual(quarter[4], quarter[3])   # same answers there, so the same simulated effect
+
 
 class TestMockRun(unittest.TestCase):
     def test_end_to_end_and_resume(self):
@@ -135,9 +171,14 @@ class _quiet:
     def __enter__(self):
         import io
         self._old, sys.stdout = sys.stdout, io.StringIO()
+        self._buf = sys.stdout
+        return self
 
     def __exit__(self, *exc):
         sys.stdout = self._old
+
+    def text(self) -> str:
+        return self._buf.getvalue()
 
 
 if __name__ == "__main__":

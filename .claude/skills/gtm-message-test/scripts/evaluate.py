@@ -50,12 +50,14 @@ def clean(responses: object, request: dict, seg_ids: set[str], warnings: list[st
             continue
         seen.add(key)
         ratings: dict[str, dict] = {}
-        ok = (r.get("status") == "answered" and r.get("segmentId") in seg_ids and isinstance(r.get("choice"), str)
+        ok = (r.get("status") == "answered" and isinstance(r.get("id"), str) and isinstance(r.get("segmentId"), str)
+              and r["segmentId"] in seg_ids and isinstance(r.get("choice"), str)
               and r.get("choice") in shown | {"none"} and type(r.get("orderingIndex")) is int and 0 <= r["orderingIndex"] < k
               and isinstance(r.get("ratings"), list))
         for rating in r.get("ratings") if ok else []:
             scores = rating.get("scores") if isinstance(rating, dict) else None
-            if not isinstance(scores, dict) or rating.get("candidateId") not in shown or not all(is_score(scores.get(d)) for d in stats.DIMENSIONS):
+            cid = rating.get("candidateId") if isinstance(rating, dict) else None
+            if not isinstance(scores, dict) or not isinstance(cid, str) or cid not in shown or not all(is_score(scores.get(d)) for d in stats.DIMENSIONS):
                 ok = False
                 break
             ratings[rating["candidateId"]] = {d: scores[d] for d in stats.DIMENSIONS}
@@ -65,7 +67,8 @@ def clean(responses: object, request: dict, seg_ids: set[str], warnings: list[st
                 warnings.append(f"response {r.get('id')}: choice, ordering or ratings don't match what was shown; counted as skipped")
             skipped += 0 if is_repeat else 1
             continue
-        objections = [o for o in r.get("objections") or [] if isinstance(o, dict) and isinstance(o.get("text"), str)]
+        given = r.get("objections") if isinstance(r.get("objections"), list) else []  # malformed objections are dropped, not the answer
+        objections = [o for o in given if isinstance(o, dict) and isinstance(o.get("text"), str)]
         item = {"id": r.get("id"), "customerId": r["customerId"], "segmentId": r["segmentId"], "choice": r["choice"],
                 "ratings": ratings, "objections": objections}
         (repeats if is_repeat else main).append(item)
@@ -91,8 +94,9 @@ def themes_from(data: dict | None, main: list[dict], shown: set[str], warnings: 
     seen = set()
     for tag in tags:
         tag = tag if isinstance(tag, dict) else {}
-        r, idx, theme = by_id.get(tag.get("responseId")), tag.get("objectionIndex"), tag.get("themeId")
-        if not r or theme not in names or type(idx) is not int or not 0 <= idx < len(r["objections"]) or (r["id"], idx) in seen:
+        rid, idx, theme = tag.get("responseId"), tag.get("objectionIndex"), tag.get("themeId")
+        r = by_id.get(rid) if isinstance(rid, str) else None
+        if not r or not isinstance(theme, str) or theme not in names or type(idx) is not int or not 0 <= idx < len(r["objections"]) or (r["id"], idx) in seen:
             warnings.append(f"ignored theme tag {tag}: unknown response, objection or theme, or tagged twice")
             continue
         seen.add((r["id"], idx))
@@ -101,9 +105,20 @@ def themes_from(data: dict | None, main: list[dict], shown: set[str], warnings: 
     if total and len(seen) < total:
         warnings.append(f"{total - len(seen)} of {total} objections have no theme tag, so the theme counts leave them out")
     out = [{"theme": names[t], "count": len(objs),
-            "candidateIds": sorted({o.get("candidateId") for o in objs if o.get("candidateId") in shown}),
+            "candidateIds": sorted({o["candidateId"] for o in objs if isinstance(o.get("candidateId"), str) and o["candidateId"] in shown}),
             "simulatedQuotes": [o["text"] for o in objs[:3]]} for t, objs in found.items() if objs]
     return sorted(out, key=lambda t: -t["count"])
+
+
+def check_fingerprint(request: dict, responses: dict, warnings: list[str]) -> None:
+    """build_test.py reuses exp_1 and hyp_ ids, so after a rebuild only the fingerprint tells old answers from new."""
+    expected, got = request.get("fingerprint"), responses.get("requestFingerprint")
+    if expected and got and got != expected:
+        raise SystemExit("ERROR customer-responses.json answers an older version of this test (requestFingerprint doesn't "
+                         "match experiment-request.json): simulate again before scoring")
+    if expected and not got:
+        warnings.append("customer-responses.json has no requestFingerprint, so nothing confirms it answered this version "
+                        "of the test; make sure it was simulated after the last build_test.py run")
 
 
 def evaluate(intake: dict, positioning: dict, request: dict, responses: dict, themes: dict | None, seed: int):
@@ -112,6 +127,7 @@ def evaluate(intake: dict, positioning: dict, request: dict, responses: dict, th
     seg_ids = [s["id"] for s in segments]
     shown = [s["candidateId"] for s in request.get("stimuli", [])]
     kinds = {h["id"]: h.get("source", "generated") for h in positioning.get("hypotheses", [])}
+    check_fingerprint(request, responses, warnings)
     main, repeats, skipped = clean(responses.get("responses"), request, set(seg_ids), warnings)
     if not main:
         raise SystemExit("ERROR no usable answered responses; check customer-responses.json against experiment-request.json")
@@ -137,8 +153,10 @@ def evaluate(intake: dict, positioning: dict, request: dict, responses: dict, th
                        "detail": f"The owner's guess came first in {round(guess_rate * stats.RESAMPLES)} of {stats.RESAMPLES} reshuffles"
                                  + ("." if stable else "; treat \"your guess holds\" as a lead, not a finding.")})
 
-    # Counted the way gtm-intake counts them: excerpts tagged to the group that also carry a concern tag.
-    evidence_by_seg = {s: sum(s in (e.get("segmentIds") or []) and bool(e.get("concernIds")) for e in intake.get("evidence", []))
+    # Counted the way gtm-intake counts them: customer-voice excerpts (reviews, forum posts) tagged to the group
+    # that also carry a concern tag. The owner's own words don't count.
+    evidence_by_seg = {s: sum(s in (e.get("segmentIds") or []) and bool(e.get("concernIds"))
+                              and e.get("sourceType") in ("review", "forum-post") for e in intake.get("evidence", []))
                        for s in seg_ids}
     per_seg = {s: sum(1 for r in main if r["segmentId"] == s) for s in seg_ids}
     flags = [name for name, on in (
@@ -153,7 +171,7 @@ def evaluate(intake: dict, positioning: dict, request: dict, responses: dict, th
     limitations = ["Simulated customers, not real ones: these are hypotheses to test, not results."]
     if skipped:
         limitations.append(f"{skipped} simulated customers were skipped (refused, timed out or answered invalidly).")
-    if responses.get("_note", "").startswith("FAKE"):
+    if str(responses.get("_note") or "").startswith("FAKE"):
         limitations.insert(0, "FAKE responses generated for testing; nothing here is a finding.")
     if verdict_rate is not None:
         limitations.append(f"The top customer group came first in {round(verdict_rate * stats.RESAMPLES)} of {stats.RESAMPLES} reshuffles of the answers.")
@@ -161,7 +179,7 @@ def evaluate(intake: dict, positioning: dict, request: dict, responses: dict, th
     if themes is None:
         limitations.append("Objection themes weren't grouped for this run.")
 
-    fake = str(responses.get("_note", "")).startswith("FAKE")
+    fake = str(responses.get("_note") or "").startswith("FAKE")
     return {
         "schemaVersion": 1,
         **({"_note": "FAKE: computed from FAKE responses generated for testing. Not a finding."} if fake else {}),
@@ -185,6 +203,9 @@ def main() -> int:
     ap.add_argument("--list-objections", action="store_true", help="print objections (one JSON per line) and exit")
     args = ap.parse_args()
     intake, positioning, request, responses = (load(p) for p in (args.intake, args.positioning, args.request, args.responses))
+    for name, data in (("intake", intake), ("positioning", positioning), ("request", request), ("responses", responses)):
+        if not isinstance(data, dict):
+            raise SystemExit(f"ERROR {getattr(args, name)} isn't a JSON object")
 
     if args.list_objections:
         main_resps, _, _ = clean(responses.get("responses"), request, {s["id"] for s in intake.get("segments", [])}, [])

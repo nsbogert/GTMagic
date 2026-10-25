@@ -23,6 +23,29 @@ MESSAGING_BANNED = {
 }
 # ---- end of copy ----
 
+# ---- Copied from gtm-intake's guardrails.py and provenance.py (keep identical; a test checks they agree) ----
+# Words that carry no meaning of their own, ignored when checking that a line really uses a customer phrase.
+STOPWORDS = frozenset("a an and are as at be but by do for from had has have i i'm i've in is it it's its "
+                      "just me my of on or our so than that the their them then they this to too us was we "
+                      "were what when with you you're your".split())
+
+
+def norm(text: str) -> str:
+    text = text.replace("’", "'").replace("‘", "'").replace("“", '"').replace("”", '"')
+    return re.sub(r"\s+", " ", text).strip().lower()
+
+
+def content_words(text: str) -> set[str]:
+    words = re.findall(r"[a-z0-9]+(?:'[a-z]+)?", norm(text))
+    return {w for w in words if w not in STOPWORDS} or set(words)
+
+
+def uses_phrase(line: str, phrase: str) -> bool:
+    """At least half of the phrase's content words appear in the line: borrowed in substance, not just cited."""
+    wanted = content_words(phrase)
+    return bool(wanted) and 2 * len(wanted & content_words(line)) >= len(wanted)
+# ---- end of copy ----
+
 HEALTH_ONLY = {"names a medication, drug class or treatment", "assumes the reader's health condition", "makes a medical claim"}
 NUM = r"(?:\d+(?:\.\d+)?\+?|a|one|two|three|four|five|six|seven|eight|nine|ten|twelve|fifteen|twenty|thirty|forty|fifty)"
 WEIGHT_UNIT = r"(?:lbs?|pounds?|kgs?|kilos?|kilograms?|stone|(?:dress |clothing )?sizes?|inch(?:es)?|%|percent)"

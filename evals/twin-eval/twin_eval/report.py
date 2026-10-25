@@ -96,7 +96,8 @@ def render(rep: dict) -> str:
     lines += ["How to read it:",
               "- **Same buy/skip as twin**: share of the 40 products where the simulated person made the same call as their real twin. "
               "Brackets are a 95% interval over people. Compare with the ceiling and floor rows.",
-              "- **Buy-rates track humans**: correlation across the 40 products between the simulated and real share who would buy. "
+              "- **Buy-rates track humans**: correlation across the 40 products between the simulated and real share who would buy, "
+              "both counted over the same people. A product no simulated person answered is left out. "
               "This is the population view a message test relies on.",
               "- **Framing direction right**: wording changes where the real effect is big enough to call, and the simulated "
               "people shifted the same way. Random answers get about half of these right by chance, so read it next to **effect size (r)**, "
@@ -125,14 +126,17 @@ def _framing_table(rep: dict) -> List[str]:
     lines = ["## Framing experiments", "",
              "Effects are the change between versions as a share of the answer scale (for number answers, in units of the real spread).",
              "", head, "|" + "---|" * (3 + len(arms))]
-    first = rep["arms"][arms[0]]["framing"]["experiments"]
-    for i, exp in enumerate(first):
-        for j, con in enumerate(exp["contrasts"]):
-            cells = []
-            for a in arms:
-                cs = rep["arms"][a]["framing"]["experiments"][i]["contrasts"]
-                c = cs[j] if j < len(cs) else None
-                cells.append("n/a" if c is None else f"{c['simulatedEffect']:+.2f} ({c['direction']})")
+    # Arms can each omit different contrasts, so join on (experiment, condition), never list position.
+    found = {a: {(e["key"], c["condition"]): c for e in rep["arms"][a]["framing"]["experiments"]
+                 for c in e["contrasts"]} for a in arms}
+    for exp in rep["arms"][arms[0]]["framing"]["experiments"]:   # every arm lists every experiment
+        for cond in exp["conditions"][1:]:
+            row = [found[a].get((exp["key"], cond["label"])) for a in arms]
+            con = next((c for c in row if c), None)
+            if con is None:
+                continue
+            cells = ["n/a" if c is None else f"{c['simulatedEffect']:+.2f} ({c['direction']})" for c in row]
+            # The real effect is the same in every arm: it's computed over all twins, not the answered ones.
             lines.append(f"| {exp['title']} | {con['vs']} | {con['humanEffect']:+.2f} | " + " | ".join(cells) + " |")
     return lines + [""]
 

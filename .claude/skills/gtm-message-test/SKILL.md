@@ -35,7 +35,7 @@ Work in the same folder as gtm-intake: `gtm-workspace/<business-slug>/` (gitigno
 - `readiness.status` in intake.json must be `ready` (`build_test.py` refuses anything else).
   - `no-supported-segment`: stop. Tell the owner plainly there's no customer group to test messages on yet.
   - `needs-more`: send them back to gtm-intake.
-- **The current message** is the control. If intake.json has no `business.currentMessage`, ask: "What's the headline on your website or app store page today, and the line under it?" Use their exact words. If they have none, the test runs without a control; say so.
+- **The current message** is the control. If it's one of intake.json's `creatives[]` (a live or past ad, or the website headline), pass its id with `--current-creative` and the script copies the owner's words itself. Otherwise ask: "What's the headline on your website or app store page today, and the line under it?" and pass their exact words with `--current-headline` / `--current-subheadline`. If they have none, the test runs without a control; say so.
 - **A decoy category:** one to three generic words for what the business is ("fitness app", "bakery", "accounting software"). The script builds a deliberately generic decoy from it.
 
 ## Step 1: draft the options
@@ -44,6 +44,7 @@ Write 6–8 options in `message-drafts.json`, best first. The script needs 4 (5 
 
 - Start from intake.json `roughMessaging`, then add distinct angles from the segments' needs, barriers and concerns. One angle per option, and about the same number of options aimed at each customer group: the group comparison mostly reflects who the messages were written for, and the script warns when it's lopsided.
 - Each option: `angle`, `headline` (≤ 10 words), `subheadline` (≤ 30 words), `targetSegmentIds`, `lexiconIds` (the real phrases it borrows, at least one), `evidenceIds`, `valueProposition`, `differentiator`, `callToAction`, `assumptions`.
+- **Really use the phrase you cite**, in what customers see: at least half of one cited phrase's key words must be in the headline (plus the subheadline, when options show one), the same rule gtm-intake applies to its messaging lines. If the test is headline-only, put the borrowed words in the headline.
 - **Messaging rules** (gtm-intake's rule list, plus intake constraints with `appliesTo` messaging or all; the medical and drug rules apply only to health-related businesses, see `references/method.md`):
   - No medication or drug names, brand or generic, GLP-1 included.
   - Don't assume the reader's condition ("Are you on…?", "your shots").
@@ -55,7 +56,7 @@ Write 6–8 options in `message-drafts.json`, best first. The script needs 4 (5 
 
 ```
 python3 scripts/build_test.py <ws>/intake.json <ws>/message-drafts.json --out-dir <ws> \
-  --current-headline "<exact words>" --current-subheadline "<exact words>" --category "<decoy category>" \
+  (--current-creative <cr_id> | --current-headline "<exact words>" --current-subheadline "<exact words>") --category "<decoy category>" \
   [--audience <ws>/audience-sample.json] [--channel landing-page|ad|email]
 ```
 
@@ -103,7 +104,7 @@ Say "customer group", "message", "simulated customers", "cost per sign-up". Neve
 
 If the user says "demo":
 - Copy `fixtures/demo/intake.json` and `fixtures/demo/message-test/message-drafts.json` into `gtm-workspace/keepstrong-demo/` and work there. Never write into `fixtures/`.
-- The current message is the owner's best Meta ad: "Lose weight without losing muscle" / "Short strength sessions built for people losing weight." Use `--category "fitness app"`.
+- The current message is the owner's best Meta ad, creative `cr_1` ("Lose weight without losing muscle"): pass `--current-creative cr_1 --category "fitness app"`. It has no line under the headline, so the demo test is headline-only.
 - Use FAKE responses (Step 3) and tag objections as usual. Label the business "(fictional)" everywhere.
 - Reference outputs are in `fixtures/demo/message-test/` (`positioning-set.json` and `experiment-request.json` should match exactly; `experiment-results.json` differs if your objection themes differ).
 
@@ -114,6 +115,7 @@ Standard library only, so they run in Claude chat's sandbox too. Paths are relat
 | Script | Does |
 |---|---|
 | `build_test.py` | Checks drafts, adds the current message and decoy, assigns blind labels and a Latin-square order |
+| `ordering.py` | The Williams Latin-square orderings and the customers asked twice (used by `build_test.py`) |
 | `copy_checks.py` | The messaging rules (gtm-intake's list, copied exactly, plus extra checks; medical rules only for health briefs) |
 | `evaluate.py` | Checks responses against what was shown, then computes every number in experiment-results.json |
 | `stats.py` | The counting, ranking, resampling and verdict rules |

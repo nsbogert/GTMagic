@@ -28,7 +28,7 @@ def resp(cust: str, seg: str, choice: str, intent: int = 4) -> dict:
     return {"customerId": cust, "segmentId": seg, "choice": choice, "ratings": ratings}
 
 
-def verdict(rows: list[str], kinds: dict, none: int = 0, cids: list[str] | None = None, repeats=(0, 0, 0.0)):
+def verdict(rows: list[str], kinds: dict, none: int = 0, cids: list[str] | None = None, repeats=(10, 10, 0.5)):
     """Message verdict for customers who chose `rows` (candidate ids), plus `none` who chose nothing."""
     cids = cids or ["hyp_1", "hyp_2", "hyp_3"]
     resps = [{"customerId": f"c{i}", "segmentId": "seg_1", "choice": c, "ratings": {}} for i, c in enumerate(rows + ["none"] * none)]
@@ -44,6 +44,12 @@ class CopyChecks(unittest.TestCase):
         import guardrails
         self.assertEqual(copy_checks.MESSAGING_BANNED, guardrails.MESSAGING_BANNED)
         self.assertEqual(copy_checks.DRUG_TERMS, guardrails.DRUG_TERMS)
+        self.assertEqual(copy_checks.STOPWORDS, guardrails.STOPWORDS)
+        phrases = [x["phrase"] for x in INTAKE["lexicon"]] + ["I\u2019m   done", "the"]
+        lines = [f"{o['headline']} {o['subheadline']}" for o in DRAFTS["options"]] + ["I'M DONE with it"]
+        for line in lines:
+            for phrase in phrases:
+                self.assertEqual(copy_checks.uses_phrase(line, phrase), guardrails.uses_phrase(line, phrase), (line, phrase))
 
     def test_health_brief(self):
         for level, text in [("ok", "Keep your strength while the weight comes off"), ("block", "The strength plan built for GLP-1"),
@@ -77,7 +83,10 @@ class Build(unittest.TestCase):
         pairs = [(r[j], r[j + 1]) for r in rows for j in range(5)]
         self.assertEqual(len(set(pairs)), 30)  # every option right after every other exactly once
         texts = [s["text"] for s in req["stimuli"]]
-        self.assertTrue(all("hyp_" not in t and t.count(". ") == 1 and t.endswith(".") for t in texts), texts)
+        self.assertTrue(all("hyp_" not in t and ". " not in t and t.endswith(".") for t in texts), texts)  # headline only, like cr_1
+        owner = next(h for h in pos["hypotheses"] if h["source"] == "founder-current")
+        self.assertEqual(owner["headline"], next(c for c in INTAKE["creatives"] if c["id"] == "cr_1")["headline"])  # copied by code
+        self.assertEqual(len(req["fingerprint"]), 12)
 
     def test_odd_number_of_options_gets_mirrored_rows(self):
         rows = build_test.williams_square(list("ABCDE"))
@@ -117,13 +126,32 @@ class Build(unittest.TestCase):
         intake["readiness"]["status"] = "no-supported-segment"
         self.assertTrue(any("not 'ready'" in e for e in build_test.build(intake, DRAFTS, demo.build_args())[2]))
 
+    def test_typed_current_message_with_a_subheadline(self):
+        args = demo.build_args(current_creative=None, current_headline="Lose weight without losing muscle",
+                               current_subheadline="Short strength sessions built for people losing weight.")
+        _, req, errors, _ = build_test.build(INTAKE, DRAFTS, args)
+        self.assertEqual(errors, [])
+        self.assertTrue(all(s["text"].count(". ") == 1 for s in req["stimuli"]), [s["text"] for s in req["stimuli"]])
+
+    def test_unknown_creative_is_refused(self):
+        self.assertTrue(any("cr_9" in e for e in build_test.build(INTAKE, DRAFTS, demo.build_args(current_creative="cr_9"))[2]))
+
+    def test_copy_must_really_use_a_cited_phrase_and_not_copy_the_decoy(self):
+        drafts = copy.deepcopy(DRAFTS)
+        drafts["options"][0].update(headline="Pancakes for a rainy Tuesday", subheadline="Fresh ideas every day.")
+        drafts["options"][1]["headline"] = "The fitness app for everyone"
+        pos, _, _, warnings = build_test.build(INTAKE, drafts, demo.build_args())
+        self.assertTrue(any("doesn't really use" in w and "Pancakes" in w for w in warnings), warnings)
+        self.assertEqual([h["headline"] for h in pos["hypotheses"]].count("The fitness app for everyone"), 1)  # the decoy only
+
     def test_same_shape_without_a_current_subheadline(self):
-        _, req, _, warnings = build_test.build(INTAKE, DRAFTS, demo.build_args(current_subheadline=""))
+        args = demo.build_args(current_creative=None, current_headline="Lose weight without losing muscle", current_subheadline="")
+        _, req, _, warnings = build_test.build(INTAKE, DRAFTS, args)
         self.assertTrue(all(s["text"].count(".") == 1 for s in req["stimuli"]), [s["text"] for s in req["stimuli"]])
         self.assertTrue(any("headline only" in w for w in warnings))
 
     def test_no_current_message_means_five_new_options_and_grammar(self):
-        pos, req, errors, _ = build_test.build(INTAKE, DRAFTS, demo.build_args(current_headline=None, category="an app", channel="ad"))
+        pos, req, errors, _ = build_test.build(INTAKE, DRAFTS, demo.build_args(current_creative=None, category="an app", channel="ad"))
         self.assertEqual(errors, [])
         self.assertEqual([h["source"] for h in pos["hypotheses"]].count("generated"), 5)
         self.assertEqual(req["scenario"]["context"], "You're looking at an ad for an app.")
@@ -145,6 +173,8 @@ class Stats(unittest.TestCase):
         self.assertEqual(stats.icp_verdict(strong + tied, segs, "seg_2", 1)[0], "too-close-to-call")  # a tie isn't a hold
         self.assertEqual(stats.icp_verdict(strong[:1] + weak, segs, "seg_2", 1)[0], "too-close-to-call")  # one customer can't win
         self.assertEqual(stats.icp_verdict(strong, ["seg_1"], None, 1)[0], "no-guess")
+        self.assertEqual(stats.icp_verdict(strong[:2], segs, "seg_1", 1)[0], "too-close-to-call")  # nobody to compare against
+        self.assertEqual(stats.icp_verdict(strong[:2] + weak, segs, "seg_1", 1)[0], "too-close-to-call")  # two customers can't hold
 
     def test_decoy_rules(self):
         kinds = {"hyp_3": "decoy"}
@@ -165,6 +195,8 @@ class Stats(unittest.TestCase):
         rows = ["hyp_1"] * 40 + ["hyp_2"] * 5
         self.assertEqual(verdict(rows, {}, repeats=(9, 10, 0.5))[1], "clear-winner")      # well above luck
         self.assertEqual(verdict(rows, {}, repeats=(6, 10, 0.5))[1], "no-clear-winner")   # barely above luck
+        self.assertEqual(verdict(rows, {}, repeats=(3, 3, 0.5))[1], "no-clear-winner")    # too few repeats to check
+        self.assertEqual(verdict(rows, {}, repeats=(9, 10, 0.88))[1], "clear-winner")     # luck + 0.15 would need over 100%
 
     def test_wilson_ranges(self):
         self.assertEqual(stats.wilson(0, 48)[0], 0.0)
@@ -201,6 +233,25 @@ class Evaluate(unittest.TestCase):
         self.assertEqual(res["answered"], 43)
         self.assertEqual(sum(c["choiceCount"] for c in res["candidates"]) + res["noneCount"], res["answered"])
 
+    def test_wrongly_typed_fields_are_skipped_not_a_crash(self):
+        bad = copy.deepcopy(self.resps)
+        bad["_note"] = None
+        mains = [r for r in bad["responses"] if not r["isRepeat"]]
+        mains[0]["segmentId"] = ["seg_1"]
+        mains[1]["ratings"][0]["candidateId"] = ["hyp_1"]
+        mains[2]["objections"] = 17                                # dropped; the answer still counts
+        themes = {"themes": [{"id": "th_x", "theme": "x"}], "tags": [{"responseId": ["r"], "objectionIndex": 0, "themeId": ["th_x"]}]}
+        res, _ = evaluate.evaluate(INTAKE, self.pos, self.req, bad, themes, 42)
+        self.assertEqual((res["skipped"], res["answered"]), (2, 46))
+
+    def test_answers_to_an_older_build_are_refused(self):
+        old = copy.deepcopy(self.resps)
+        old["requestFingerprint"] = "000000000000"
+        with self.assertRaises(SystemExit):
+            evaluate.evaluate(INTAKE, self.pos, self.req, old, None, 42)
+        del old["requestFingerprint"]
+        self.assertTrue(any("requestFingerprint" in w for w in evaluate.evaluate(INTAKE, self.pos, self.req, old, None, 42)[1]))
+
     def test_theme_counting_and_untagged_warning(self):
         themes = demo.tag_themes(self.resps)
         themes["tags"] = themes["tags"][:5] + [{"responseId": "nope", "objectionIndex": 0, "themeId": "th_price"}]
@@ -235,7 +286,7 @@ class Commands(unittest.TestCase):
             (Path(ws) / "message-drafts.json").write_text(json.dumps(DRAFTS))
             self.assertEqual(run(SCRIPTS / "build_test.py", f"{ws}/intake.json", f"{ws}/message-drafts.json").returncode, 2)  # --out-dir required
             built = run(SCRIPTS / "build_test.py", f"{ws}/intake.json", f"{ws}/message-drafts.json", "--out-dir", ws,
-                        "--current-headline", demo.CURRENT[0], "--current-subheadline", demo.CURRENT[1], "--category", "fitness app")
+                        "--current-creative", demo.CURRENT_CREATIVE, "--category", "fitness app")
             self.assertEqual(built.returncode, 0, built.stdout + built.stderr)
             files = [f"{ws}/{n}" for n in ("intake.json", "positioning-set.json", "experiment-request.json", "customer-responses.json")]
             self.assertEqual(run(SCRIPTS / "fake_responses.py", *files[:3], "--out", files[3]).returncode, 0)

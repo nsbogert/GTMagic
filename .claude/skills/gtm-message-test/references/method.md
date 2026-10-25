@@ -12,7 +12,8 @@ How the test is built and scored. **CONTRACTS.md** marks what follows `docs/CONT
   - has no headline, or borrows no real customer phrase (a lexicon entry with `voice: "customer"`; gtm-intake tags the owner's own words `owner`);
   - lacks a subheadline while the others show one, or has a subheadline over 30 words;
   - breaks a messaging rule;
-  - or repeats another headline, ignoring case and punctuation (the current message included).
+  - doesn't really use any customer phrase it cites: at least half of one cited phrase's key words must be in what customers see (gtm-intake's `uses_phrase`, copied exactly);
+  - or repeats another headline, ignoring case and punctuation (the current message and the decoy included).
   Unknown segment, lexicon or evidence IDs are removed with a warning (CONTRACTS.md validator 1).
 - **Messaging rules:**
   - gtm-intake's `MESSAGING_BANNED`, copied exactly. A test fails if they drift.
@@ -44,23 +45,23 @@ How the test is built and scored. **CONTRACTS.md** marks what follows `docs/CONT
   - Segment `score = (1 − noneShare) × mean actionIntent of the chosen option ÷ 5`.
 - **ICP verdict (CONTRACTS.md), with two safety rails (Addition):**
   - A tie doesn't count as `guess-holds`.
-  - A group with fewer than 5 answers can't produce `different-segment`.
+  - A group with fewer than 5 answers can't produce `different-segment`, and `guess-holds` needs the guess and every group it's compared with to have at least 5 (with nobody to compare against, it's `too-close-to-call`).
   - For `guess-holds`, a `customer-group` check reports how often the guess still came first in 500 reshuffles. Below 80%, it's a lead, not a finding.
 - **Message verdict and checks (Addition):**
   - **Decoy** fails when it was chosen at least max(4, ⅔ × an average option's count). Its rank isn't used, so a couple of stray picks don't sink a strong result.
   - **Winner and current message:** the top option must be chosen more often than the runner-up, and more often than the current message, in ≥ 97.5% of 500 reshuffles. The top and runner-up are picked from the same data, so a nominal 95% bar behaves like 90%.
   - **Interest** blocks a winner when more than half chose "none", or "none" at least matched the top option.
-  - **Consistency** blocks a winner when customers asked twice repeat their choice no more than luck plus 15 points (needs at least 5 repeats).
+  - **Consistency** blocks a winner when customers asked twice repeat their choice no more than luck plus 15 points, or when fewer than 5 were asked twice (no evidence isn't a pass). When one message is so popular that luck alone nearly guarantees a repeat, 9 in 10 repeating counts as steady; otherwise the bar would be over 100%.
   - **At least 30 answered.**
   - `clear-winner` requires all of these; `unreliable` means the decoy failed; anything else is `no-clear-winner`.
-- **Ranges (Addition):** a 90% Wilson interval for each share, valid even at 0 of n. It describes re-asking the same simulated customers, not real ones.
+- **Ranges (Addition):** a 90% Wilson interval for each share, valid even at 0 of n: how much it could move with a fresh set of simulated customers from the same groups. It says nothing about real customers.
 - **Stability (CONTRACTS.md):** the bootstrap winner rate and repeat consistency.
 - **Confidence flags (CONTRACTS.md):**
   - `small-sample`: a group under 5 answers, including a group with none;
   - `everyone-agreed`: nobody chose none;
   - `nobody-interested`: over half chose none;
   - `unstable-winner`: bootstrap below 0.7;
-  - `thin-evidence`: a group with fewer than 10 tagged excerpts, counted like gtm-intake;
+  - `thin-evidence`: a group with fewer than 10 concern-tagged customer-voice excerpts (reviews and forum posts), counted exactly like gtm-intake;
   - `many-skipped`: over 10% skipped.
 - **Objection themes:** Claude tags; code counts, warns about untagged objections, and copies up to 3 per theme as `simulatedQuotes`.
 
@@ -85,7 +86,7 @@ Simulated customers can be more alike than real ones, so a lopsided result is a 
 4. **ICP score.** Score each group on its highest would-act rating across all options, counting everyone, including those who chose none. The current score is mostly 1 − noneShare, because the chosen option's rating is high by construction.
 5. **`everyone-agreed`:** fire below a 5% none-share rather than at exactly 0.
 6. **Resume key:** include `isRepeat`. The current key would skip the repeat answer.
-7. **intake.json:** an optional `business.currentMessage { headline, subheadline }`. gtm-intake's pre-read extracts the current headline but has nowhere to store it.
+7. ~~**intake.json:** an optional `business.currentMessage { headline, subheadline }`.~~ Superseded: gtm-intake now stores the owner's ads and headlines in `creatives[]`, and `--current-creative` copies one by code. `business.currentMessage` is still read if present.
 
 ## Differences from CONTRACTS.md that need no OK
 

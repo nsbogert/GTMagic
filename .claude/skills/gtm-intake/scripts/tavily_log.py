@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.error
@@ -37,11 +38,22 @@ RESEARCH_CAP = 15            # SKILL.md: at most 15 searches and fetches today
 MAX_LOGGED_CHARS = 8000      # per extracted page; enough to quote from without bloating the log
 REDDIT_SNIPPET_CHARS = 400   # Reddit search results: one short snippet, never page text (Reddit's Responsible Builder Policy)
 KEYCHAIN_SERVICE = "gtmagic-tavily"
+PRE_READ_CAP = 5             # pages of the owner's own website; more than that is research and counts
+REDDIT_USER_PATH = re.compile(r"^/(user|u)/", re.IGNORECASE)  # RESEARCH.md: never a Reddit user's profile
+
+
+def host(url: str) -> str:
+    """Lowercase hostname, also for a URL typed without https:// (which urlparse would read as a path)."""
+    return (urlparse(url if "//" in url else "//" + url).hostname or "").lower().rstrip(".")
+
+
+def site(url: str) -> str:
+    return host(url).removeprefix("www.")
 
 
 def is_reddit(url: str) -> bool:
-    host = (urlparse(url).hostname or "").lower().rstrip(".")
-    return host in ("reddit.com", "redd.it") or host.endswith((".reddit.com", ".redd.it"))
+    h = host(url)
+    return h in ("reddit.com", "redd.it") or h.endswith((".reddit.com", ".redd.it"))
 ERRORS = {401: "the Tavily API key was rejected", 429: "Tavily rate limit hit; wait a minute and retry",
           432: "your Tavily plan's credit limit is used up", 433: "Tavily's pay-as-you-go limit is used up"}
 
@@ -99,6 +111,8 @@ def api_key() -> str:
 def call(endpoint: str, body: dict, replay: str | None) -> dict:
     """POST to Tavily, or read a saved response (for tests and offline demos)."""
     if replay:
+        if os.environ.get("TAVILY_LOG_REPLAY") != "1":  # otherwise a hand-written file could pose as what Tavily returned
+            raise SystemExit("ERROR --replay is only for tests and offline demos (set TAVILY_LOG_REPLAY=1). Nothing was logged.")
         with open(replay, encoding="utf-8") as f:
             return json.load(f)
     key = api_key()
@@ -141,6 +155,8 @@ def search(args: argparse.Namespace) -> list[dict]:
                 "credits": (data.get("usage") or {}).get("credits")}]
     for r in data.get("results") or []:
         if isinstance(r, dict) and r.get("url") and r.get("content"):
+            if is_reddit(r["url"]) and REDDIT_USER_PATH.search(urlparse(r["url"]).path):
+                continue
             text = scrub(r["content"])
             if is_reddit(r["url"]):  # keep only a short snippet from Reddit, never the whole thread
                 text = text.split(" [...] ")[0][:REDDIT_SNIPPET_CHARS]
@@ -161,6 +177,9 @@ def extract(args: argparse.Namespace) -> list[dict]:
     entries: list[dict] = []
     for r in data.get("results") or []:
         if isinstance(r, dict) and r.get("url") and r.get("raw_content"):
+            if is_reddit(r["url"]):  # a redirect can land on Reddit; its page text is never kept
+                print(f"WARNING skipped {r['url']}: it's a Reddit page, which isn't read in full")
+                continue
             text = scrub(r["raw_content"])
             entries.append({"kind": "fetch", "url": r["url"], "at": at, "tool": "tavily", "preRead": args.pre_read,
                             "requestId": data.get("request_id")})
@@ -172,13 +191,13 @@ def extract(args: argparse.Namespace) -> list[dict]:
     return entries
 
 
-def show(entries: list[dict], log_path: str, total_used: int) -> None:
+def show(entries: list[dict], log_path: str, total_used: int, cap: int) -> None:
     """What Claude reads: numbered sources, so it never has to open or retype the log."""
     sources = [e for e in entries if e["kind"] == "source"]
     for n, e in enumerate(sources, 1):
         preview = " ".join(e["excerpt"].split())[:300]
         print(f"[{n}] {e['title'] or '(no title)'} — {e['url']}\n    {preview}{'…' if len(e['excerpt']) > 300 else ''}")
-    print(f"OK logged {len(sources)} source(s) to {log_path}; research budget used: {total_used} of {RESEARCH_CAP}")
+    print(f"OK logged {len(sources)} source(s) to {log_path}; research budget used: {total_used} of {cap}")
 
 
 def main() -> int:
@@ -203,7 +222,7 @@ def main() -> int:
         p.add_argument("--log", required=True, help="research-log.jsonl in the workspace")
     e.add_argument("--pre-read", action="store_true", help="the owner's own website; doesn't count against the cap")
     for p in (s, e):
-        p.add_argument("--cap", type=int, default=RESEARCH_CAP)
+        p.add_argument("--cap", type=int, default=RESEARCH_CAP, help="lower the cap (tests); it can't go above 15")
         p.add_argument("--replay", help="use a saved Tavily response instead of calling the API (tests, offline demo)")
     args = ap.parse_args()
 
@@ -214,14 +233,24 @@ def main() -> int:
     pre_read = getattr(args, "pre_read", False)
     if args.command == "search":
         args.pre_read = False
+    cap = min(args.cap, RESEARCH_CAP)
     cost = len(args.urls) if args.command == "extract" else 1
-    if not pre_read and used(log) + cost > args.cap:
-        print(f"ERROR this would go past the research cap ({used(log)} used + {cost} of {args.cap}). "
+    if pre_read:  # one website, a few pages: otherwise --pre-read would be a way around the research cap
+        earlier = [e["url"] for e in log if e.get("kind") == "fetch" and e.get("preRead")]
+        sites = {site(u) for u in earlier + args.urls}
+        if len(sites) > 1 or len(earlier) + cost > PRE_READ_CAP:
+            print(f"ERROR --pre-read is for up to {PRE_READ_CAP} pages of the owner's own website ({', '.join(sorted(sites))}). "
+                  "Read other sites without it; they count against the research cap. Nothing was logged.")
+            return 1
+    elif used(log) + cost > cap:
+        print(f"ERROR this would go past the research cap ({used(log)} used + {cost} of {cap}). "
               "Put open questions in openQuestions instead. Nothing was logged.")
         return 1
     entries = search(args) if args.command == "search" else extract(args)
+    for e in entries if args.replay else []:
+        e["replay"] = True  # saved responses, not a live call: auditable as such
     append(args.log, entries)
-    show(entries, args.log, used(log + entries))
+    show(entries, args.log, used(log + entries), cap)
     return 0
 
 

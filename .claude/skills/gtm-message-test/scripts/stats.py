@@ -20,6 +20,8 @@ WILSON_Z = 1.645            # 90% interval for each share
 MIN_ANSWERED = 30           # proposed: below this, no message is called a winner
 MIN_SEGMENT = 5             # a customer group needs this many answers before it can beat the owner's guess
 NOBODY_INTERESTED = 0.5     # if more than half chose "none", no message is called a winner
+MIN_REPEATS = 5             # customers asked twice needed before consistency can be checked
+STEADY_ENOUGH = 0.9         # repeat agreement that counts as steady however popular the top message is
 
 
 def mean(xs: list[float]) -> float:
@@ -96,8 +98,11 @@ def icp_verdict(resps: list[dict], seg_ids: list[str], guess: str | None, seed: 
         return "no-guess", None
     ranking = segment_ranking(resps, seg_ids)
     guess_row = next((x for x in ranking if x["segmentId"] == guess), None)
-    if guess_row and all(x["score"] < guess_row["score"] for x in ranking if x is not guess_row):
-        return "guess-holds", None  # strictly ahead: a tie isn't a hold
+    others = [x for x in ranking if x is not guess_row]
+    # Strictly ahead (a tie isn't a hold) of at least one other group, with enough answers on both sides to compare.
+    if (guess_row and others and min(x["n"] for x in [guess_row, *others]) >= MIN_SEGMENT
+            and all(x["score"] < guess_row["score"] for x in others)):
+        return "guess-holds", None
     top = ranking[0] if ranking else None
     if top is None or guess_row is None or top is guess_row:
         return "too-close-to-call", None
@@ -212,12 +217,17 @@ def message_checks(table: list[dict], kinds: dict[str, str], heads: dict[str, st
                        "detail": f"{none_count} of {answered} chose none of these messages, at least as many as chose the top one, "
                                  "so none is worth calling a winner."})
     same, pairs, chance = repeats
-    if pairs >= 5:
-        # Customers asked twice should mostly repeat themselves, clearly more than luck would (chance + 0.15).
-        steady = same / pairs > chance + 0.15
+    if pairs >= MIN_REPEATS:
+        # Customers asked twice should repeat themselves clearly more than luck would (chance + 0.15). When one message
+        # is so popular that luck alone nearly guarantees a repeat, that bar passes 100%, so 9 in 10 is enough.
+        steady = same / pairs > chance + 0.15 or same / pairs >= STEADY_ENOUGH
         checks.append({"id": "consistency", "status": "pass" if steady else "warn",
                        "detail": f"{same} of {pairs} customers asked twice chose the same message again (luck alone: about "
                                  f"{round(chance * pairs)})" + ("." if steady else "; answers aren't steady enough to name a winner.")})
+    else:  # no evidence isn't a pass
+        checks.append({"id": "consistency", "status": "warn",
+                       "detail": f"Only {pairs} customers were asked twice (at least {MIN_REPEATS} are needed), so nobody "
+                                 "checked whether answers are steady enough to name a winner."})
     if answered < MIN_ANSWERED:
         checks.append({"id": "sample-size", "status": "warn", "detail": f"Only {answered} answered; at least {MIN_ANSWERED} are needed to call a winner."})
 

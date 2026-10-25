@@ -41,8 +41,9 @@ python3 -m twin_eval run --n 200 --out out/haiku-200
 - Default model is `claude-haiku-5-5` (the team's simulation model), at effort `low`. Use `--model`, `--effort`, `--arms vanilla,gtmagic`, and `--concurrency` to change it.
 - One call per person per arm (plus one more for `invented`). The 40 pricing questions sit in a cached system prompt.
 - On Haiku 5.5, 200 people × 5 arms is roughly $1.50–2.50, and all 2,058 people is roughly $20. These are estimates; the report prints the actual cost.
-- Responses are saved as they arrive (`out/<run>/responses-<arm>.jsonl`). Re-running the same command resumes and doesn't pay twice. Failed or refused calls are recorded as skipped.
-- `python3 -m twin_eval report --out out/haiku-200` re-scores saved responses without calling the API.
+- Responses are saved as they arrive (`out/<run>/responses-<arm>.jsonl`). Re-running the same command resumes: answered people aren't asked again, skipped ones are retried, and a line half-written by a crash is skipped with a warning. Adding arms to a run is fine, but a resume with a different model, effort, `--n`, seed, prompt version, or (once the `gtmagic` arm has answers) a different or edited `--card-module` stops and asks for a new `--out`.
+- Failed or refused calls, and responses that answer fewer than half the pricing questions (`skipReason: "incomplete"`), are recorded as skipped and shown in the Skipped column. Tokens billed for them still count toward the reported cost.
+- `python3 -m twin_eval report --out out/haiku-200` re-scores saved responses without calling the API, for the same people (`n` and seed from the run's `run.json`).
 - `python3 -m twin_eval preview --arm voice` prints exactly what one simulated person sees.
 
 Output: `report.md` (scorecard first) and `report.json` (every number, with counts and n).

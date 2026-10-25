@@ -130,7 +130,7 @@ python3 scripts/tavily_log.py budget --log <ws>/research-log.jsonl
 ```
 
 - It prints numbered sources to choose from. Copy each evidence `excerpt` (at most 25 words) word for word out of what it printed or logged; never retype or tidy it.
-- It counts searches and fetches against the cap of 15 and refuses anything that would go past it. Reading the owner's own website (`extract --pre-read`) doesn't count.
+- It counts searches and fetches against the cap of 15 and refuses anything that would go past it. Reading the owner's own website (`extract --pre-read`, up to 5 pages of that one site) doesn't count.
 - It never extracts Reddit pages (Reddit doesn't allow scraping), and keeps only one short snippet from each Reddit search result. Quote it briefly, with the link.
 - Use `--exact` with quoted phrases for switching language (`"switched from <competitor>"`, `"<competitor> alternative"`); `--skeptic` marks skeptic-pass queries.
 - Without a key (or in Claude chat), use the web tools or the Tavily connector and append log lines yourself, as below.

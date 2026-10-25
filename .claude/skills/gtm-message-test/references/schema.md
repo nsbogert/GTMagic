@@ -39,7 +39,7 @@ interface PositioningSet {
 
 ## experiment-request.json (`build_test.py`)
 
-CONTRACTS.md `ExperimentRequest`: `schemaVersion: 1`, `id: "exp_1"`, `round: 1`, `scenario { context, decision, channel }`, `stimuli [{ label, candidateId, text }]`, `orderings` (a Williams Latin square of labels: see "For the simulation skill"), `repeatCustomerIds`, `protocol { version, instructions, dimensionDefinitions }`.
+CONTRACTS.md `ExperimentRequest`: `schemaVersion: 1`, `id: "exp_1"`, `round: 1`, `scenario { context, decision, channel }`, `stimuli [{ label, candidateId, text }]`, `orderings` (a Williams Latin square of labels: see "For the simulation skill"), `repeatCustomerIds`, `protocol { version, instructions, dimensionDefinitions }`, plus `fingerprint` (Addition, optional): 12 hex characters computed by code from the stimuli, orderings and repeat customers. IDs repeat when the test is rebuilt, so this is what tells answers to an older build apart.
 
 ## For the simulation skill
 
@@ -56,6 +56,7 @@ How to run the test in `experiment-request.json`, so the scoring can trust the a
 CONTRACTS.md `CustomerResponses`. What this skill relies on:
 
 - `experimentId` matches the request; one main response per `customerId`, plus one with `isRepeat: true` for each repeat customer.
+- `requestFingerprint` (top level) is copied from the request's `fingerprint`. `evaluate.py` refuses a mismatch (answers to an older build) and warns when it's missing.
 - `segmentId` is an intake segment ID; `orderingIndex` is the ordering the customer saw.
 - `status: "answered"` responses have:
   - `choice` = a `candidateId` that was shown, or `"none"`, mapped from the label by code;

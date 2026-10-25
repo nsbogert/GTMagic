@@ -19,7 +19,7 @@ import build_test  # noqa: E402
 import evaluate  # noqa: E402
 import fake_responses  # noqa: E402
 
-CURRENT = ("Lose weight without losing muscle", "Short strength sessions built for people losing weight.")  # the owner's best Meta ad
+CURRENT_CREATIVE = "cr_1"  # the owner's best Meta ad: "Lose weight without losing muscle" (headline only, so every option is too)
 FAKE_N, FAKE_SEED, EVAL_SEED = 48, 7, 42
 # Stands in for Claude's tagging step: the fake objections are templates, so each maps to one theme.
 THEMES = [("th_generic", "Sounds like every other app", "Sounds like every other app."),
@@ -34,7 +34,7 @@ def load(name: str) -> dict:
 
 
 def build_args(**over: object) -> argparse.Namespace:
-    base = dict(current_headline=CURRENT[0], current_subheadline=CURRENT[1], category="fitness app",
+    base = dict(current_creative=CURRENT_CREATIVE, current_headline=None, current_subheadline=None, category="fitness app",
                 channel="landing-page", audience=None, seed=None)
     return argparse.Namespace(**{**base, **over})
 

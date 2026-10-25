@@ -11,32 +11,32 @@
     {
       "label": "A",
       "candidateId": "hyp_5",
-      "text": "Lose weight without losing muscle. Short strength sessions built for people losing weight."
+      "text": "Lose weight without losing muscle."
     },
     {
       "label": "B",
       "candidateId": "hyp_1",
-      "text": "Keep your strength while the weight comes off. Short strength sessions and protein help, built to protect muscle as you lose weight."
+      "text": "Keep your strength while the weight comes off."
     },
     {
       "label": "C",
       "candidateId": "hyp_3",
-      "text": "A plan that tells you exactly what to do. Twenty-minute strength sessions laid out day by day, for people new to the weight room."
+      "text": "A plan that tells you exactly what to do."
     },
     {
       "label": "D",
-      "candidateId": "hyp_4",
-      "text": "Protein help for the days you're not hungry. Simple targets and easy ideas when eating feels like a chore."
+      "candidateId": "hyp_6",
+      "text": "The fitness app for everyone."
     },
     {
       "label": "E",
-      "candidateId": "hyp_2",
-      "text": "Build habits that actually last. A strength routine you can keep long after the weight is gone."
+      "candidateId": "hyp_4",
+      "text": "Muscle is the plan."
     },
     {
       "label": "F",
-      "candidateId": "hyp_6",
-      "text": "The fitness app for everyone. Everything you need, all in one place."
+      "candidateId": "hyp_2",
+      "text": "Build habits that actually last."
     }
   ],
   "orderings": [
@@ -100,5 +100,6 @@
       "clarity": "How quickly you understand what's offered and who it's for.",
       "actionIntent": "How likely you'd be to click or sign up after seeing it."
     }
-  }
+  },
+  "fingerprint": "01491d342aa9"
 }

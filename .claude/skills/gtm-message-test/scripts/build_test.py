@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Build the message test: drafted options + intake.json -> positioning-set.json + experiment-request.json.
 
-Usage: python3 build_test.py <intake.json> <drafts.json> --out-dir <workspace> [--current-headline H]
-                             [--current-subheadline S] [--category "fitness app"] [--channel landing-page]
+Usage: python3 build_test.py <intake.json> <drafts.json> --out-dir <workspace> [--current-creative cr_1 |
+                             --current-headline H [--current-subheadline S]] [--category "fitness app"] [--channel landing-page]
                              [--audience audience-sample.json] [--seed N]
 
 Checks every drafted option (references, copy rules, length, duplicates, shape), adds the owner's
@@ -13,6 +13,7 @@ Standard library only (runs in Claude chat's sandbox too).
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import random
@@ -20,10 +21,10 @@ import sys
 import zlib
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # works under python -I too
-from copy_checks import check_copy, dedupe_key, is_health_brief, words  # noqa: E402
+from copy_checks import check_copy, dedupe_key, is_health_brief, uses_phrase, words  # noqa: E402
+from ordering import pick_repeats, williams_square  # noqa: E402
 
 OPTIONS_PER_TEST = 6          # generated + current message (if any) + decoy
-REPEATS = 10                  # customers asked again with their ordering reversed
 MAX_SUBHEADLINE_WORDS = 30    # CONTRACTS.md: headline + <=30-word subheadline is what customers see
 MAX_HEADLINE_WORDS = 10
 PROTOCOL_VERSION = "protocol-v1"  # bump whenever INSTRUCTIONS or DIMENSIONS change
@@ -70,29 +71,26 @@ def article(noun: str) -> str:
     return ("an " if noun[:1].lower() in "aeiou" else "a ") + noun
 
 
-def current_message(intake: dict, headline: str | None, subheadline: str | None) -> dict | None:
-    """The owner's current message: from the command line if given, else business.currentMessage if intake has it."""
+def current_message(intake: dict, args: argparse.Namespace, errors: list[str], warnings: list[str]) -> dict | None:
+    """The owner's current message in their exact words: a creative from intake.json, copied by code (--current-creative),
+    else the command line, else business.currentMessage if intake has it."""
+    creative_id, headline, subheadline = getattr(args, "current_creative", None), args.current_headline, args.current_subheadline
+    if creative_id:
+        cr = next((c for c in intake.get("creatives") or [] if isinstance(c, dict) and c.get("id") == creative_id), None)
+        if not cr or not text(cr.get("headline")):
+            errors.append(f"--current-creative {creative_id}: intake.json has no creative with that id and a headline")
+            return None
+        body = text(cr.get("body"))
+        if words(body) > MAX_SUBHEADLINE_WORDS:  # an ad's main text would stand out next to one-line subheadlines
+            warnings.append(f"creative {creative_id}'s main text is over {MAX_SUBHEADLINE_WORDS} words, so only its headline is tested")
+            body = ""
+        return {"headline": text(cr["headline"]), "subheadline": body}
     if headline and headline.strip():
         return {"headline": headline.strip(), "subheadline": (subheadline or "").strip()}
     stored = (intake.get("business") or {}).get("currentMessage") or {}
     if isinstance(stored, dict) and text(stored.get("headline")):
         return {"headline": text(stored.get("headline")), "subheadline": text(stored.get("subheadline"))}
     return None
-
-
-def williams_square(labels: list[str]) -> list[list[str]]:
-    """Every label in every position equally often, and (for an even count) right after every other label
-    exactly once, so no option always follows the same one. An odd count needs the mirrored rows too."""
-    n = len(labels)
-    base, lo, hi = [0], 1, n - 1
-    while len(base) < n:
-        base.append(lo)
-        lo += 1
-        if len(base) < n:
-            base.append(hi)
-            hi -= 1
-    rows = [[labels[(b + r) % n] for b in base] for r in range(n)]
-    return rows if n % 2 == 0 else rows + [list(reversed(row)) for row in rows]
 
 
 def check_draft(d: object, i: int, ctx: dict) -> tuple[dict | None, list[str]]:
@@ -111,6 +109,8 @@ def check_draft(d: object, i: int, ctx: dict) -> tuple[dict | None, list[str]]:
     problem = (
         "no headline" if not head
         else "borrows no real customer phrase (lexiconIds)" if not kept["lexiconIds"]
+        else "doesn't really use any customer phrase it cites" if not any(
+            uses_phrase(ctx["visible"](head, sub), ctx["phrases"][x]) for x in kept["lexiconIds"])
         else "no subheadline, but every option shows one" if ctx["show_sub"] and not sub
         else f"subheadline over {MAX_SUBHEADLINE_WORDS} words" if ctx["show_sub"] and words(sub) > MAX_SUBHEADLINE_WORDS
         else "; ".join(r for r in reasons if level == "block") if level == "block"
@@ -141,25 +141,33 @@ def build(intake: dict, drafts: dict, args: argparse.Namespace) -> tuple[dict, d
     if status != "ready":
         errors.append(f"intake.json readiness is '{status}', not 'ready': finish gtm-intake first")
     segments = [s for s in intake.get("segments") or [] if isinstance(s, dict)]
-    owner = current_message(intake, args.current_headline, args.current_subheadline)
-    if not owner:
-        warnings.append("No current message given, so nothing is tested against it (pass --current-headline).")
+    owner = current_message(intake, args, errors, warnings)
+    if not owner and not getattr(args, "current_creative", None):
+        warnings.append("No current message given, so nothing is tested against it (pass --current-creative or --current-headline).")
     show_sub = not owner or bool(owner["subheadline"])  # same shape: no current subheadline, nobody shows one
     if not show_sub:
         warnings.append("The current message has no subheadline, so every option shows its headline only.")
+    category = args.category.strip().rstrip(".")
+    for prefix in ("a ", "an ", "the "):
+        category = category[len(prefix):] if category.lower().startswith(prefix) else category
+    category = category or "product"
+    decoy = f"The {category} for everyone"
     lexicon = [x for x in intake.get("lexicon") or [] if isinstance(x, dict)]
     ctx = {
         "seg_ids": {s.get("id") for s in segments},
         # gtm-intake tags the owner's own ad copy voice "owner"; only customer voice counts as a real customer phrase.
         "lex_ids": {x.get("id") for x in lexicon if x.get("voice") == "customer"},
+        "phrases": {x.get("id"): text(x.get("phrase")) for x in lexicon},
         "not_customer_lex_ids": {x.get("id") for x in lexicon if x.get("voice") != "customer"},
         "ev_ids": {e.get("id") for e in intake.get("evidence") or [] if isinstance(e, dict)},
         "competitors": [i.get("name", "") for s in segments for i in (s.get("serviceability") or {}).get("incumbents") or []
                         if isinstance(i, dict)],
         "health": is_health_brief(intake), "show_sub": show_sub,
         "visible": lambda h, s: f"{h} {s}" if show_sub and s else h,
-        "seen": {dedupe_key(owner["headline"])} if owner else set(),
+        "seen": {dedupe_key(decoy)} | ({dedupe_key(owner["headline"])} if owner else set()),  # no draft may copy either
     }
+    if check_copy(decoy, ctx["competitors"], ctx["health"])[0] == "block":
+        errors.append(f"the decoy \"{decoy}\" breaks a messaging rule: pass a plainer --category")
     needed = OPTIONS_PER_TEST - 1 - (1 if owner else 0)
 
     hypotheses: list[dict] = []
@@ -192,12 +200,8 @@ def build(intake: dict, drafts: dict, args: argparse.Namespace) -> tuple[dict, d
         warnings += [f"current message: {r} (kept: it's the owner's own)" for r in reasons]
         hypotheses.append({"id": "", "round": 1, "source": "founder-current", "angle": "Your current message",
                            **blank, "headline": owner["headline"], "subheadline": owner["subheadline"]})
-    category = args.category.strip().rstrip(".")
-    for prefix in ("a ", "an ", "the "):
-        category = category[len(prefix):] if category.lower().startswith(prefix) else category
-    category = category or "product"
     hypotheses.append({"id": "", "round": 1, "source": "decoy", "angle": "Generic decoy (control)", **blank,
-                       "headline": f"The {category} for everyone",
+                       "headline": decoy,
                        "subheadline": "Everything you need, all in one place." if show_sub else ""})
     for n, h in enumerate(hypotheses, 1):
         h["id"] = f"hyp_{n}"
@@ -221,31 +225,10 @@ def build(intake: dict, drafts: dict, args: argparse.Namespace) -> tuple[dict, d
         "repeatCustomerIds": pick_repeats(args.audience, rng, warnings, {str(s) for s in ctx["seg_ids"]}),
         "protocol": {"version": PROTOCOL_VERSION, "instructions": INSTRUCTIONS, "dimensionDefinitions": DIMENSIONS},
     }
+    # Ids repeat across rebuilds (exp_1, hyp_1…), so this is what tells answers to an older build apart.
+    request["fingerprint"] = hashlib.sha256(json.dumps([request["stimuli"], request["orderings"], request["repeatCustomerIds"]],
+                                                       sort_keys=True).encode()).hexdigest()[:12]
     return {"schemaVersion": 1, "round": 1, "hypotheses": hypotheses, "warnings": warnings}, request, errors, warnings
-
-
-def pick_repeats(audience_path: str | None, rng: random.Random, warnings: list[str], seg_ids: set) -> list[str]:
-    """About 10 customers, taken round-robin across segments, asked again with the ordering reversed."""
-    if not audience_path:
-        warnings.append("No audience sample given (--audience), so repeatCustomerIds is empty; "
-                        f"the simulation should repeat {REPEATS} customers spread across segments.")
-        return []
-    by_seg: dict[str, list[str]] = {}
-    audience = load(audience_path)
-    for c in audience.get("customers") or []:
-        if isinstance(c, dict) and isinstance(c.get("id"), str):
-            by_seg.setdefault(str(c.get("segmentId")), []).append(c["id"])
-    unknown = sorted(set(by_seg) - seg_ids)
-    if unknown:
-        warnings.append(f"the audience sample has customer groups intake.json doesn't: {', '.join(unknown)}; is it from the same run?")
-    for ids in by_seg.values():
-        rng.shuffle(ids)
-    picked: list[str] = []
-    while len(picked) < REPEATS and any(by_seg.values()):
-        for seg in sorted(by_seg):
-            if by_seg[seg] and len(picked) < REPEATS:
-                picked.append(by_seg[seg].pop())
-    return picked
 
 
 def main() -> int:
@@ -253,6 +236,7 @@ def main() -> int:
     ap.add_argument("intake")
     ap.add_argument("drafts")
     ap.add_argument("--out-dir", required=True, help="the workspace folder; never fixtures/demo")
+    ap.add_argument("--current-creative", help="id of the owner's creative in intake.json to test as the current message")
     ap.add_argument("--current-headline")
     ap.add_argument("--current-subheadline")
     ap.add_argument("--category", default="product", help="1-3 generic words for the decoy, e.g. 'fitness app'")
