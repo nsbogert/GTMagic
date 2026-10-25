@@ -22,11 +22,11 @@ You interview a small-business owner, research their market in one capped turn, 
 
 - **Evidence records are copied, never written.** Each `evidence[]` entry is one of:
   - `origin: "web"`: copied from a search or fetch result you received in this session. `url` is the page you read. `excerpt` is verbatim text from it, at most 25 words, with personal details (names, usernames, emails, exact locations) replaced by `[removed]`.
-  - `origin: "owner-text"` or `"owner-file"`: the owner's own words in this chat, or text and rows from a file they gave you.
+  - `origin: "owner-text"` or `"owner-file"`: the owner's own words in this chat, or text and rows from a file they gave you. Customer reviews or emails the owner pastes get `sourceType: "review"`; only reviews and forum posts count as customer voices.
 - If you can't point to the tool result or the owner's text, you don't have the evidence. Write an open question or a research task instead.
 - Never invent a URL, quote, rating, review count, survey figure or sample size. A number printed in a source (a rating, a review count, a survey n) may be copied, with that source's evidence ID.
-- **You never type computed numbers:** concern counts, bundle weights, normalized attribute weights or `sampleShare`, cost per sign-up, ad verdicts, or `sizeMath`. Leave placeholders (`concernBundles: []`, `sizeMath` zeros, ad `verdict: "inconclusive"`) and let `validate_intake.py --write` fill them. Don't quote one of these numbers to the owner until the script has produced it.
-- Where the schema needs an estimate the script doesn't compute (`size.population`, demographic shares, overlap ranges): set `isEstimate: true`, write each input and its evidence ID in `logic`, and do any arithmetic with code execution, not in your head. Attribute weights are rough relative judgments; the script normalizes them.
+- **You never type computed numbers:** concern counts, bundle weights, normalized attribute weights or normalized `sampleShare`, `business.unitEconomics` (a customer's yearly revenue, the max cost per sign-up, the target the verdicts use), cost per sign-up, ad verdicts, or `sizeMath`. Leave placeholders (`concernBundles: []`, `sizeMath` zeros, ad `verdict: "inconclusive"`, no `unitEconomics`) and let `validate_intake.py --write` fill them. Don't quote one of these numbers to the owner until the script has produced it.
+- Where the schema needs an estimate the script doesn't compute (`size.population`, demographic shares, overlap ranges): set `isEstimate: true`, write each input and its evidence ID in `logic`, and do any arithmetic with code execution, not in your head. Attribute weights and `sampleShare` are rough relative judgments (`sampleShare` from the owner's ranking, e.g. 7 and 3); the script normalizes them.
 
 ## Environment and files
 
@@ -40,11 +40,11 @@ Detect where you're running before the first file write.
 ## Session flow (one sitting, in this order)
 
 1. **One-liner.** Ask the owner to describe the business in one line. Save their exact words.
-2. **Baseline, frozen FIRST.** Before you fetch the website, open any upload, or search anything, run `prompts/baseline.md` on the one-liner alone. In Claude Code, run it in a fresh subagent given only that prompt and the one-liner. In chat, answer it right away from the one-liner only. Store it in `baseline` with `ownerFirstDescription` (verbatim), `promptVersion: "baseline-v1"` and `frozenAt` (ISO time). Never edit it afterward. It's the "before" picture; showing it to a real owner is optional.
-3. **Pre-read.** Fetch the website if given, and read uploads (today: one Meta ads CSV). Pull out the current headline (later tested as the control), pricing, and claims. Present each as a draft fact marked "please confirm". Log the website fetch to `research-log.jsonl`; it doesn't count against the research cap. Each Meta campaign becomes a `PriorExperiment` with metrics copied from the file.
-4. **Session 1.** 2–3 rounds of 2–4 questions (about 15 minutes) from the question bank: offer, traction, goals (12-month revenue goal, price and purchases per year), target cost per sign-up, what's been tried, alternatives, why people buy, and today's targeting dimensions. End with a draft primary hypothesis, one alternate, and a short list of research questions.
-5. **Research turn.** One capped turn: at most **15 searches and fetches today**, skeptic queries included. Append to `research-log.jsonl` as each result lands. Tell the owner you're researching first.
-6. **Session 2.** Run `validate_intake.py --write` (safe to repeat) so concern counts and size math exist; quote only numbers the script wrote. Then show findings against each hypothesis, the skeptic's counter-case, and at most one pushback per must-have. Use a send-back question wherever research found the target crowded or vague. Ask the owner to rank the customer groups (`ownerRank`). About 15 minutes.
+2. **Baseline, frozen FIRST.** Before you fetch the website, open any upload, or search anything, run `prompts/baseline.md` on the one-liner alone. In Claude Code, run it in a fresh subagent given only that prompt and the one-liner. In chat, answer it right away from the one-liner only. Store it in `baseline` with `ownerFirstDescription` (verbatim), `promptVersion: "baseline-v1"` and `frozenAt` (ISO time). Never edit it afterward. It's the "before" picture; showing it to a real owner is optional. (Demo mode doesn't generate a baseline; see Demo mode.)
+3. **Pre-read.** Do this whenever the owner gives you a URL or a file, which may be partway through session 1. Fetch the website, and read uploads (today: one Meta ads CSV). Pull out the current headline (later tested as the control), pricing, and claims. Present each as a draft fact marked "please confirm". Log the website fetch to `research-log.jsonl`; it doesn't count against the research cap. Each Meta campaign becomes a `PriorExperiment` with metrics copied from the file.
+4. **Session 1.** 3–4 rounds of 2–4 questions (about 15 minutes) from the question bank: offer, traction, goals (the minimum revenue needed in a year to sustain or grow the business, price and purchases per year), target cost per sign-up (or, if the owner doesn't know it, the walk-through that backs into it), what's been tried, alternatives, who it's for (the owner's own guess), why people buy, and today's targeting dimensions. End with a draft primary hypothesis, one alternate, and a short list of research questions.
+5. **Research turn.** One capped turn: at most **15 searches and fetches today**, skeptic queries included. A source you read from a search's results doesn't count as a separate fetch; opening a page yourself does. Append to `research-log.jsonl` as each result lands. Tell the owner you're researching first.
+6. **Session 2.** Run `validate_intake.py --write` (safe to repeat) so concern counts, size math and unit economics exist; quote only numbers the script wrote. If research found the target crowded or vague, the send-back question is the first question of session 2. Then show findings against each hypothesis, the skeptic's counter-case, and at most one pushback per must-have. Ask the owner to rank the customer groups (`ownerRank`). About 15 minutes.
 7. **Validate.** Run `validate_intake.py --write`. Fix every integrity error and re-run until it exits 0. The script sets `readiness.status`; never set it yourself.
 8. **Handoff.** Render `brief.md` and walk the owner through it. When they confirm, add `{"check": "Owner confirmed the brief", "pass": true}` to `readiness.checks`, re-run the validator (the status can't be `ready` without this check), re-render, and deliver both files.
 
@@ -52,7 +52,7 @@ Detect where you're running before the first file write.
 
 ## Interview rules
 
-1. **Four buckets.** Every targeting fact becomes a `Constraint` in exactly one bucket: `locked` (must-have), `preference`, `hypothesis` (with "wrong if" and confidence 1–5), or `unknown`.
+1. **Four buckets.** Every targeting fact becomes a `Constraint` in exactly one bucket: `locked` (must-have), `preference`, `hypothesis` (a guess; its "wrong if" and confidence 1–5 go on the matching `hypotheses[]` entry, not the constraint), or `unknown`.
 2. **Vagueness check.** An answer with no number, no named group or place, and no observable behavior gets **one** concrete follow-up (the question bank has one per topic). Still vague: record a hypothesis at confidence 1 and add a research question. Don't ask a third time.
 3. **"I don't know"** becomes `unknown`, never a blocker. Geography and price can't stay unknown for `ready`: propose a best guess from evidence and ask the owner to confirm it.
 4. **Locked constraints:**
@@ -61,7 +61,7 @@ Detect where you're running before the first file write.
 5. **Converge** on one primary hypothesis plus up to 2 alternates (today: 1), each in this form, with a "wrong if" and a confidence 1–5:
    > **[customer group]** will **[buy | switch]** because **[motivation]**, instead of **[current alternative]**, at **[price]**.
 6. **2–4 questions at a time.** Number them so the owner can answer in a line each.
-7. **Plain words with the owner.** Say "customer group", "must-have", "nice-to-have", "best guess", "not sure yet", "cost per sign-up". Never say ICP, segment, locked, bucket, hypothesis, persona or CPA to the owner. Schema words stay in the files.
+7. **Plain words with the owner.** Say "customer group", "must-have", "nice-to-have", "best guess", "not sure yet", "cost per sign-up". Never say ICP, segment, locked, bucket, hypothesis, persona, CPA or CAC to the owner. Schema words stay in the files.
 8. **Today's dimensions only.** Ask about geography, age, price, channel, health and regulatory limits, and interests (up to 3 interest groups). Every other dimension (sex, income, life stage, language, and so on) defaults to `unknown` without asking, unless the owner volunteers it.
 9. **Send-back.** When research finds the target crowded or vague, ask one narrowing question that cites the evidence (pattern in the question bank).
 
@@ -75,7 +75,7 @@ Detect where you're running before the first file write.
   - It doesn't assume the reader's condition ("Are you on Ozempic?", "your GLP-1 journey").
   - It makes no medical claims (treats, cures, prevents, clinically proven).
   - It names no medication or drug class (brand or generic). The validator rejects these outright.
-- For a public demo video, render the brief with `--no-links` so health-related quotes never appear next to their source links.
+- For demo runs and anything public (such as a demo video), render the brief with `--public`: no source links, so health-related quotes never appear next to them, and medication names masked in the plain-AI "before" column (research findings and real quotes stay verbatim). Real owners get the default render.
 
 ## Research protocol
 
@@ -98,14 +98,14 @@ Detect where you're running before the first file write.
 - **Incumbents:** name, rating, review count, copied from sources.
 - **Unresolved concerns:** concern IDs that incumbents' reviews show going unaddressed.
 - **Switching or quitting language:** evidence IDs.
-- **Size:** `size.population` as an estimate with logic. The script computes `customersNeeded = revenueGoal ÷ (price × purchasesPerYear)` and `minPopulation = customersNeeded ÷ adoptionRate` (default 1%).
+- **Size:** `size.population` as an estimate with logic. The script computes `customersNeeded = revenueGoal12mo ÷ (price × purchasesPerYear)`, where `revenueGoal12mo` is the minimum revenue the owner needs in a year to sustain or grow the business, and `minPopulation = customersNeeded ÷ business.adoptionRate`: the owner's own estimate of the share of the group they could win in a year (no default; without it, size isn't judged).
 - **Motivation:** why this person buys now (trigger plus job to be done).
 
 Verdict: `serviceable`, `marginal`, `not-serviceable` or `insufficient-evidence`. Write it only after the script has filled `sizeMath`.
 
-**Skeptic pass.** One structured counter-case per key claim (at minimum: the primary motivation, the gap incumbents leave, and size). Run disconfirming queries, log them, and record in `skeptic[]` the claim, the queries actually run, and the result: `unresolved` (cite the counter-evidence), `resolved`, or `nothing-found` ("found nothing against X after queries A, B"). In Claude Code you may run it in a separate subagent given only the claims, so it doesn't rubber-stamp your work; it logs to the same file.
+**Skeptic pass.** One structured counter-case per key claim (at minimum: the primary motivation, the gap incumbents leave, and size). Run disconfirming queries, log them, and record in `skeptic[]` the claim, its `kind` (`motivation`, `incumbent-gap` or `size`; all three are required), the queries actually run, and the result: `unresolved` (cite the counter-evidence), `resolved`, or `nothing-found` ("found nothing against X after queries A, B"). In Claude Code you may run it in a separate subagent given only the claims, so it doesn't rubber-stamp your work; it logs to the same file.
 
-**Prior ad results.** Copy campaign-level metrics into `priorExperiments[]`. The script computes the verdict and its reason against `targetCpa`: `inconclusive` below 100 clicks or 10 conversions, or when there's no target.
+**Prior ad results.** Copy campaign-level metrics into `priorExperiments[]`. Ask the owner whether the export's "sign-ups" are free trials or paying customers, and record it as `conversionType` (`paying`, `trial` or `unknown`); only `paying` results are judged. The script computes the verdict and its reason against `business.unitEconomics.targetCpaUsed`: the owner's `targetCpa` if they gave one, otherwise the max it derived from their `acquisitionShare`. `inconclusive` below 100 clicks or 10 conversions, for trials or unknown conversion types, or when there's no target at all.
 
 ### Research log
 
@@ -147,13 +147,13 @@ Script paths are relative to this skill's folder (in Claude Code: `.claude/skill
 python3 scripts/validate_intake.py <intake.json> --log <research-log.jsonl> --write
 ```
 
-Fills the script-computed fields (concernBundles, sizeMath, ad verdicts, normalized weights and sampleShare, the readiness checks it can compute), prints a report, and exits 1 on integrity errors. On errors, fix the JSON and re-run. **Never hand off a file that fails.**
+Fills the script-computed fields (concernBundles, sizeMath, unitEconomics, ad verdicts, normalized weights and sampleShare, the readiness checks it can compute), prints a report, and exits 1 on integrity errors. On errors, fix the JSON and re-run. **Never hand off a file that fails.**
 
 ```
 python3 scripts/render_brief.py <intake.json> -o brief.md
 ```
 
-Writes the owner-facing summary. Add `--no-links` when making a public demo video. Don't hand-edit `brief.md`: change the JSON and re-render.
+Writes the owner-facing summary. Add `--public` for demo runs and anything public: it drops source links and masks medication names. Real owners get the default render. Don't hand-edit `brief.md`: change the JSON and re-render.
 
 If a script is missing or crashes (as opposed to reporting integrity errors), tell the user plainly, hand off as `needs-more`, and do not compute its fields yourself.
 
@@ -162,8 +162,11 @@ If a script is missing or crashes (as opposed to reporting integrity errors), te
 If the user says "demo":
 - Play the owner using `fixtures/demo/intake-script.md` (the answers) and `fixtures/demo/meta-ads.csv` (the upload), both at the repo root. Answer only what the script covers; anything else is "I don't know".
 - Set `"mode": "demo"`. Label the business, owner and owner-supplied numbers as fictional everywhere: "(fictional)" after the business name, `limitations: "Fictional demo data"` on demo evidence, and a first `openQuestions` entry starting "DEMO FIXTURE:".
-- The baseline is still frozen first, and the interview rules still apply (including the scripted vague answers and follow-ups).
-- **Research turn:** don't search live. The evidence is the fictional `evidence[]` already in `fixtures/demo/intake.json` (the cached run). Build `research-log.jsonl` from it: one `source` line per record with a `url` (copy its url, title and excerpt), and one `search` line per `skeptic[].queries` entry, so the validator's log check passes. Never add evidence beyond the fixture.
-- **Seed with one command, never by hand:** `python3 scripts/demo_seed.py fixtures/demo/intake.json gtm-workspace/keepstrong-demo` writes the research log and `evidence.json` (cached evidence, concerns, skeptic entries). Load those into intake.json with code, not by retyping.
+- **One-liner:** read it from `fixtures/demo/one-liner.txt`.
+- **Baseline: don't generate one.** Copy the `baseline` recorded in `fixtures/demo/intake.json` with code. It was recorded from a plain Claude chat during planning; a subagent here inherits the project's instructions, so it isn't a fair "plain Claude". (Live runs follow step 2 as written.)
+- The interview rules still apply (including the scripted vague answers and follow-ups).
+- **Research turn:** don't search live. The evidence is the fictional `evidence[]` already in `fixtures/demo/intake.json` (the cached run). Build `research-log.jsonl` from it: one `source` line per record with a `url` (copy its url, title and excerpt), and one `search` line per `skeptic[].queries` entry, so the validator's log check passes. Never add web evidence beyond the fixture. Owner-text evidence from the script's answers is allowed (the owner's own words, such as why people buy).
+- **Seed with one command, never by hand:** `python3 scripts/demo_seed.py fixtures/demo/intake.json gtm-workspace/keepstrong-demo` appends to the research log (so it's safe after a logged website fetch) and writes `evidence.json` (cached evidence, concerns, skeptic entries). Load those into intake.json with code, not by retyping.
+- **Render** with `render_brief.py --public` (no links; medication names masked in the plain-AI baseline).
 - Start `readiness.checks` empty. The owner's confirmation is recorded only after the walkthrough, as in a live run.
 - `fixtures/demo/intake.json` is the reference result. Read it, but write your output to the workspace; don't overwrite the fixture.
