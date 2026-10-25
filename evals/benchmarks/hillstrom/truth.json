@@ -1,0 +1,4170 @@
+{
+ "source": {
+  "url": "http://www.minethatdata.com/Kevin_Hillstrom_MineThatData_E-MailAnalytics_DataMiningChallenge_2008.03.20.csv",
+  "sha256": "0e5893329d8b93cefecc571777672028290ab69865718020c78c7284f291aece",
+  "rows": 64000
+ },
+ "minSegmentSize": 1500,
+ "overall": {
+  "arms": {
+   "control": {
+    "n": 21306,
+    "visits": 2262,
+    "conversions": 122
+   },
+   "mens": {
+    "n": 21307,
+    "visits": 3894,
+    "conversions": 267
+   },
+   "womens": {
+    "n": 21387,
+    "visits": 3238,
+    "conversions": 189
+   }
+  },
+  "visit": {
+   "rate": {
+    "control": 10.617,
+    "mens": 18.276,
+    "womens": 15.14
+   },
+   "mensVsControl": {
+    "diff": 7.659,
+    "lo": 6.995,
+    "hi": 8.323,
+    "p": 2.71e-113,
+    "sig": true
+   },
+   "womensVsControl": {
+    "diff": 4.523,
+    "lo": 3.889,
+    "hi": 5.157,
+    "p": 1.92e-44,
+    "sig": true
+   },
+   "mensVsWomens": {
+    "diff": 3.136,
+    "lo": 2.429,
+    "hi": 3.843,
+    "p": 3.59e-18,
+    "sig": true
+   }
+  },
+  "conversion": {
+   "rate": {
+    "control": 0.573,
+    "mens": 1.253,
+    "womens": 0.884
+   },
+   "mensVsControl": {
+    "diff": 0.681,
+    "lo": 0.5,
+    "hi": 0.861,
+    "p": 1.47e-13,
+    "sig": true
+   },
+   "womensVsControl": {
+    "diff": 0.311,
+    "lo": 0.15,
+    "hi": 0.472,
+    "p": 0.000156,
+    "sig": true
+   },
+   "mensVsWomens": {
+    "diff": 0.369,
+    "lo": 0.174,
+    "hi": 0.564,
+    "p": 0.000206,
+    "sig": true
+   }
+  }
+ },
+ "segments": [
+  {
+   "id": "S01",
+   "key": "buyer=mens-only",
+   "description": "Customers who bought only men's merchandise from us in the past year",
+   "n": 28818,
+   "arms": {
+    "control": {
+     "n": 9638,
+     "visits": 962,
+     "conversions": 53
+    },
+    "mens": {
+     "n": 9558,
+     "visits": 1615,
+     "conversions": 110
+    },
+    "womens": {
+     "n": 9622,
+     "visits": 1067,
+     "conversions": 59
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 9.981,
+     "mens": 16.897,
+     "womens": 11.089
+    },
+    "mensVsControl": {
+     "diff": 6.916,
+     "lo": 5.955,
+     "hi": 7.876,
+     "p": 3.19e-45,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 1.108,
+     "lo": 0.241,
+     "hi": 1.975,
+     "p": 0.0123,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 5.808,
+     "lo": 4.829,
+     "hi": 6.786,
+     "p": 2.91e-31,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": -1.34,
+     "lo": -2.667,
+     "hi": -0.014,
+     "p": 0.0477,
+     "sig": true
+    },
+    "womensVsRest": {
+     "diff": -6.204,
+     "lo": -7.456,
+     "hi": -4.951,
+     "p": 2.82e-22,
+     "sig": true
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.55,
+     "mens": 1.151,
+     "womens": 0.613
+    },
+    "mensVsControl": {
+     "diff": 0.601,
+     "lo": 0.341,
+     "hi": 0.861,
+     "p": 0.00000582,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.063,
+     "lo": -0.152,
+     "hi": 0.278,
+     "p": 0.564,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 0.538,
+     "lo": 0.273,
+     "hi": 0.802,
+     "p": 0.0000684,
+     "sig": true
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S02",
+   "key": "buyer=womens-only",
+   "description": "Customers who bought only women's merchandise from us in the past year",
+   "n": 28734,
+   "arms": {
+    "control": {
+     "n": 9519,
+     "visits": 912,
+     "conversions": 49
+    },
+    "mens": {
+     "n": 9568,
+     "visits": 1592,
+     "conversions": 104
+    },
+    "womens": {
+     "n": 9647,
+     "visits": 1638,
+     "conversions": 99
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 9.581,
+     "mens": 16.639,
+     "womens": 16.979
+    },
+    "mensVsControl": {
+     "diff": 7.058,
+     "lo": 6.106,
+     "hi": 8.01,
+     "p": 7.89e-48,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 7.399,
+     "lo": 6.444,
+     "hi": 8.353,
+     "p": 3.91e-52,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": -0.341,
+     "lo": -1.398,
+     "hi": 0.717,
+     "p": 0.528,
+     "sig": false
+    },
+    "mensVsRest": {
+     "diff": -1.099,
+     "lo": -2.423,
+     "hi": 0.225,
+     "p": 0.104,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": 5.223,
+     "lo": 3.948,
+     "hi": 6.499,
+     "p": 1e-15,
+     "sig": true
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.515,
+     "mens": 1.087,
+     "womens": 1.026
+    },
+    "mensVsControl": {
+     "diff": 0.572,
+     "lo": 0.32,
+     "hi": 0.825,
+     "p": 0.00000904,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.511,
+     "lo": 0.264,
+     "hi": 0.759,
+     "p": 0.0000501,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 0.061,
+     "lo": -0.228,
+     "hi": 0.35,
+     "p": 0.681,
+     "sig": false
+    }
+   },
+   "betterEmail": null,
+   "betterEmailHolm": null
+  },
+  {
+   "id": "S03",
+   "key": "buyer=both",
+   "description": "Customers who bought both men's and women's merchandise from us in the past year",
+   "n": 6448,
+   "arms": {
+    "control": {
+     "n": 2149,
+     "visits": 388,
+     "conversions": 20
+    },
+    "mens": {
+     "n": 2181,
+     "visits": 687,
+     "conversions": 53
+    },
+    "womens": {
+     "n": 2118,
+     "visits": 533,
+     "conversions": 31
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 18.055,
+     "mens": 31.499,
+     "womens": 25.165
+    },
+    "mensVsControl": {
+     "diff": 13.444,
+     "lo": 10.906,
+     "hi": 15.983,
+     "p": 3.08e-25,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 7.11,
+     "lo": 4.649,
+     "hi": 9.572,
+     "p": 1.51e-8,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 6.334,
+     "lo": 3.648,
+     "hi": 9.02,
+     "p": 0.00000381,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": 6.459,
+     "lo": 3.832,
+     "hi": 9.086,
+     "p": 0.00000145,
+     "sig": true
+    },
+    "womensVsRest": {
+     "diff": 2.855,
+     "lo": 0.309,
+     "hi": 5.4,
+     "p": 0.0279,
+     "sig": true
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.931,
+     "mens": 2.43,
+     "womens": 1.464
+    },
+    "mensVsControl": {
+     "diff": 1.499,
+     "lo": 0.736,
+     "hi": 2.263,
+     "p": 0.000118,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.533,
+     "lo": -0.12,
+     "hi": 1.186,
+     "p": 0.11,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 0.966,
+     "lo": 0.142,
+     "hi": 1.791,
+     "p": 0.0215,
+     "sig": true
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S04",
+   "key": "tenure=new",
+   "description": "Customers who are new (first purchase from us within the past 12 months)",
+   "n": 32144,
+   "arms": {
+    "control": {
+     "n": 10695,
+     "visits": 843,
+     "conversions": 40
+    },
+    "mens": {
+     "n": 10686,
+     "visits": 1647,
+     "conversions": 119
+    },
+    "womens": {
+     "n": 10763,
+     "visits": 1391,
+     "conversions": 97
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 7.882,
+     "mens": 15.413,
+     "womens": 12.924
+    },
+    "mensVsControl": {
+     "diff": 7.531,
+     "lo": 6.676,
+     "hi": 8.385,
+     "p": 6.54e-67,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 5.042,
+     "lo": 4.228,
+     "hi": 5.856,
+     "p": 6.42e-34,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 2.489,
+     "lo": 1.556,
+     "hi": 3.422,
+     "p": 1.71e-7,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": -0.253,
+     "lo": -1.576,
+     "hi": 1.071,
+     "p": 0.708,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": 1.029,
+     "lo": -0.236,
+     "hi": 2.295,
+     "p": 0.111,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.374,
+     "mens": 1.114,
+     "womens": 0.901
+    },
+    "mensVsControl": {
+     "diff": 0.74,
+     "lo": 0.509,
+     "hi": 0.97,
+     "p": 3.01e-10,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.527,
+     "lo": 0.314,
+     "hi": 0.74,
+     "p": 0.00000119,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 0.212,
+     "lo": -0.055,
+     "hi": 0.48,
+     "p": 0.119,
+     "sig": false
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S05",
+   "key": "tenure=returning",
+   "description": "Customers who have been our customers for more than 12 months",
+   "n": 31856,
+   "arms": {
+    "control": {
+     "n": 10611,
+     "visits": 1419,
+     "conversions": 82
+    },
+    "mens": {
+     "n": 10621,
+     "visits": 2247,
+     "conversions": 148
+    },
+    "womens": {
+     "n": 10624,
+     "visits": 1847,
+     "conversions": 92
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 13.373,
+     "mens": 21.156,
+     "womens": 17.385
+    },
+    "mensVsControl": {
+     "diff": 7.783,
+     "lo": 6.772,
+     "hi": 8.795,
+     "p": 2.04e-51,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 4.012,
+     "lo": 3.043,
+     "hi": 4.981,
+     "p": 4.8e-16,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 3.771,
+     "lo": 2.711,
+     "hi": 4.831,
+     "p": 3.04e-12,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": 0.253,
+     "lo": -1.071,
+     "hi": 1.576,
+     "p": 0.708,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": -1.029,
+     "lo": -2.295,
+     "hi": 0.236,
+     "p": 0.111,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.773,
+     "mens": 1.393,
+     "womens": 0.866
+    },
+    "mensVsControl": {
+     "diff": 0.621,
+     "lo": 0.342,
+     "hi": 0.899,
+     "p": 0.0000124,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.093,
+     "lo": -0.149,
+     "hi": 0.336,
+     "p": 0.451,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 0.528,
+     "lo": 0.243,
+     "hi": 0.812,
+     "p": 0.000274,
+     "sig": true
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S06",
+   "key": "recency=1-3m",
+   "description": "Customers who last bought from us 1–3 months ago",
+   "n": 22393,
+   "arms": {
+    "control": {
+     "n": 7438,
+     "visits": 1025,
+     "conversions": 67
+    },
+    "mens": {
+     "n": 7469,
+     "visits": 1664,
+     "conversions": 122
+    },
+    "womens": {
+     "n": 7486,
+     "visits": 1361,
+     "conversions": 88
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 13.781,
+     "mens": 22.279,
+     "womens": 18.181
+    },
+    "mensVsControl": {
+     "diff": 8.498,
+     "lo": 7.272,
+     "hi": 9.725,
+     "p": 5.22e-42,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 4.4,
+     "lo": 3.227,
+     "hi": 5.573,
+     "p": 1.99e-13,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 4.098,
+     "lo": 2.812,
+     "hi": 5.384,
+     "p": 4.22e-10,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": 1.303,
+     "lo": -0.148,
+     "hi": 2.754,
+     "p": 0.0784,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": -0.183,
+     "lo": -1.57,
+     "hi": 1.205,
+     "p": 0.796,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.901,
+     "mens": 1.633,
+     "womens": 1.176
+    },
+    "mensVsControl": {
+     "diff": 0.733,
+     "lo": 0.374,
+     "hi": 1.091,
+     "p": 0.0000628,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.275,
+     "lo": -0.05,
+     "hi": 0.6,
+     "p": 0.0977,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 0.458,
+     "lo": 0.081,
+     "hi": 0.835,
+     "p": 0.0173,
+     "sig": true
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S07",
+   "key": "recency=4-6m",
+   "description": "Customers who last bought from us 4–6 months ago",
+   "n": 14192,
+   "arms": {
+    "control": {
+     "n": 4766,
+     "visits": 504,
+     "conversions": 26
+    },
+    "mens": {
+     "n": 4673,
+     "visits": 847,
+     "conversions": 49
+    },
+    "womens": {
+     "n": 4753,
+     "visits": 695,
+     "conversions": 38
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 10.575,
+     "mens": 18.125,
+     "womens": 14.622
+    },
+    "mensVsControl": {
+     "diff": 7.55,
+     "lo": 6.143,
+     "hi": 8.958,
+     "p": 7.67e-26,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 4.047,
+     "lo": 2.717,
+     "hi": 5.378,
+     "p": 2.51e-9,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 3.503,
+     "lo": 2.01,
+     "hi": 4.996,
+     "p": 0.00000425,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": -0.139,
+     "lo": -1.735,
+     "hi": 1.458,
+     "p": 0.865,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": -0.612,
+     "lo": -2.125,
+     "hi": 0.902,
+     "p": 0.428,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.546,
+     "mens": 1.049,
+     "womens": 0.799
+    },
+    "mensVsControl": {
+     "diff": 0.503,
+     "lo": 0.144,
+     "hi": 0.862,
+     "p": 0.00605,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.254,
+     "lo": -0.074,
+     "hi": 0.582,
+     "p": 0.13,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 0.249,
+     "lo": -0.137,
+     "hi": 0.636,
+     "p": 0.207,
+     "sig": false
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S08",
+   "key": "recency=7-9m",
+   "description": "Customers who last bought from us 7–9 months ago",
+   "n": 14014,
+   "arms": {
+    "control": {
+     "n": 4699,
+     "visits": 385,
+     "conversions": 16
+    },
+    "mens": {
+     "n": 4688,
+     "visits": 714,
+     "conversions": 53
+    },
+    "womens": {
+     "n": 4627,
+     "visits": 628,
+     "conversions": 31
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 8.193,
+     "mens": 15.23,
+     "womens": 13.573
+    },
+    "mensVsControl": {
+     "diff": 7.037,
+     "lo": 5.744,
+     "hi": 8.331,
+     "p": 1.5e-26,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 5.379,
+     "lo": 4.119,
+     "hi": 6.64,
+     "p": 6.04e-17,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 1.658,
+     "lo": 0.232,
+     "hi": 3.083,
+     "p": 0.0226,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": -0.795,
+     "lo": -2.299,
+     "hi": 0.709,
+     "p": 0.3,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": 1.109,
+     "lo": -0.348,
+     "hi": 2.566,
+     "p": 0.136,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.34,
+     "mens": 1.131,
+     "womens": 0.67
+    },
+    "mensVsControl": {
+     "diff": 0.79,
+     "lo": 0.445,
+     "hi": 1.135,
+     "p": 0.00000738,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.329,
+     "lo": 0.041,
+     "hi": 0.618,
+     "p": 0.025,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 0.461,
+     "lo": 0.077,
+     "hi": 0.844,
+     "p": 0.0185,
+     "sig": true
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": null
+  },
+  {
+   "id": "S09",
+   "key": "recency=10-12m",
+   "description": "Customers who last bought from us 10–12 months ago",
+   "n": 13401,
+   "arms": {
+    "control": {
+     "n": 4403,
+     "visits": 348,
+     "conversions": 13
+    },
+    "mens": {
+     "n": 4477,
+     "visits": 669,
+     "conversions": 43
+    },
+    "womens": {
+     "n": 4521,
+     "visits": 554,
+     "conversions": 32
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 7.904,
+     "mens": 14.943,
+     "womens": 12.254
+    },
+    "mensVsControl": {
+     "diff": 7.039,
+     "lo": 5.726,
+     "hi": 8.353,
+     "p": 8.39e-26,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 4.35,
+     "lo": 3.106,
+     "hi": 5.595,
+     "p": 7.31e-12,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 2.689,
+     "lo": 1.273,
+     "hi": 4.105,
+     "p": 0.000197,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": -0.799,
+     "lo": -2.318,
+     "hi": 0.72,
+     "p": 0.302,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": -0.24,
+     "lo": -1.683,
+     "hi": 1.203,
+     "p": 0.744,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.295,
+     "mens": 0.96,
+     "womens": 0.708
+    },
+    "mensVsControl": {
+     "diff": 0.665,
+     "lo": 0.338,
+     "hi": 0.993,
+     "p": 0.0000689,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.413,
+     "lo": 0.12,
+     "hi": 0.705,
+     "p": 0.00566,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 0.253,
+     "lo": -0.123,
+     "hi": 0.629,
+     "p": 0.188,
+     "sig": false
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S10",
+   "key": "channel=phone",
+   "description": "Customers who bought from us only by phone in the past year",
+   "n": 28021,
+   "arms": {
+    "control": {
+     "n": 9327,
+     "visits": 813,
+     "conversions": 50
+    },
+    "mens": {
+     "n": 9240,
+     "visits": 1504,
+     "conversions": 100
+    },
+    "womens": {
+     "n": 9454,
+     "visits": 1246,
+     "conversions": 67
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 8.717,
+     "mens": 16.277,
+     "womens": 13.18
+    },
+    "mensVsControl": {
+     "diff": 7.56,
+     "lo": 6.615,
+     "hi": 8.506,
+     "p": 2.44e-55,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 4.463,
+     "lo": 3.573,
+     "hi": 5.353,
+     "p": 8.79e-23,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 3.097,
+     "lo": 2.082,
+     "hi": 4.113,
+     "p": 2.27e-9,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": -0.149,
+     "lo": -1.469,
+     "hi": 1.17,
+     "p": 0.824,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": -0.134,
+     "lo": -1.392,
+     "hi": 1.123,
+     "p": 0.834,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.536,
+     "mens": 1.082,
+     "womens": 0.709
+    },
+    "mensVsControl": {
+     "diff": 0.546,
+     "lo": 0.288,
+     "hi": 0.804,
+     "p": 0.0000329,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.173,
+     "lo": -0.052,
+     "hi": 0.397,
+     "p": 0.132,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 0.374,
+     "lo": 0.103,
+     "hi": 0.644,
+     "p": 0.00677,
+     "sig": true
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S11",
+   "key": "channel=web",
+   "description": "Customers who bought from us only on our website in the past year",
+   "n": 28217,
+   "arms": {
+    "control": {
+     "n": 9373,
+     "visits": 1114,
+     "conversions": 54
+    },
+    "mens": {
+     "n": 9490,
+     "visits": 1845,
+     "conversions": 123
+    },
+    "womens": {
+     "n": 9354,
+     "visits": 1539,
+     "conversions": 86
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 11.885,
+     "mens": 19.442,
+     "womens": 16.453
+    },
+    "mensVsControl": {
+     "diff": 7.556,
+     "lo": 6.525,
+     "hi": 8.587,
+     "p": 8.8e-47,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 4.568,
+     "lo": 3.571,
+     "hi": 5.565,
+     "p": 2.69e-19,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 2.989,
+     "lo": 1.894,
+     "hi": 4.083,
+     "p": 8.76e-8,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": -0.163,
+     "lo": -1.508,
+     "hi": 1.182,
+     "p": 0.813,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": 0.069,
+     "lo": -1.22,
+     "hi": 1.357,
+     "p": 0.917,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.576,
+     "mens": 1.296,
+     "womens": 0.919
+    },
+    "mensVsControl": {
+     "diff": 0.72,
+     "lo": 0.446,
+     "hi": 0.994,
+     "p": 2.69e-7,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.343,
+     "lo": 0.097,
+     "hi": 0.59,
+     "p": 0.0064,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 0.377,
+     "lo": 0.078,
+     "hi": 0.675,
+     "p": 0.0134,
+     "sig": true
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S12",
+   "key": "channel=multichannel",
+   "description": "Customers who bought from us both by phone and on our website in the past year",
+   "n": 7762,
+   "arms": {
+    "control": {
+     "n": 2606,
+     "visits": 335,
+     "conversions": 18
+    },
+    "mens": {
+     "n": 2577,
+     "visits": 545,
+     "conversions": 44
+    },
+    "womens": {
+     "n": 2579,
+     "visits": 453,
+     "conversions": 36
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 12.855,
+     "mens": 21.149,
+     "womens": 17.565
+    },
+    "mensVsControl": {
+     "diff": 8.294,
+     "lo": 6.26,
+     "hi": 10.328,
+     "p": 1.33e-15,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 4.71,
+     "lo": 2.759,
+     "hi": 6.661,
+     "p": 0.00000224,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 3.584,
+     "lo": 1.429,
+     "hi": 5.738,
+     "p": 0.00111,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": 0.718,
+     "lo": -1.433,
+     "hi": 2.869,
+     "p": 0.513,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": 0.207,
+     "lo": -1.856,
+     "hi": 2.27,
+     "p": 0.844,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.691,
+     "mens": 1.707,
+     "womens": 1.396
+    },
+    "mensVsControl": {
+     "diff": 1.017,
+     "lo": 0.424,
+     "hi": 1.609,
+     "p": 0.000774,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.705,
+     "lo": 0.152,
+     "hi": 1.258,
+     "p": 0.0125,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 0.312,
+     "lo": -0.363,
+     "hi": 0.986,
+     "p": 0.365,
+     "sig": false
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S13",
+   "key": "area=urban",
+   "description": "Customers who live in an urban area",
+   "n": 25661,
+   "arms": {
+    "control": {
+     "n": 8542,
+     "visits": 827,
+     "conversions": 48
+    },
+    "mens": {
+     "n": 8563,
+     "visits": 1511,
+     "conversions": 105
+    },
+    "womens": {
+     "n": 8556,
+     "visits": 1230,
+     "conversions": 79
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 9.682,
+     "mens": 17.646,
+     "womens": 14.376
+    },
+    "mensVsControl": {
+     "diff": 7.964,
+     "lo": 6.942,
+     "hi": 8.986,
+     "p": 1.24e-52,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 4.694,
+     "lo": 3.722,
+     "hi": 5.667,
+     "p": 3.08e-21,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 3.27,
+     "lo": 2.172,
+     "hi": 4.367,
+     "p": 5.25e-9,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": 0.508,
+     "lo": -0.835,
+     "hi": 1.851,
+     "p": 0.459,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": 0.287,
+     "lo": -0.994,
+     "hi": 1.568,
+     "p": 0.66,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.562,
+     "mens": 1.226,
+     "womens": 0.923
+    },
+    "mensVsControl": {
+     "diff": 0.664,
+     "lo": 0.382,
+     "hi": 0.946,
+     "p": 0.00000386,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.361,
+     "lo": 0.104,
+     "hi": 0.619,
+     "p": 0.00591,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 0.303,
+     "lo": -0.006,
+     "hi": 0.612,
+     "p": 0.0546,
+     "sig": false
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S14",
+   "key": "area=suburban",
+   "description": "Customers who live in a suburban area",
+   "n": 28776,
+   "arms": {
+    "control": {
+     "n": 9625,
+     "visits": 953,
+     "conversions": 48
+    },
+    "mens": {
+     "n": 9501,
+     "visits": 1647,
+     "conversions": 118
+    },
+    "womens": {
+     "n": 9650,
+     "visits": 1427,
+     "conversions": 73
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 9.901,
+     "mens": 17.335,
+     "womens": 14.788
+    },
+    "mensVsControl": {
+     "diff": 7.434,
+     "lo": 6.467,
+     "hi": 8.401,
+     "p": 2.78e-51,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 4.886,
+     "lo": 3.96,
+     "hi": 5.812,
+     "p": 4.59e-25,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 2.547,
+     "lo": 1.508,
+     "hi": 3.587,
+     "p": 0.00000157,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": -0.393,
+     "lo": -1.721,
+     "hi": 0.935,
+     "p": 0.562,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": 0.663,
+     "lo": -0.607,
+     "hi": 1.932,
+     "p": 0.306,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.499,
+     "mens": 1.242,
+     "womens": 0.756
+    },
+    "mensVsControl": {
+     "diff": 0.743,
+     "lo": 0.48,
+     "hi": 1.007,
+     "p": 3.2e-8,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.258,
+     "lo": 0.035,
+     "hi": 0.481,
+     "p": 0.0234,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 0.485,
+     "lo": 0.204,
+     "hi": 0.767,
+     "p": 0.000737,
+     "sig": true
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S15",
+   "key": "area=rural",
+   "description": "Customers who live in a rural area",
+   "n": 9563,
+   "arms": {
+    "control": {
+     "n": 3139,
+     "visits": 482,
+     "conversions": 26
+    },
+    "mens": {
+     "n": 3243,
+     "visits": 736,
+     "conversions": 44
+    },
+    "womens": {
+     "n": 3181,
+     "visits": 581,
+     "conversions": 37
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 15.355,
+     "mens": 22.695,
+     "womens": 18.265
+    },
+    "mensVsControl": {
+     "diff": 7.34,
+     "lo": 5.424,
+     "hi": 9.255,
+     "p": 5.89e-14,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 2.909,
+     "lo": 1.067,
+     "hi": 4.752,
+     "p": 0.00196,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 4.43,
+     "lo": 2.46,
+     "hi": 6.4,
+     "p": 0.0000104,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": -0.344,
+     "lo": -2.385,
+     "hi": 1.696,
+     "p": 0.741,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": -1.887,
+     "lo": -3.847,
+     "hi": 0.074,
+     "p": 0.0593,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.828,
+     "mens": 1.357,
+     "womens": 1.163
+    },
+    "mensVsControl": {
+     "diff": 0.528,
+     "lo": 0.02,
+     "hi": 1.037,
+     "p": 0.0418,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.335,
+     "lo": -0.154,
+     "hi": 0.824,
+     "p": 0.18,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 0.194,
+     "lo": -0.352,
+     "hi": 0.739,
+     "p": 0.487,
+     "sig": false
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S16",
+   "key": "spend=0-100",
+   "description": "Customers who spent under $100 with us in the past year",
+   "n": 22970,
+   "arms": {
+    "control": {
+     "n": 7612,
+     "visits": 646,
+     "conversions": 32
+    },
+    "mens": {
+     "n": 7724,
+     "visits": 1185,
+     "conversions": 71
+    },
+    "womens": {
+     "n": 7634,
+     "visits": 1005,
+     "conversions": 61
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 8.487,
+     "mens": 15.342,
+     "womens": 13.165
+    },
+    "mensVsControl": {
+     "diff": 6.855,
+     "lo": 5.836,
+     "hi": 7.874,
+     "p": 1.02e-39,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 4.678,
+     "lo": 3.695,
+     "hi": 5.662,
+     "p": 1.13e-20,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 2.177,
+     "lo": 1.072,
+     "hi": 3.282,
+     "p": 0.000113,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": -1.288,
+     "lo": -2.623,
+     "hi": 0.047,
+     "p": 0.0586,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": 0.243,
+     "lo": -1.038,
+     "hi": 1.523,
+     "p": 0.71,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.42,
+     "mens": 0.919,
+     "womens": 0.799
+    },
+    "mensVsControl": {
+     "diff": 0.499,
+     "lo": 0.241,
+     "hi": 0.757,
+     "p": 0.000149,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.379,
+     "lo": 0.132,
+     "hi": 0.626,
+     "p": 0.00266,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 0.12,
+     "lo": -0.172,
+     "hi": 0.412,
+     "p": 0.42,
+     "sig": false
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S17",
+   "key": "spend=100-200",
+   "description": "Customers who spent $100–$200 with us in the past year",
+   "n": 14254,
+   "arms": {
+    "control": {
+     "n": 4836,
+     "visits": 440,
+     "conversions": 20
+    },
+    "mens": {
+     "n": 4691,
+     "visits": 751,
+     "conversions": 42
+    },
+    "womens": {
+     "n": 4727,
+     "visits": 631,
+     "conversions": 37
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 9.098,
+     "mens": 16.009,
+     "womens": 13.349
+    },
+    "mensVsControl": {
+     "diff": 6.911,
+     "lo": 5.585,
+     "hi": 8.237,
+     "p": 1.69e-24,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 4.25,
+     "lo": 2.987,
+     "hi": 5.514,
+     "p": 4.33e-11,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 2.661,
+     "lo": 1.232,
+     "hi": 4.089,
+     "p": 0.000262,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": -0.942,
+     "lo": -2.472,
+     "hi": 0.588,
+     "p": 0.228,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": -0.335,
+     "lo": -1.795,
+     "hi": 1.124,
+     "p": 0.653,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.414,
+     "mens": 0.895,
+     "womens": 0.783
+    },
+    "mensVsControl": {
+     "diff": 0.482,
+     "lo": 0.157,
+     "hi": 0.806,
+     "p": 0.00363,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.369,
+     "lo": 0.06,
+     "hi": 0.679,
+     "p": 0.0194,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 0.113,
+     "lo": -0.256,
+     "hi": 0.481,
+     "p": 0.549,
+     "sig": false
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S18",
+   "key": "spend=200-350",
+   "description": "Customers who spent $200–$350 with us in the past year",
+   "n": 12289,
+   "arms": {
+    "control": {
+     "n": 4044,
+     "visits": 511,
+     "conversions": 28
+    },
+    "mens": {
+     "n": 4090,
+     "visits": 862,
+     "conversions": 63
+    },
+    "womens": {
+     "n": 4155,
+     "visits": 675,
+     "conversions": 26
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 12.636,
+     "mens": 21.076,
+     "womens": 16.245
+    },
+    "mensVsControl": {
+     "diff": 8.44,
+     "lo": 6.824,
+     "hi": 10.056,
+     "p": 1.35e-24,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 3.609,
+     "lo": 2.091,
+     "hi": 5.128,
+     "p": 0.00000319,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 4.83,
+     "lo": 3.151,
+     "hi": 6.51,
+     "p": 1.73e-8,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": 0.973,
+     "lo": -0.798,
+     "hi": 2.744,
+     "p": 0.282,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": -1.12,
+     "lo": -2.791,
+     "hi": 0.55,
+     "p": 0.189,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.692,
+     "mens": 1.54,
+     "womens": 0.626
+    },
+    "mensVsControl": {
+     "diff": 0.848,
+     "lo": 0.392,
+     "hi": 1.304,
+     "p": 0.000266,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": -0.067,
+     "lo": -0.417,
+     "hi": 0.284,
+     "p": 0.709,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 0.915,
+     "lo": 0.467,
+     "hi": 1.362,
+     "p": 0.000061,
+     "sig": true
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S19",
+   "key": "spend=350-750",
+   "description": "Customers who spent $350–$750 with us in the past year",
+   "n": 11320,
+   "arms": {
+    "control": {
+     "n": 3776,
+     "visits": 500,
+     "conversions": 33
+    },
+    "mens": {
+     "n": 3694,
+     "visits": 835,
+     "conversions": 64
+    },
+    "womens": {
+     "n": 3850,
+     "visits": 709,
+     "conversions": 46
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 13.242,
+     "mens": 22.604,
+     "womens": 18.416
+    },
+    "mensVsControl": {
+     "diff": 9.363,
+     "lo": 7.634,
+     "hi": 11.091,
+     "p": 2.51e-26,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 5.174,
+     "lo": 3.541,
+     "hi": 6.807,
+     "p": 5.34e-10,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 4.189,
+     "lo": 2.367,
+     "hi": 6.01,
+     "p": 0.00000658,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": 2.046,
+     "lo": 0.176,
+     "hi": 3.917,
+     "p": 0.032,
+     "sig": true
+    },
+    "womensVsRest": {
+     "diff": 0.804,
+     "lo": -0.966,
+     "hi": 2.575,
+     "p": 0.373,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.874,
+     "mens": 1.733,
+     "womens": 1.195
+    },
+    "mensVsControl": {
+     "diff": 0.859,
+     "lo": 0.344,
+     "hi": 1.374,
+     "p": 0.00108,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.321,
+     "lo": -0.133,
+     "hi": 0.775,
+     "p": 0.166,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 0.538,
+     "lo": -0.005,
+     "hi": 1.081,
+     "p": 0.0523,
+     "sig": false
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S20",
+   "key": "spend=750+",
+   "description": "Customers who spent $750 or more with us in the past year",
+   "n": 3167,
+   "arms": {
+    "control": {
+     "n": 1038,
+     "visits": 165,
+     "conversions": 9
+    },
+    "mens": {
+     "n": 1108,
+     "visits": 261,
+     "conversions": 27
+    },
+    "womens": {
+     "n": 1021,
+     "visits": 218,
+     "conversions": 19
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 15.896,
+     "mens": 23.556,
+     "womens": 21.352
+    },
+    "mensVsControl": {
+     "diff": 7.66,
+     "lo": 4.315,
+     "hi": 11.005,
+     "p": 0.00000719,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 5.456,
+     "lo": 2.099,
+     "hi": 8.812,
+     "p": 0.00144,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 2.204,
+     "lo": -1.34,
+     "hi": 5.749,
+     "p": 0.223,
+     "sig": false
+    },
+    "mensVsRest": {
+     "diff": 0.02,
+     "lo": -3.392,
+     "hi": 3.433,
+     "p": 0.991,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": 0.973,
+     "lo": -2.444,
+     "hi": 4.391,
+     "p": 0.577,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.867,
+     "mens": 2.437,
+     "womens": 1.861
+    },
+    "mensVsControl": {
+     "diff": 1.57,
+     "lo": 0.501,
+     "hi": 2.639,
+     "p": 0.00399,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.994,
+     "lo": -0.009,
+     "hi": 1.996,
+     "p": 0.052,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 0.576,
+     "lo": -0.653,
+     "hi": 1.805,
+     "p": 0.359,
+     "sig": false
+    }
+   },
+   "betterEmail": null,
+   "betterEmailHolm": null
+  },
+  {
+   "id": "S21",
+   "key": "buyer=mens-only & tenure=new",
+   "description": "Customers who bought only men's merchandise from us in the past year and are new (first purchase from us within the past 12 months)",
+   "n": 14134,
+   "arms": {
+    "control": {
+     "n": 4721,
+     "visits": 333,
+     "conversions": 9
+    },
+    "mens": {
+     "n": 4694,
+     "visits": 616,
+     "conversions": 48
+    },
+    "womens": {
+     "n": 4719,
+     "visits": 412,
+     "conversions": 29
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 7.054,
+     "mens": 13.123,
+     "womens": 8.731
+    },
+    "mensVsControl": {
+     "diff": 6.07,
+     "lo": 4.859,
+     "hi": 7.281,
+     "p": 8.92e-23,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 1.677,
+     "lo": 0.59,
+     "hi": 2.764,
+     "p": 0.0025,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 4.392,
+     "lo": 3.135,
+     "hi": 5.65,
+     "p": 7.63e-12,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": -2.031,
+     "lo": -3.47,
+     "hi": -0.592,
+     "p": 0.00567,
+     "sig": true
+    },
+    "womensVsRest": {
+     "diff": -3.647,
+     "lo": -4.967,
+     "hi": -2.326,
+     "p": 6.27e-8,
+     "sig": true
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.191,
+     "mens": 1.023,
+     "womens": 0.615
+    },
+    "mensVsControl": {
+     "diff": 0.832,
+     "lo": 0.518,
+     "hi": 1.145,
+     "p": 1.99e-7,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.424,
+     "lo": 0.169,
+     "hi": 0.679,
+     "p": 0.00114,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 0.408,
+     "lo": 0.044,
+     "hi": 0.772,
+     "p": 0.028,
+     "sig": true
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S22",
+   "key": "buyer=mens-only & tenure=returning",
+   "description": "Customers who bought only men's merchandise from us in the past year and have been our customers for more than 12 months",
+   "n": 14684,
+   "arms": {
+    "control": {
+     "n": 4917,
+     "visits": 629,
+     "conversions": 44
+    },
+    "mens": {
+     "n": 4864,
+     "visits": 999,
+     "conversions": 62
+    },
+    "womens": {
+     "n": 4903,
+     "visits": 655,
+     "conversions": 30
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 12.792,
+     "mens": 20.539,
+     "womens": 13.359
+    },
+    "mensVsControl": {
+     "diff": 7.746,
+     "lo": 6.276,
+     "hi": 9.216,
+     "p": 5.2e-25,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.567,
+     "lo": -0.767,
+     "hi": 1.9,
+     "p": 0.405,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 7.179,
+     "lo": 5.698,
+     "hi": 8.661,
+     "p": 2.18e-21,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": 0.104,
+     "lo": -1.542,
+     "hi": 1.75,
+     "p": 0.901,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": -5.139,
+     "lo": -6.654,
+     "hi": -3.623,
+     "p": 3.01e-11,
+     "sig": true
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.895,
+     "mens": 1.275,
+     "womens": 0.612
+    },
+    "mensVsControl": {
+     "diff": 0.38,
+     "lo": -0.031,
+     "hi": 0.791,
+     "p": 0.0699,
+     "sig": false
+    },
+    "womensVsControl": {
+     "diff": -0.283,
+     "lo": -0.625,
+     "hi": 0.059,
+     "p": 0.105,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 0.663,
+     "lo": 0.279,
+     "hi": 1.046,
+     "p": 0.000704,
+     "sig": true
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S23",
+   "key": "buyer=womens-only & tenure=new",
+   "description": "Customers who bought only women's merchandise from us in the past year and are new (first purchase from us within the past 12 months)",
+   "n": 14099,
+   "arms": {
+    "control": {
+     "n": 4657,
+     "visits": 292,
+     "conversions": 15
+    },
+    "mens": {
+     "n": 4695,
+     "visits": 644,
+     "conversions": 41
+    },
+    "womens": {
+     "n": 4747,
+     "visits": 648,
+     "conversions": 45
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 6.27,
+     "mens": 13.717,
+     "womens": 13.651
+    },
+    "mensVsControl": {
+     "diff": 7.447,
+     "lo": 6.241,
+     "hi": 8.652,
+     "p": 9.65e-34,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 7.381,
+     "lo": 6.181,
+     "hi": 8.58,
+     "p": 1.71e-33,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 0.066,
+     "lo": -1.32,
+     "hi": 1.452,
+     "p": 0.926,
+     "sig": false
+    },
+    "mensVsRest": {
+     "diff": -0.285,
+     "lo": -1.72,
+     "hi": 1.149,
+     "p": 0.697,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": 3.648,
+     "lo": 2.24,
+     "hi": 5.056,
+     "p": 3.81e-7,
+     "sig": true
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.322,
+     "mens": 0.873,
+     "womens": 0.948
+    },
+    "mensVsControl": {
+     "diff": 0.551,
+     "lo": 0.239,
+     "hi": 0.863,
+     "p": 0.000534,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.626,
+     "lo": 0.306,
+     "hi": 0.946,
+     "p": 0.000127,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": -0.075,
+     "lo": -0.458,
+     "hi": 0.308,
+     "p": 0.702,
+     "sig": false
+    }
+   },
+   "betterEmail": null,
+   "betterEmailHolm": null
+  },
+  {
+   "id": "S24",
+   "key": "buyer=womens-only & tenure=returning",
+   "description": "Customers who bought only women's merchandise from us in the past year and have been our customers for more than 12 months",
+   "n": 14635,
+   "arms": {
+    "control": {
+     "n": 4862,
+     "visits": 620,
+     "conversions": 34
+    },
+    "mens": {
+     "n": 4873,
+     "visits": 948,
+     "conversions": 63
+    },
+    "womens": {
+     "n": 4900,
+     "visits": 990,
+     "conversions": 54
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 12.752,
+     "mens": 19.454,
+     "womens": 20.204
+    },
+    "mensVsControl": {
+     "diff": 6.702,
+     "lo": 5.248,
+     "hi": 8.156,
+     "p": 1.65e-19,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 7.452,
+     "lo": 5.988,
+     "hi": 8.916,
+     "p": 1.91e-23,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": -0.75,
+     "lo": -2.331,
+     "hi": 0.831,
+     "p": 0.352,
+     "sig": false
+    },
+    "mensVsRest": {
+     "diff": -1.239,
+     "lo": -2.872,
+     "hi": 0.395,
+     "p": 0.137,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": 3.803,
+     "lo": 2.182,
+     "hi": 5.423,
+     "p": 0.00000427,
+     "sig": true
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.699,
+     "mens": 1.293,
+     "womens": 1.102
+    },
+    "mensVsControl": {
+     "diff": 0.594,
+     "lo": 0.199,
+     "hi": 0.988,
+     "p": 0.00317,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.403,
+     "lo": 0.028,
+     "hi": 0.777,
+     "p": 0.0351,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 0.191,
+     "lo": -0.241,
+     "hi": 0.622,
+     "p": 0.386,
+     "sig": false
+    }
+   },
+   "betterEmail": null,
+   "betterEmailHolm": null
+  },
+  {
+   "id": "S25",
+   "key": "buyer=both & tenure=new",
+   "description": "Customers who bought both men's and women's merchandise from us in the past year and are new (first purchase from us within the past 12 months)",
+   "n": 3911,
+   "arms": {
+    "control": {
+     "n": 1317,
+     "visits": 218,
+     "conversions": 16
+    },
+    "mens": {
+     "n": 1297,
+     "visits": 387,
+     "conversions": 30
+    },
+    "womens": {
+     "n": 1297,
+     "visits": 331,
+     "conversions": 23
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 16.553,
+     "mens": 29.838,
+     "womens": 25.52
+    },
+    "mensVsControl": {
+     "diff": 13.285,
+     "lo": 10.087,
+     "hi": 16.484,
+     "p": 3.91e-16,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 8.968,
+     "lo": 5.86,
+     "hi": 12.075,
+     "p": 1.55e-8,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 4.318,
+     "lo": 0.878,
+     "hi": 7.757,
+     "p": 0.0139,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": 5.985,
+     "lo": 2.716,
+     "hi": 9.253,
+     "p": 0.000332,
+     "sig": true
+    },
+    "womensVsRest": {
+     "diff": 4.723,
+     "lo": 1.55,
+     "hi": 7.897,
+     "p": 0.00353,
+     "sig": true
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 1.215,
+     "mens": 2.313,
+     "womens": 1.773
+    },
+    "mensVsControl": {
+     "diff": 1.098,
+     "lo": 0.089,
+     "hi": 2.108,
+     "p": 0.033,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.558,
+     "lo": -0.372,
+     "hi": 1.489,
+     "p": 0.24,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 0.54,
+     "lo": -0.549,
+     "hi": 1.628,
+     "p": 0.331,
+     "sig": false
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": null
+  },
+  {
+   "id": "S26",
+   "key": "buyer=both & tenure=returning",
+   "description": "Customers who bought both men's and women's merchandise from us in the past year and have been our customers for more than 12 months",
+   "n": 2537,
+   "arms": {
+    "control": {
+     "n": 832,
+     "visits": 170,
+     "conversions": 4
+    },
+    "mens": {
+     "n": 884,
+     "visits": 300,
+     "conversions": 23
+    },
+    "womens": {
+     "n": 821,
+     "visits": 202,
+     "conversions": 8
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 20.433,
+     "mens": 33.937,
+     "womens": 24.604
+    },
+    "mensVsControl": {
+     "diff": 13.504,
+     "lo": 9.351,
+     "hi": 17.657,
+     "p": 1.86e-10,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 4.171,
+     "lo": 0.148,
+     "hi": 8.195,
+     "p": 0.0421,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 9.333,
+     "lo": 5.04,
+     "hi": 13.625,
+     "p": 0.0000203,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": 6.124,
+     "lo": 1.918,
+     "hi": 10.33,
+     "p": 0.00432,
+     "sig": true
+    },
+    "womensVsRest": {
+     "diff": -0.373,
+     "lo": -4.446,
+     "hi": 3.701,
+     "p": 0.858,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.481,
+     "mens": 2.602,
+     "womens": 0.974
+    },
+    "mensVsControl": {
+     "diff": 2.121,
+     "lo": 0.971,
+     "hi": 3.271,
+     "p": 0.0003,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.494,
+     "lo": -0.326,
+     "hi": 1.314,
+     "p": 0.238,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 1.627,
+     "lo": 0.381,
+     "hi": 2.873,
+     "p": 0.0105,
+     "sig": true
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S27",
+   "key": "buyer=mens-only & channel=phone",
+   "description": "Customers who bought only men's merchandise from us in the past year and bought from us only by phone in the past year",
+   "n": 12919,
+   "arms": {
+    "control": {
+     "n": 4327,
+     "visits": 350,
+     "conversions": 26
+    },
+    "mens": {
+     "n": 4257,
+     "visits": 632,
+     "conversions": 45
+    },
+    "womens": {
+     "n": 4335,
+     "visits": 412,
+     "conversions": 22
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 8.089,
+     "mens": 14.846,
+     "womens": 9.504
+    },
+    "mensVsControl": {
+     "diff": 6.757,
+     "lo": 5.415,
+     "hi": 8.099,
+     "p": 5.65e-23,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 1.415,
+     "lo": 0.223,
+     "hi": 2.608,
+     "p": 0.02,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 5.342,
+     "lo": 3.963,
+     "hi": 6.722,
+     "p": 3.2e-14,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": -1.114,
+     "lo": -2.655,
+     "hi": 0.428,
+     "p": 0.157,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": -3.897,
+     "lo": -5.296,
+     "hi": -2.497,
+     "p": 4.88e-8,
+     "sig": true
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.601,
+     "mens": 1.057,
+     "womens": 0.507
+    },
+    "mensVsControl": {
+     "diff": 0.456,
+     "lo": 0.072,
+     "hi": 0.84,
+     "p": 0.0199,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": -0.093,
+     "lo": -0.406,
+     "hi": 0.219,
+     "p": 0.558,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 0.55,
+     "lo": 0.177,
+     "hi": 0.923,
+     "p": 0.00388,
+     "sig": true
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S28",
+   "key": "buyer=mens-only & channel=web",
+   "description": "Customers who bought only men's merchandise from us in the past year and bought from us only on our website in the past year",
+   "n": 12982,
+   "arms": {
+    "control": {
+     "n": 4340,
+     "visits": 498,
+     "conversions": 20
+    },
+    "mens": {
+     "n": 4330,
+     "visits": 806,
+     "conversions": 53
+    },
+    "womens": {
+     "n": 4312,
+     "visits": 547,
+     "conversions": 26
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 11.475,
+     "mens": 18.614,
+     "womens": 12.686
+    },
+    "mensVsControl": {
+     "diff": 7.14,
+     "lo": 5.642,
+     "hi": 8.637,
+     "p": 9.34e-21,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 1.211,
+     "lo": -0.162,
+     "hi": 2.584,
+     "p": 0.084,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 5.929,
+     "lo": 4.402,
+     "hi": 7.455,
+     "p": 2.71e-14,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": -0.652,
+     "lo": -2.323,
+     "hi": 1.018,
+     "p": 0.444,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": -4.152,
+     "lo": -5.699,
+     "hi": -2.604,
+     "p": 1.46e-7,
+     "sig": true
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.461,
+     "mens": 1.224,
+     "womens": 0.603
+    },
+    "mensVsControl": {
+     "diff": 0.763,
+     "lo": 0.379,
+     "hi": 1.148,
+     "p": 0.0001,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.142,
+     "lo": -0.164,
+     "hi": 0.449,
+     "p": 0.364,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 0.621,
+     "lo": 0.22,
+     "hi": 1.022,
+     "p": 0.00239,
+     "sig": true
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S29",
+   "key": "buyer=mens-only & channel=multichannel",
+   "description": "Customers who bought only men's merchandise from us in the past year and bought from us both by phone and on our website in the past year",
+   "n": 2917,
+   "arms": {
+    "control": {
+     "n": 971,
+     "visits": 114,
+     "conversions": 7
+    },
+    "mens": {
+     "n": 971,
+     "visits": 177,
+     "conversions": 12
+    },
+    "womens": {
+     "n": 975,
+     "visits": 108,
+     "conversions": 11
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 11.74,
+     "mens": 18.229,
+     "womens": 11.077
+    },
+    "mensVsControl": {
+     "diff": 6.488,
+     "lo": 3.326,
+     "hi": 9.65,
+     "p": 0.0000577,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": -0.664,
+     "lo": -3.488,
+     "hi": 2.161,
+     "p": 0.645,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 7.152,
+     "lo": 4.025,
+     "hi": 10.279,
+     "p": 0.00000737,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": -1.227,
+     "lo": -4.46,
+     "hi": 2.007,
+     "p": 0.457,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": -5.435,
+     "lo": -8.333,
+     "hi": -2.536,
+     "p": 0.000238,
+     "sig": true
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.721,
+     "mens": 1.236,
+     "womens": 1.128
+    },
+    "mensVsControl": {
+     "diff": 0.515,
+     "lo": -0.36,
+     "hi": 1.39,
+     "p": 0.249,
+     "sig": false
+    },
+    "womensVsControl": {
+     "diff": 0.407,
+     "lo": -0.443,
+     "hi": 1.257,
+     "p": 0.348,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 0.108,
+     "lo": -0.853,
+     "hi": 1.068,
+     "p": 0.826,
+     "sig": false
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S30",
+   "key": "buyer=womens-only & channel=phone",
+   "description": "Customers who bought only women's merchandise from us in the past year and bought from us only by phone in the past year",
+   "n": 12912,
+   "arms": {
+    "control": {
+     "n": 4271,
+     "visits": 338,
+     "conversions": 17
+    },
+    "mens": {
+     "n": 4241,
+     "visits": 632,
+     "conversions": 37
+    },
+    "womens": {
+     "n": 4400,
+     "visits": 673,
+     "conversions": 35
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 7.914,
+     "mens": 14.902,
+     "womens": 15.295
+    },
+    "mensVsControl": {
+     "diff": 6.988,
+     "lo": 5.645,
+     "hi": 8.331,
+     "p": 2.04e-24,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 7.382,
+     "lo": 6.045,
+     "hi": 8.718,
+     "p": 2.65e-27,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": -0.393,
+     "lo": -1.903,
+     "hi": 1.117,
+     "p": 0.61,
+     "sig": false
+    },
+    "mensVsRest": {
+     "diff": -0.831,
+     "lo": -2.373,
+     "hi": 0.711,
+     "p": 0.291,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": 3.576,
+     "lo": 2.059,
+     "hi": 5.094,
+     "p": 0.00000385,
+     "sig": true
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.398,
+     "mens": 0.872,
+     "womens": 0.795
+    },
+    "mensVsControl": {
+     "diff": 0.474,
+     "lo": 0.137,
+     "hi": 0.812,
+     "p": 0.00589,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.397,
+     "lo": 0.074,
+     "hi": 0.721,
+     "p": 0.016,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 0.077,
+     "lo": -0.307,
+     "hi": 0.461,
+     "p": 0.694,
+     "sig": false
+    }
+   },
+   "betterEmail": null,
+   "betterEmailHolm": null
+  },
+  {
+   "id": "S31",
+   "key": "buyer=womens-only & channel=web",
+   "description": "Customers who bought only women's merchandise from us in the past year and bought from us only on our website in the past year",
+   "n": 12971,
+   "arms": {
+    "control": {
+     "n": 4308,
+     "visits": 475,
+     "conversions": 26
+    },
+    "mens": {
+     "n": 4377,
+     "visits": 792,
+     "conversions": 54
+    },
+    "womens": {
+     "n": 4286,
+     "visits": 794,
+     "conversions": 50
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 11.026,
+     "mens": 18.095,
+     "womens": 18.525
+    },
+    "mensVsControl": {
+     "diff": 7.069,
+     "lo": 5.594,
+     "hi": 8.544,
+     "p": 5.83e-21,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 7.499,
+     "lo": 6.007,
+     "hi": 8.992,
+     "p": 6.97e-23,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": -0.431,
+     "lo": -2.06,
+     "hi": 1.198,
+     "p": 0.604,
+     "sig": false
+    },
+    "mensVsRest": {
+     "diff": -0.741,
+     "lo": -2.392,
+     "hi": 0.911,
+     "p": 0.379,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": 3.721,
+     "lo": 2.073,
+     "hi": 5.369,
+     "p": 0.00000961,
+     "sig": true
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.604,
+     "mens": 1.234,
+     "womens": 1.167
+    },
+    "mensVsControl": {
+     "diff": 0.63,
+     "lo": 0.23,
+     "hi": 1.031,
+     "p": 0.00204,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.563,
+     "lo": 0.167,
+     "hi": 0.959,
+     "p": 0.00533,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 0.067,
+     "lo": -0.391,
+     "hi": 0.526,
+     "p": 0.774,
+     "sig": false
+    }
+   },
+   "betterEmail": null,
+   "betterEmailHolm": null
+  },
+  {
+   "id": "S32",
+   "key": "buyer=womens-only & channel=multichannel",
+   "description": "Customers who bought only women's merchandise from us in the past year and bought from us both by phone and on our website in the past year",
+   "n": 2851,
+   "arms": {
+    "control": {
+     "n": 940,
+     "visits": 99,
+     "conversions": 6
+    },
+    "mens": {
+     "n": 950,
+     "visits": 168,
+     "conversions": 13
+    },
+    "womens": {
+     "n": 961,
+     "visits": 171,
+     "conversions": 14
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 10.532,
+     "mens": 17.684,
+     "womens": 17.794
+    },
+    "mensVsControl": {
+     "diff": 7.152,
+     "lo": 4.032,
+     "hi": 10.273,
+     "p": 0.00000704,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 7.262,
+     "lo": 4.148,
+     "hi": 10.376,
+     "p": 0.00000486,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": -0.11,
+     "lo": -3.535,
+     "hi": 3.316,
+     "p": 0.95,
+     "sig": false
+    },
+    "mensVsRest": {
+     "diff": -0.53,
+     "lo": -3.724,
+     "hi": 2.663,
+     "p": 0.745,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": 2.868,
+     "lo": -0.313,
+     "hi": 6.048,
+     "p": 0.0772,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.638,
+     "mens": 1.368,
+     "womens": 1.457
+    },
+    "mensVsControl": {
+     "diff": 0.73,
+     "lo": -0.167,
+     "hi": 1.627,
+     "p": 0.111,
+     "sig": false
+    },
+    "womensVsControl": {
+     "diff": 0.819,
+     "lo": -0.094,
+     "hi": 1.731,
+     "p": 0.0788,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": -0.088,
+     "lo": -1.147,
+     "hi": 0.97,
+     "p": 0.87,
+     "sig": false
+    }
+   },
+   "betterEmail": null,
+   "betterEmailHolm": null
+  },
+  {
+   "id": "S33",
+   "key": "buyer=both & channel=phone",
+   "description": "Customers who bought both men's and women's merchandise from us in the past year and bought from us only by phone in the past year",
+   "n": 2190,
+   "arms": {
+    "control": {
+     "n": 729,
+     "visits": 125,
+     "conversions": 7
+    },
+    "mens": {
+     "n": 742,
+     "visits": 240,
+     "conversions": 18
+    },
+    "womens": {
+     "n": 719,
+     "visits": 161,
+     "conversions": 10
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 17.147,
+     "mens": 32.345,
+     "womens": 22.392
+    },
+    "mensVsControl": {
+     "diff": 15.198,
+     "lo": 10.861,
+     "hi": 19.536,
+     "p": 6.54e-12,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 5.245,
+     "lo": 1.15,
+     "hi": 9.341,
+     "p": 0.0121,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 9.953,
+     "lo": 5.413,
+     "hi": 14.493,
+     "p": 0.0000174,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": 7.816,
+     "lo": 3.427,
+     "hi": 12.204,
+     "p": 0.000483,
+     "sig": true
+    },
+    "womensVsRest": {
+     "diff": 0.743,
+     "lo": -3.402,
+     "hi": 4.888,
+     "p": 0.725,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.96,
+     "mens": 2.426,
+     "womens": 1.391
+    },
+    "mensVsControl": {
+     "diff": 1.466,
+     "lo": 0.152,
+     "hi": 2.78,
+     "p": 0.0288,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.431,
+     "lo": -0.68,
+     "hi": 1.541,
+     "p": 0.447,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 1.035,
+     "lo": -0.364,
+     "hi": 2.434,
+     "p": 0.147,
+     "sig": false
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S34",
+   "key": "buyer=both & channel=web",
+   "description": "Customers who bought both men's and women's merchandise from us in the past year and bought from us only on our website in the past year",
+   "n": 2264,
+   "arms": {
+    "control": {
+     "n": 725,
+     "visits": 141,
+     "conversions": 8
+    },
+    "mens": {
+     "n": 783,
+     "visits": 247,
+     "conversions": 16
+    },
+    "womens": {
+     "n": 756,
+     "visits": 198,
+     "conversions": 10
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 19.448,
+     "mens": 31.545,
+     "womens": 26.19
+    },
+    "mensVsControl": {
+     "diff": 12.097,
+     "lo": 7.75,
+     "hi": 16.444,
+     "p": 4.91e-8,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 6.742,
+     "lo": 2.485,
+     "hi": 10.999,
+     "p": 0.00191,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 5.355,
+     "lo": 0.836,
+     "hi": 9.873,
+     "p": 0.0202,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": 4.633,
+     "lo": 0.235,
+     "hi": 9.031,
+     "p": 0.0389,
+     "sig": true
+    },
+    "womensVsRest": {
+     "diff": 2.313,
+     "lo": -1.992,
+     "hi": 6.617,
+     "p": 0.292,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 1.103,
+     "mens": 2.043,
+     "womens": 1.323
+    },
+    "mensVsControl": {
+     "diff": 0.94,
+     "lo": -0.309,
+     "hi": 2.189,
+     "p": 0.14,
+     "sig": false
+    },
+    "womensVsControl": {
+     "diff": 0.219,
+     "lo": -0.895,
+     "hi": 1.334,
+     "p": 0.7,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 0.721,
+     "lo": -0.562,
+     "hi": 2.003,
+     "p": 0.271,
+     "sig": false
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": null
+  },
+  {
+   "id": "S35",
+   "key": "buyer=both & channel=multichannel",
+   "description": "Customers who bought both men's and women's merchandise from us in the past year and bought from us both by phone and on our website in the past year",
+   "n": 1994,
+   "arms": {
+    "control": {
+     "n": 695,
+     "visits": 122,
+     "conversions": 5
+    },
+    "mens": {
+     "n": 656,
+     "visits": 200,
+     "conversions": 19
+    },
+    "womens": {
+     "n": 643,
+     "visits": 174,
+     "conversions": 11
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 17.554,
+     "mens": 30.488,
+     "womens": 27.061
+    },
+    "mensVsControl": {
+     "diff": 12.934,
+     "lo": 8.416,
+     "hi": 17.452,
+     "p": 2.01e-8,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 9.507,
+     "lo": 5.058,
+     "hi": 13.955,
+     "p": 0.0000281,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 3.427,
+     "lo": -1.492,
+     "hi": 8.347,
+     "p": 0.172,
+     "sig": false
+    },
+    "mensVsRest": {
+     "diff": 5.429,
+     "lo": 0.862,
+     "hi": 9.996,
+     "p": 0.0198,
+     "sig": true
+    },
+    "womensVsRest": {
+     "diff": 5.119,
+     "lo": 0.625,
+     "hi": 9.613,
+     "p": 0.0256,
+     "sig": true
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.719,
+     "mens": 2.896,
+     "womens": 1.711
+    },
+    "mensVsControl": {
+     "diff": 2.177,
+     "lo": 0.748,
+     "hi": 3.606,
+     "p": 0.00283,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.991,
+     "lo": -0.192,
+     "hi": 2.174,
+     "p": 0.1,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 1.186,
+     "lo": -0.443,
+     "hi": 2.814,
+     "p": 0.154,
+     "sig": false
+    }
+   },
+   "betterEmail": null,
+   "betterEmailHolm": null
+  },
+  {
+   "id": "S36",
+   "key": "tenure=new & recency=1-3m",
+   "description": "Customers who are new (first purchase from us within the past 12 months) and last bought from us 1–3 months ago",
+   "n": 12036,
+   "arms": {
+    "control": {
+     "n": 4005,
+     "visits": 456,
+     "conversions": 23
+    },
+    "mens": {
+     "n": 4001,
+     "visits": 807,
+     "conversions": 57
+    },
+    "womens": {
+     "n": 4030,
+     "visits": 665,
+     "conversions": 53
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 11.386,
+     "mens": 20.17,
+     "womens": 16.501
+    },
+    "mensVsControl": {
+     "diff": 8.784,
+     "lo": 7.199,
+     "hi": 10.37,
+     "p": 1.81e-27,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 5.115,
+     "lo": 3.605,
+     "hi": 6.626,
+     "p": 3.17e-11,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 3.669,
+     "lo": 1.978,
+     "hi": 5.36,
+     "p": 0.0000212,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": 1.385,
+     "lo": -0.36,
+     "hi": 3.131,
+     "p": 0.12,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": 0.73,
+     "lo": -0.934,
+     "hi": 2.394,
+     "p": 0.39,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.574,
+     "mens": 1.425,
+     "womens": 1.315
+    },
+    "mensVsControl": {
+     "diff": 0.85,
+     "lo": 0.415,
+     "hi": 1.286,
+     "p": 0.000129,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.741,
+     "lo": 0.318,
+     "hi": 1.163,
+     "p": 0.000588,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 0.11,
+     "lo": -0.399,
+     "hi": 0.618,
+     "p": 0.673,
+     "sig": false
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S37",
+   "key": "tenure=new & recency=4-6m",
+   "description": "Customers who are new (first purchase from us within the past 12 months) and last bought from us 4–6 months ago",
+   "n": 6998,
+   "arms": {
+    "control": {
+     "n": 2379,
+     "visits": 174,
+     "conversions": 12
+    },
+    "mens": {
+     "n": 2260,
+     "visits": 345,
+     "conversions": 19
+    },
+    "womens": {
+     "n": 2359,
+     "visits": 299,
+     "conversions": 17
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 7.314,
+     "mens": 15.265,
+     "womens": 12.675
+    },
+    "mensVsControl": {
+     "diff": 7.951,
+     "lo": 6.137,
+     "hi": 9.766,
+     "p": 8.87e-18,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 5.361,
+     "lo": 3.659,
+     "hi": 7.063,
+     "p": 6.69e-10,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 2.591,
+     "lo": 0.59,
+     "hi": 4.591,
+     "p": 0.0111,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": 0.35,
+     "lo": -1.598,
+     "hi": 2.299,
+     "p": 0.724,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": 0.947,
+     "lo": -0.886,
+     "hi": 2.78,
+     "p": 0.311,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.504,
+     "mens": 0.841,
+     "womens": 0.721
+    },
+    "mensVsControl": {
+     "diff": 0.336,
+     "lo": -0.136,
+     "hi": 0.808,
+     "p": 0.163,
+     "sig": false
+    },
+    "womensVsControl": {
+     "diff": 0.216,
+     "lo": -0.228,
+     "hi": 0.661,
+     "p": 0.34,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 0.12,
+     "lo": -0.388,
+     "hi": 0.628,
+     "p": 0.643,
+     "sig": false
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": null
+  },
+  {
+   "id": "S38",
+   "key": "tenure=new & recency=7-9m",
+   "description": "Customers who are new (first purchase from us within the past 12 months) and last bought from us 7–9 months ago",
+   "n": 6730,
+   "arms": {
+    "control": {
+     "n": 2247,
+     "visits": 112,
+     "conversions": 4
+    },
+    "mens": {
+     "n": 2271,
+     "visits": 249,
+     "conversions": 24
+    },
+    "womens": {
+     "n": 2212,
+     "visits": 234,
+     "conversions": 17
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 4.984,
+     "mens": 10.964,
+     "womens": 10.579
+    },
+    "mensVsControl": {
+     "diff": 5.98,
+     "lo": 4.411,
+     "hi": 7.549,
+     "p": 7.95e-14,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 5.594,
+     "lo": 4.028,
+     "hi": 7.16,
+     "p": 2.53e-12,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 0.386,
+     "lo": -1.429,
+     "hi": 2.201,
+     "p": 0.677,
+     "sig": false
+    },
+    "mensVsRest": {
+     "diff": -1.887,
+     "lo": -3.612,
+     "hi": -0.162,
+     "p": 0.032,
+     "sig": true
+    },
+    "womensVsRest": {
+     "diff": 1.209,
+     "lo": -0.5,
+     "hi": 2.917,
+     "p": 0.166,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.178,
+     "mens": 1.057,
+     "womens": 0.769
+    },
+    "mensVsControl": {
+     "diff": 0.879,
+     "lo": 0.424,
+     "hi": 1.334,
+     "p": 0.000155,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.591,
+     "lo": 0.187,
+     "hi": 0.994,
+     "p": 0.00413,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 0.288,
+     "lo": -0.268,
+     "hi": 0.844,
+     "p": 0.31,
+     "sig": false
+    }
+   },
+   "betterEmail": null,
+   "betterEmailHolm": null
+  },
+  {
+   "id": "S39",
+   "key": "tenure=new & recency=10-12m",
+   "description": "Customers who are new (first purchase from us within the past 12 months) and last bought from us 10–12 months ago",
+   "n": 6380,
+   "arms": {
+    "control": {
+     "n": 2064,
+     "visits": 101,
+     "conversions": 1
+    },
+    "mens": {
+     "n": 2154,
+     "visits": 246,
+     "conversions": 19
+    },
+    "womens": {
+     "n": 2162,
+     "visits": 193,
+     "conversions": 10
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 4.893,
+     "mens": 11.421,
+     "womens": 8.927
+    },
+    "mensVsControl": {
+     "diff": 6.527,
+     "lo": 4.893,
+     "hi": 8.161,
+     "p": 4.93e-15,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 4.034,
+     "lo": 2.513,
+     "hi": 5.554,
+     "p": 1.99e-7,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 2.494,
+     "lo": 0.691,
+     "hi": 4.296,
+     "p": 0.00669,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": -1.289,
+     "lo": -3.072,
+     "hi": 0.494,
+     "p": 0.157,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": -0.575,
+     "lo": -2.241,
+     "hi": 1.092,
+     "p": 0.499,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.048,
+     "mens": 0.882,
+     "womens": 0.463
+    },
+    "mensVsControl": {
+     "diff": 0.834,
+     "lo": 0.428,
+     "hi": 1.24,
+     "p": 0.0000574,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.414,
+     "lo": 0.113,
+     "hi": 0.715,
+     "p": 0.00708,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 0.42,
+     "lo": -0.068,
+     "hi": 0.907,
+     "p": 0.0917,
+     "sig": false
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": null
+  },
+  {
+   "id": "S40",
+   "key": "tenure=returning & recency=1-3m",
+   "description": "Customers who have been our customers for more than 12 months and last bought from us 1–3 months ago",
+   "n": 10357,
+   "arms": {
+    "control": {
+     "n": 3433,
+     "visits": 569,
+     "conversions": 44
+    },
+    "mens": {
+     "n": 3468,
+     "visits": 857,
+     "conversions": 65
+    },
+    "womens": {
+     "n": 3456,
+     "visits": 696,
+     "conversions": 35
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 16.574,
+     "mens": 24.712,
+     "womens": 20.139
+    },
+    "mensVsControl": {
+     "diff": 8.137,
+     "lo": 6.238,
+     "hi": 10.037,
+     "p": 4.61e-17,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 3.564,
+     "lo": 1.738,
+     "hi": 5.391,
+     "p": 0.00013,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 4.573,
+     "lo": 2.611,
+     "hi": 6.535,
+     "p": 0.00000491,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": 0.585,
+     "lo": -1.439,
+     "hi": 2.609,
+     "p": 0.571,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": -1.14,
+     "lo": -3.084,
+     "hi": 0.804,
+     "p": 0.251,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 1.282,
+     "mens": 1.874,
+     "womens": 1.013
+    },
+    "mensVsControl": {
+     "diff": 0.593,
+     "lo": 0.005,
+     "hi": 1.18,
+     "p": 0.0481,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": -0.269,
+     "lo": -0.772,
+     "hi": 0.234,
+     "p": 0.295,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 0.862,
+     "lo": 0.3,
+     "hi": 1.423,
+     "p": 0.00263,
+     "sig": true
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S41",
+   "key": "tenure=returning & recency=4-6m",
+   "description": "Customers who have been our customers for more than 12 months and last bought from us 4–6 months ago",
+   "n": 7194,
+   "arms": {
+    "control": {
+     "n": 2387,
+     "visits": 330,
+     "conversions": 14
+    },
+    "mens": {
+     "n": 2413,
+     "visits": 502,
+     "conversions": 30
+    },
+    "womens": {
+     "n": 2394,
+     "visits": 396,
+     "conversions": 21
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 13.825,
+     "mens": 20.804,
+     "womens": 16.541
+    },
+    "mensVsControl": {
+     "diff": 6.979,
+     "lo": 4.848,
+     "hi": 9.11,
+     "p": 1.37e-10,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 2.716,
+     "lo": 0.684,
+     "hi": 4.749,
+     "p": 0.00882,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 4.263,
+     "lo": 2.063,
+     "hi": 6.462,
+     "p": 0.000146,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": -0.762,
+     "lo": -3.004,
+     "hi": 1.48,
+     "p": 0.505,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": -2.035,
+     "lo": -4.174,
+     "hi": 0.104,
+     "p": 0.0623,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.587,
+     "mens": 1.243,
+     "womens": 0.877
+    },
+    "mensVsControl": {
+     "diff": 0.657,
+     "lo": 0.119,
+     "hi": 1.195,
+     "p": 0.0167,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.291,
+     "lo": -0.192,
+     "hi": 0.774,
+     "p": 0.238,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 0.366,
+     "lo": -0.213,
+     "hi": 0.945,
+     "p": 0.215,
+     "sig": false
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": "mens"
+  },
+  {
+   "id": "S42",
+   "key": "tenure=returning & recency=7-9m",
+   "description": "Customers who have been our customers for more than 12 months and last bought from us 7–9 months ago",
+   "n": 7284,
+   "arms": {
+    "control": {
+     "n": 2452,
+     "visits": 273,
+     "conversions": 12
+    },
+    "mens": {
+     "n": 2417,
+     "visits": 465,
+     "conversions": 29
+    },
+    "womens": {
+     "n": 2415,
+     "visits": 394,
+     "conversions": 14
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 11.134,
+     "mens": 19.239,
+     "womens": 16.315
+    },
+    "mensVsControl": {
+     "diff": 8.105,
+     "lo": 6.1,
+     "hi": 10.11,
+     "p": 2.31e-15,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 5.181,
+     "lo": 3.252,
+     "hi": 7.11,
+     "p": 1.41e-7,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 2.924,
+     "lo": 0.77,
+     "hi": 5.078,
+     "p": 0.00781,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": 0.502,
+     "lo": -1.623,
+     "hi": 2.627,
+     "p": 0.643,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": 0.74,
+     "lo": -1.303,
+     "hi": 2.782,
+     "p": 0.478,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.489,
+     "mens": 1.2,
+     "womens": 0.58
+    },
+    "mensVsControl": {
+     "diff": 0.71,
+     "lo": 0.196,
+     "hi": 1.225,
+     "p": 0.0068,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.09,
+     "lo": -0.32,
+     "hi": 0.5,
+     "p": 0.666,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 0.62,
+     "lo": 0.091,
+     "hi": 1.149,
+     "p": 0.0216,
+     "sig": true
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": null
+  },
+  {
+   "id": "S43",
+   "key": "tenure=returning & recency=10-12m",
+   "description": "Customers who have been our customers for more than 12 months and last bought from us 10–12 months ago",
+   "n": 7021,
+   "arms": {
+    "control": {
+     "n": 2339,
+     "visits": 247,
+     "conversions": 12
+    },
+    "mens": {
+     "n": 2323,
+     "visits": 423,
+     "conversions": 24
+    },
+    "womens": {
+     "n": 2359,
+     "visits": 361,
+     "conversions": 22
+    }
+   },
+   "visit": {
+    "rate": {
+     "control": 10.56,
+     "mens": 18.209,
+     "womens": 15.303
+    },
+    "mensVsControl": {
+     "diff": 7.649,
+     "lo": 5.646,
+     "hi": 9.653,
+     "p": 7.27e-14,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 4.743,
+     "lo": 2.829,
+     "hi": 6.657,
+     "p": 0.00000119,
+     "sig": true
+    },
+    "mensVsWomens": {
+     "diff": 2.906,
+     "lo": 0.768,
+     "hi": 5.045,
+     "p": 0.00774,
+     "sig": true
+    },
+    "mensVsRest": {
+     "diff": -0.011,
+     "lo": -2.134,
+     "hi": 2.112,
+     "p": 0.992,
+     "sig": false
+    },
+    "womensVsRest": {
+     "diff": 0.247,
+     "lo": -1.781,
+     "hi": 2.275,
+     "p": 0.811,
+     "sig": false
+    }
+   },
+   "conversion": {
+    "rate": {
+     "control": 0.513,
+     "mens": 1.033,
+     "womens": 0.933
+    },
+    "mensVsControl": {
+     "diff": 0.52,
+     "lo": 0.017,
+     "hi": 1.023,
+     "p": 0.0427,
+     "sig": true
+    },
+    "womensVsControl": {
+     "diff": 0.42,
+     "lo": -0.064,
+     "hi": 0.904,
+     "p": 0.0893,
+     "sig": false
+    },
+    "mensVsWomens": {
+     "diff": 0.101,
+     "lo": -0.465,
+     "hi": 0.666,
+     "p": 0.727,
+     "sig": false
+    }
+   },
+   "betterEmail": "mens",
+   "betterEmailHolm": null
+  }
+ ]
+}

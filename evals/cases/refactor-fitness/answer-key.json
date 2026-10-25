@@ -1,0 +1,98 @@
+{
+  "id": "refactor-fitness",
+  "note": "Ground truth for the known-answer test. NEVER give this file to a pipeline step or put its content in a prompt. Built from Refactor Fitness's public site on 2026-10-25; items marked 'inferred' need Nick's confirmation.",
+  "leakTerms": ["Refactor Fitness", "refactorfitness", "Nick Bogert", "Lose the weight, not your strength"],
+  "sources": [
+    { "key": "home", "url": "https://refactorfitness.app/" },
+    { "key": "llms", "url": "https://refactorfitness.app/llms.txt" },
+    { "key": "glp1", "url": "https://refactorfitness.app/glp1" },
+    { "key": "over40", "url": "https://refactorfitness.app/over-40" },
+    { "key": "selfLed", "url": "https://refactorfitness.app/for/self-led-lifters" },
+    { "key": "about", "url": "https://refactorfitness.app/about" },
+    { "key": "media", "url": "https://refactorfitness.app/media" },
+    { "key": "sitemap", "url": "https://refactorfitness.app/sitemap.xml" }
+  ],
+  "items": [
+    {
+      "id": "primary-segment",
+      "label": "Who to target first",
+      "groundTruth": "People losing weight who want to keep their strength and muscle, with people on GLP-1 medications as the sharpest group. Site banner: 'For people on GLP-1 medications and anyone losing weight.'",
+      "full": "Recommends leading with people losing weight who are worried about losing muscle or strength, and names GLP-1 medication users as a key group.",
+      "partial": "Names only one half: GLP-1 users without the muscle/strength angle, or 'people cutting weight' without GLP-1.",
+      "sourceKeys": ["home", "llms", "glp1"],
+      "confidence": "public-site"
+    },
+    {
+      "id": "secondary-segment",
+      "label": "Second segment worth a test",
+      "groundTruth": "Men roughly 38-55 rebuilding strength and energy around a career, a family, and a home gym, with little time per session.",
+      "full": "Names midlife or over-40 adults (especially men) training at home or with limited time as a distinct segment.",
+      "partial": "Mentions busy professionals or older lifters only in passing, without home-gym or time constraints.",
+      "sourceKeys": ["over40", "llms"],
+      "confidence": "public-site"
+    },
+    {
+      "id": "guess-verdict",
+      "label": "Verdict on the founder's starting guess",
+      "groundTruth": "'Self-led lifters who track macros' is a real but secondary audience: crowded, already served by separate apps, and not where the positioning landed. The lead moved to weight loss without losing strength.",
+      "full": "Says the starting guess is too broad, too crowded, or not the best lead, and points toward weight-loss or GLP-1 users instead.",
+      "partial": "Narrows or sharpens the starting guess but keeps lifters as the lead audience.",
+      "sourceKeys": ["selfLed", "home"],
+      "confidence": "inferred"
+    },
+    {
+      "id": "core-message",
+      "label": "What to say",
+      "groundTruth": "'Lose the weight, not your strength.' The scale moving can hide muscle loss; one app watches every meal and every set so you stay strong while getting lean.",
+      "full": "Leads with keeping muscle or strength while losing weight (the scale isn't the whole story).",
+      "partial": "Leads with 'nutrition and training in one app' or AI coaching, with muscle preservation only as a secondary point.",
+      "sourceKeys": ["home", "glp1", "llms"],
+      "confidence": "public-site"
+    },
+    {
+      "id": "pain-and-trigger",
+      "label": "The pain and the moment people buy",
+      "groundTruth": "Pain: losing muscle along with fat, and under-eating protein when appetite drops. Triggers: starting a GLP-1, a milestone birthday, a concerning checkup or bloodwork.",
+      "full": "Names muscle loss during weight loss AND low protein / appetite suppression, plus at least one concrete buying trigger.",
+      "partial": "Names one of these, or only generic pains like 'tracking is tedious' or 'staying motivated'.",
+      "sourceKeys": ["glp1", "over40", "home"],
+      "confidence": "public-site"
+    },
+    {
+      "id": "objections",
+      "label": "Top objections to handle",
+      "groundTruth": "(1) Medical/safety: is this a medication app, will it give dosing advice? (2) Trust in AI: will it change my plan without asking? (3) Health-data privacy. (4) Price vs free trackers or a ~$200/month human coach.",
+      "full": "Names at least two of: medical/safety boundaries, trust/control over AI suggestions, health-data privacy, price vs free apps or human coaches.",
+      "partial": "Names exactly one of them.",
+      "sourceKeys": ["glp1", "home", "over40"],
+      "confidence": "public-site"
+    },
+    {
+      "id": "alternatives",
+      "label": "What they use today",
+      "groundTruth": "Two separate apps: a nutrition tracker (MyFitnessPal, MacroFactor, Cal AI, Noom) plus a workout log (Hevy) or a coaching app (Future, Ladder, Centr); also ChatGPT and human coaches.",
+      "full": "Describes the split between separate nutrition and workout apps AND names at least one AI or coaching alternative (ChatGPT, coaching app, human coach).",
+      "partial": "Names competitors on only one side, or only says 'other fitness apps'.",
+      "sourceKeys": ["sitemap", "llms"],
+      "confidence": "public-site"
+    },
+    {
+      "id": "claim-boundaries",
+      "label": "Claims to avoid",
+      "groundTruth": "Position as a fitness app, not a medical one: no dosing or medication advice, no guaranteed muscle retention, no drug-maker affiliation, clear disclaimers.",
+      "full": "Explicitly advises avoiding medical claims or guarantees when targeting GLP-1 users, or framing as fitness rather than medical.",
+      "partial": "Mentions caution or compliance in general terms without saying what to avoid.",
+      "sourceKeys": ["glp1", "llms"],
+      "confidence": "public-site"
+    },
+    {
+      "id": "channels",
+      "label": "Where to reach them",
+      "groundTruth": "Reddit communities (GLP-1 and lifting), YouTube demos, and search/comparison pages ('X vs Y'), plus the app stores.",
+      "full": "Names GLP-1 or lifting communities on Reddit, AND comparison/search content or YouTube.",
+      "partial": "Names only generic social media or paid ads.",
+      "sourceKeys": ["media", "sitemap"],
+      "confidence": "public-site"
+    }
+  ]
+}
