@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GTMagic</title>
+  <meta name="description" content="Find out who will buy from you, why, and what to say to them, before you spend money on marketing.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-9 0 34 34'%3E%3Ccircle cx='8' cy='4.5' r='4.5' fill='%23c8372a'/%3E%3Cpath fill='%23c8372a' d='M2.5 11h11a2.5 2.5 0 0 1 2.5 2.5V24h-3v10H9.5v-9h-3v9H3V24H0V13.5A2.5 2.5 0 0 1 2.5 11Z'/%3E%3C/svg%3E">
+  <link rel="preload" href="fonts/jost-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/jost-500.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="base.css?v=3">
+  <link rel="stylesheet" href="thread.css?v=3">
+  <link rel="stylesheet" href="cards.css?v=3">
+  <link rel="stylesheet" href="intake.css?v=3">
+</head>
+<body>
+  <svg width="0" height="0" class="defs" aria-hidden="true">
+    <symbol id="fig" viewBox="0 0 16 34"><circle cx="8" cy="4.5" r="4.5"/><path d="M2.5 11h11a2.5 2.5 0 0 1 2.5 2.5V24h-3v10H9.5v-9h-3v9H3V24H0V13.5A2.5 2.5 0 0 1 2.5 11Z"/></symbol>
+    <symbol id="i-send" viewBox="0 0 20 20"><path d="M3 10h13M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-link" viewBox="0 0 20 20"><path d="M8 4H4v12h12v-4M11 3h6v6M17 3l-8 8" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 20 20"><path d="M7 7h10v10H7zM13 7V3H3v10h4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></symbol>
+    <symbol id="i-down" viewBox="0 0 20 20"><path d="M10 3v10M5 9l5 5 5-5M3 17h14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 20 20"><path d="M3 5h14M8 5V3h4v2M5 5l1 12h8l1-12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 20 20"><path d="M10 3 2 17h16L10 3zM10 8v4M10 14.5v.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </svg>
+
+  <div class="app">
+    <aside class="rail" aria-label="Run">
+      <div class="rail-head">
+        <a class="mark" href="./">GT<span>Magic</span></a>
+        <span class="badge" id="example-badge" hidden>Example · fictional data</span>
+      </div>
+
+      <section class="rail-block" aria-labelledby="steps-h">
+        <h2 id="steps-h" class="rail-h">This run</h2>
+        <ol class="steps" id="steps">
+          <li data-step="describe">Describe it</li>
+          <li data-step="guess">Plain AI guess</li>
+          <li data-step="answers">Your answers</li>
+          <li data-step="research">Research</li>
+          <li data-step="check">Check it together</li>
+          <li data-step="save">Your save file</li>
+          <li data-step="test">Test your lines</li>
+          <li data-step="results">Results</li>
+        </ol>
+      </section>
+
+      <section class="rail-block" aria-labelledby="groups-h">
+        <h2 id="groups-h" class="rail-h">Customer groups</h2>
+        <ul class="legend" id="legend">
+          <li class="legend-empty">Groups appear here once research finishes.</li>
+        </ul>
+      </section>
+
+      <div class="rail-foot">
+        <button class="ghost-btn" id="delete-run" type="button" hidden>
+          <svg class="ic"><use href="#i-trash"/></svg>Delete this run
+        </button>
+        <p>Open source and free. No account needed.</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="thread" id="thread" aria-live="polite" aria-relevant="additions"></div>
+
+      <form class="composer" id="composer" autocomplete="off">
+        <label for="composer-input" class="sr-only">Message GTMagic</label>
+        <textarea id="composer-input" rows="1" maxlength="4000"
+          placeholder="Your business in one line"></textarea>
+        <button class="send" type="submit" aria-label="Send">
+          <svg class="ic"><use href="#i-send"/></svg>
+        </button>
+        <p class="composer-note" id="composer-note">Don't paste personal or confidential information.</p>
+      </form>
+    </main>
+  </div>
+
+  <script src="demo-script.js?v=3"></script>
+  <script src="render.js?v=3"></script>
+  <script src="economics.js?v=3"></script>
+  <script src="render-intake.js?v=3"></script>
+  <script src="sim-placeholder.js?v=3"></script>
+  <script src="crowd.js?v=3"></script>
+  <script src="app.js?v=3"></script>
+</body>
+</html>
