@@ -185,8 +185,13 @@ interface ExperimentRequest {
   stimuli: Stimulus[];               // same format for every option (headline + subheadline)
   orderings: string[][];             // Williams Latin square of labels; k = orderings.length (the number of options, or twice
                                      // that for an odd count). Within each segment, the j-th customer (j from 0, in
-                                     // AudienceSample.customers order) sees orderings[j % k]. Repeats don't advance j: they
-                                     // keep the same orderingIndex and see that ordering reversed
+                                     // AudienceSample.customers order) sees orderings[(floor(s * k / S) + j) % k]. s is the
+                                     // segment's position (from 0) among the segments with at least one customer in the
+                                     // sample, in MarketModel.segments order; S is how many such segments there are. Each
+                                     // segment starts at an evenly spaced row, so equal-sized segments keep the whole sample
+                                     // within one showing per ordering (unequal sizes drift a little). j depends only on
+                                     // position: skipped or retried calls keep their orderingIndex. Repeats don't advance
+                                     // j: they keep the same orderingIndex and see that ordering reversed
   repeatCustomerIds: string[];       // ~10 customers asked again with their ordering reversed
   protocol: { version: string; instructions: string; dimensionDefinitions: Record<Dimension, string> };
   fingerprint?: string;              // opaque hash of everything else in the request, by code; compare, never recompute.
