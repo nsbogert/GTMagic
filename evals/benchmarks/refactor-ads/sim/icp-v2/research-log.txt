@@ -1,0 +1,23 @@
+SEARCH: reddit Zepbound muscle loss strength training protein tracking app
+SEARCH: Ozempic users worry about losing muscle "protein" quotes article
+OPENED (blocked, login redirect): https://old.reddit.com/r/Zepbound/search?q=muscle+loss+strength+training&restrict_sr=on
+OPENED (redirected to unrelated app): https://apps.apple.com/us/app/shotsy-glp-1-tracker/id6469021132?see-all=reviews
+SEARCH: Shotsy GLP-1 tracker app store reviews apps.apple.com
+OPENED: https://apps.apple.com/us/app/shotsy-glp-1-tracker/id6499510249?see-all=reviews
+OPENED (403 failed): https://www.reddit.com/r/Zepbound/search.json?q=muscle%20strength%20training&restrict_sr=1&limit=25
+OPENED (page 2): https://apps.apple.com/us/app/shotsy-glp-1-tracker/id6499510249?see-all=reviews
+SEARCH: GLP-1 patients strength training to keep muscle, interview "I started lifting" Wegovy Zepbound
+SEARCH: MeAgain GLP-1 app store reviews
+OPENED: https://apps.apple.com/us/app/meagain-glp-1-tracker-app/id6744178534?see-all=reviews
+OPENED (search page, irrelevant results): https://www.bing.com/search?q=Ozempic+Zepbound+users+weightlifting+muscle+loss+news+%22she+said%22
+OPENED (bot challenge, failed): https://html.duckduckgo.com/html/?q=apps.apple.com+GLP-1+strength+training+workout+app+muscle
+OPENED (page 2): https://apps.apple.com/us/app/meagain-glp-1-tracker-app/id6744178534?see-all=reviews
+OPENED (search page, irrelevant results): https://www.bing.com/search?q=apps.apple.com+GLP-1+workout+strength+training+app+muscle+preservation
+OPENED (no content): https://forums.t-nation.com/search?q=tirzepatide%20muscle
+SEARCH: Name one forum thread URL (not reddit) where tirzepatide users discuss lifting weights and losing strength
+OPENED: https://www.medino.com/article/losing-strength-on-mounjaro
+OPENED (page 2): https://www.medino.com/article/losing-strength-on-mounjaro
+SEARCH: medino.com article "What Users Say" stopping Mounjaro or Wegovy weight regain maintenance
+OPENED: https://www.medino.com/article/life-after-stopping-mounjaro
+SEARCH: medino.com Mounjaro price rise what users say article quotes
+OPENED (402 paywall, failed): https://www.telegraph.co.uk/money/consumer-affairs/how-mounjaro-users-are-getting-around-the-price-rise/

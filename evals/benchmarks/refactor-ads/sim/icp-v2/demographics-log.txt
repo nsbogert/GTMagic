@@ -1,0 +1,15 @@
+SEARCH: KFF Health Tracking Poll GLP-1 use demographics adults currently taking by age gender race income party
+OPEN: https://www.kff.org/health-costs/poll-finding/kff-health-tracking-poll-may-2024-the-publics-use-and-views-of-glp-1-drugs/ (redirected to https://www.kff.org/health-costs/kff-health-tracking-poll-may-2024-the-publics-use-and-views-of-glp-1-drugs/)
+OPEN: https://www.kff.org/health-costs/kff-health-tracking-poll-may-2024-the-publics-use-and-views-of-glp-1-drugs/
+SEARCH: RAND survey 2025 GLP-1 weight loss use adults 11.8% demographics women income education region
+OPEN: https://www.rand.org/news/press/2025/08/nearly-12-percent-of-americans-have-used-glp-1-weight.html (failed: HTTP 403)
+OPEN: https://www.news-medical.net/news/20250806/Nearly-1225-Of-Americans-Have-Used-GLP-1-Weight-Loss-Drugs.aspx
+SEARCH: KFF poll November 2025 GLP-1 "currently taking" one in eight adults weight loss demographics
+OPEN: https://www.kff.org/public-opinion/kff-health-tracking-poll-prescription-drug-costs-views-on-trump-administration-actions-and-glp-1-use/
+SEARCH: Gallup 2025 GLP-1 weight loss injection use by income education region obesity rate declines
+OPEN: https://news.gallup.com/poll/696599/obesity-rate-declining.aspx
+SEARCH: CDC NCHS NHIS 2024 adults taking prescription medication for weight loss injectable by family income education urbanization region
+SEARCH: NCHS data brief weight loss medication use adults 2024 percent by urbanization level and family income
+OPEN: https://news.gallup.com/poll/712157/glp-usage-reaches-new-high.aspx
+SEARCH: study 2025 characteristics of US adults using GLP-1 for weight loss by household income education employment rural urban region percentage of users
+SEARCH: "GLP-1/GIP Uptake, Indication, and Access Pathways Among US Adults"

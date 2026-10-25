@@ -1,0 +1,21 @@
+SEARCH: Upworthy audience demographics Quantcast women age 2013 2014
+SEARCH: Pew Research 2013 news use on Facebook demographics of Facebook news consumers
+OPEN (403, failed): https://www.pewresearch.org/journalism/2013/10/24/who-uses-facebook-for-news/
+OPEN (returned raw PDF bytes, unusable): https://www.journalism.org/wp-content/uploads/sites/8/2013/10/FINAL-Facebook-Survey-Report-10-22-13-1.pdf
+OPEN (403, failed): https://www.journalism.org/2013/10/24/who-uses-facebook-for-news/
+SEARCH: Upworthy audience mostly women young liberal comScore unique visitors 2013 Nieman Lab
+OPEN: https://www.northcountrypublicradio.org/news/npr/533529538/upworthy-was-one-of-the-hottest-sites-ever-you-won-t-believe-what-happened-next
+OPEN: https://www.niemanlab.org/encyclo/upworthy/
+OPEN: https://www.northcountrypublicradio.org/news/npr/533529538/upworthy-was-one-of-the-hottest-sites-ever-you-won-t-believe-what-happened-next (start_index 1500)
+OPEN (page shell only, data loaded by JS, no figures): http://web.archive.org/web/2014/https://www.quantcast.com/upworthy.com -> http://web.archive.org/web/20150628062035/https://www.quantcast.com/upworthy.com
+OPEN (no more content): http://web.archive.org/web/20150628062035/https://www.quantcast.com/upworthy.com (start_index 2600)
+SEARCH: "Upworthy" audience "percent" women OR female readers demographic Pariser interview 2014
+OPEN (502, failed): https://www.wrongkindofgreen.org/2014/04/03/upworthy-reveals-audience-behavior-begins-collaborations-with-brands-ngos/
+OPEN: http://web.archive.org/web/2014/http://www.journalism.org/2013/10/24/who-uses-facebook-for-news/ -> http://web.archive.org/web/20150119003921/http://www.journalism.org/2013/10/24/who-uses-facebook-for-news/
+OPEN: http://web.archive.org/web/2015/http://www.pewinternet.org/2015/01/09/demographics-of-key-social-networking-platforms-2/ -> http://web.archive.org/web/20160101033327/http://www.pewinternet.org/2015/01/09/demographics-of-key-social-networking-platforms-2/
+OPEN (403, failed): https://www.theatlantic.com/business/archive/2013/11/upworthy-i-thought-this-website-was-crazy-but-what-happened-next-changed-everything/281472/
+OPEN: https://www.niemanlab.org/2013/06/if-youre-not-feeling-it-dont-write-it-upworthys-social-success-depends-on-gut-checking-regular-people/
+SEARCH: Upworthy audience skews female millennial Digiday OR Adweek OR Contently 2014 sponsored content readers
+OPEN: http://web.archive.org/web/2014/http://www.wrongkindofgreen.org/2014/04/03/upworthy-reveals-audience-behavior-begins-collaborations-with-brands-ngos/ -> http://web.archive.org/web/20141224070139/http://wrongkindofgreen.org/2014/04/03/upworthy-reveals-audience-behavior-begins-collaborations-with-brands-ngos/
+OPEN: http://web.archive.org/web/20141224070139/http://wrongkindofgreen.org/2014/04/03/upworthy-reveals-audience-behavior-begins-collaborations-with-brands-ngos/ (start_index 7000)
+NOTE: Three fetches (Pew PDF, NPR first fetch, Nieman Lab first fetch) were auto-saved by the tool to local overflow files; those files were NOT opened. Pages were re-fetched in smaller chunks instead.

@@ -1,0 +1,327 @@
+{
+ "schemaVersion": 1,
+ "config": {
+  "sampleSize": 10,
+  "seed": 20261026,
+  "strategy": "representative"
+ },
+ "customers": [
+  {
+   "id": "cust_r1_1",
+   "segmentId": "s1",
+   "demographics": {
+    "gender": "man",
+    "ageBand": "30-49",
+    "raceEthnicity": "White non-Hispanic",
+    "education": "Bachelor's or higher",
+    "householdIncome": "$30k-$75k",
+    "region": "West",
+    "community": "urban",
+    "employment": "employed full-time",
+    "household": "single, no kids",
+    "politicalLean": "moderate",
+    "facebookVisitFrequency": "several times a day",
+    "age": 34
+   },
+   "attributes": {
+    "role": "working professional / nonprofit or education worker",
+    "currentSolution": "Facebook feed from friends and liked pages",
+    "priceSensitivity": "moderate attention: will watch a 3\u20135 minute video if the cause matters",
+    "urgency": "checks Facebook several times a day",
+    "skepticism": "low: forgives curiosity-gap headlines when the cause is good",
+    "buyingStage": "frequent sharer (shares several posts a week)"
+   },
+   "voiceLexiconIds": [
+    "lex_10",
+    "lex_6",
+    "lex_11",
+    "lex_31"
+   ]
+  },
+  {
+   "id": "cust_r1_2",
+   "segmentId": "s1",
+   "demographics": {
+    "gender": "woman",
+    "ageBand": "18-29",
+    "raceEthnicity": "White non-Hispanic",
+    "education": "Bachelor's or higher",
+    "householdIncome": "$75k+",
+    "region": "Midwest",
+    "community": "urban",
+    "employment": "employed full-time",
+    "household": "single, no kids",
+    "politicalLean": "liberal",
+    "facebookVisitFrequency": "several times a day",
+    "age": 25
+   },
+   "attributes": {
+    "role": "graduate or college student",
+    "currentSolution": "Facebook feed from friends and liked pages",
+    "priceSensitivity": "moderate attention: will watch a 3\u20135 minute video if the cause matters",
+    "urgency": "checks Facebook several times a day",
+    "skepticism": "low: forgives curiosity-gap headlines when the cause is good",
+    "buyingStage": "frequent sharer (shares several posts a week)"
+   },
+   "voiceLexiconIds": [
+    "lex_31",
+    "lex_7",
+    "lex_9",
+    "lex_11"
+   ]
+  },
+  {
+   "id": "cust_r1_3",
+   "segmentId": "s1",
+   "demographics": {
+    "gender": "woman",
+    "ageBand": "50-64",
+    "raceEthnicity": "White non-Hispanic",
+    "education": "Some college",
+    "householdIncome": "$75k+",
+    "region": "South",
+    "community": "suburban",
+    "employment": "student",
+    "household": "partnered, no kids",
+    "politicalLean": "liberal",
+    "facebookVisitFrequency": "several times a day",
+    "age": 52
+   },
+   "attributes": {
+    "role": "parent of young kids",
+    "currentSolution": "public radio / cable news",
+    "priceSensitivity": "high attention for issue content",
+    "urgency": "checks Facebook several times a day",
+    "skepticism": "moderate",
+    "buyingStage": "frequent sharer (shares several posts a week)"
+   },
+   "voiceLexiconIds": [
+    "lex_10",
+    "lex_7",
+    "lex_4"
+   ]
+  },
+  {
+   "id": "cust_r1_4",
+   "segmentId": "s1",
+   "demographics": {
+    "gender": "woman",
+    "ageBand": "30-49",
+    "raceEthnicity": "Hispanic",
+    "education": "Some college",
+    "householdIncome": "$75k+",
+    "region": "Midwest",
+    "community": "urban",
+    "employment": "employed full-time",
+    "household": "single, no kids",
+    "politicalLean": "liberal",
+    "facebookVisitFrequency": "several times a day",
+    "age": 32
+   },
+   "attributes": {
+    "role": "working professional / nonprofit or education worker",
+    "currentSolution": "Facebook feed from friends and liked pages",
+    "priceSensitivity": "low attention, skim only",
+    "urgency": "daily",
+    "skepticism": "high",
+    "buyingStage": "rare clicker"
+   },
+   "voiceLexiconIds": [
+    "lex_1",
+    "lex_4",
+    "lex_5"
+   ]
+  },
+  {
+   "id": "cust_r1_5",
+   "segmentId": "s2",
+   "demographics": {
+    "gender": "man",
+    "ageBand": "18-29",
+    "raceEthnicity": "Hispanic",
+    "education": "High school or less",
+    "householdIncome": "$75k+",
+    "region": "West",
+    "community": "urban",
+    "employment": "employed full-time",
+    "household": "kids at home",
+    "politicalLean": "liberal",
+    "facebookVisitFrequency": "several times a day",
+    "age": 19
+   },
+   "attributes": {
+    "role": "student",
+    "currentSolution": "local TV news",
+    "priceSensitivity": "low attention to spare: quick taps between other activities",
+    "urgency": "occasional",
+    "skepticism": "low",
+    "buyingStage": "occasional clicker, rare sharer"
+   },
+   "voiceLexiconIds": [
+    "lex_19",
+    "lex_20",
+    "lex_13"
+   ]
+  },
+  {
+   "id": "cust_r1_6",
+   "segmentId": "s2",
+   "demographics": {
+    "gender": "woman",
+    "ageBand": "50-64",
+    "raceEthnicity": "White non-Hispanic",
+    "education": "Some college",
+    "householdIncome": "<$30k",
+    "region": "West",
+    "community": "urban",
+    "employment": "employed full-time",
+    "household": "partnered, no kids / empty nest",
+    "politicalLean": "liberal",
+    "facebookVisitFrequency": "several times a day",
+    "age": 50
+   },
+   "attributes": {
+    "role": "working adult",
+    "currentSolution": "Facebook feed (friends' shares)",
+    "priceSensitivity": "low attention to spare: quick taps between other activities",
+    "urgency": "daily",
+    "skepticism": "moderate",
+    "buyingStage": "occasional clicker, rare sharer"
+   },
+   "voiceLexiconIds": [
+    "lex_13",
+    "lex_20",
+    "lex_9"
+   ]
+  },
+  {
+   "id": "cust_r1_7",
+   "segmentId": "s2",
+   "demographics": {
+    "gender": "man",
+    "ageBand": "30-49",
+    "raceEthnicity": "White non-Hispanic",
+    "education": "Some college",
+    "householdIncome": "<$30k",
+    "region": "West",
+    "community": "suburban",
+    "employment": "employed part-time",
+    "household": "single, no kids",
+    "politicalLean": "liberal",
+    "facebookVisitFrequency": "several times a day",
+    "age": 44
+   },
+   "attributes": {
+    "role": "working adult",
+    "currentSolution": "YouTube",
+    "priceSensitivity": "high",
+    "urgency": "checks Facebook several times a day",
+    "skepticism": "low",
+    "buyingStage": "occasional clicker, rare sharer"
+   },
+   "voiceLexiconIds": [
+    "lex_13",
+    "lex_10",
+    "lex_19",
+    "lex_11",
+    "lex_16"
+   ]
+  },
+  {
+   "id": "cust_r1_8",
+   "segmentId": "s2",
+   "demographics": {
+    "gender": "woman",
+    "ageBand": "30-49",
+    "raceEthnicity": "Asian",
+    "education": "Some college",
+    "householdIncome": "$75k+",
+    "region": "South",
+    "community": "rural",
+    "employment": "employed part-time",
+    "household": "kids at home",
+    "politicalLean": "moderate",
+    "facebookVisitFrequency": "several times a day",
+    "age": 35
+   },
+   "attributes": {
+    "role": "working adult",
+    "currentSolution": "morning shows / print newspaper",
+    "priceSensitivity": "moderate: will watch a short video",
+    "urgency": "daily",
+    "skepticism": "moderate",
+    "buyingStage": "rarely clicks"
+   },
+   "voiceLexiconIds": [
+    "lex_10",
+    "lex_12",
+    "lex_16",
+    "lex_19",
+    "lex_17"
+   ]
+  },
+  {
+   "id": "cust_r1_9",
+   "segmentId": "s3",
+   "demographics": {
+    "gender": "man",
+    "ageBand": "18-29",
+    "raceEthnicity": "Other/multiracial",
+    "education": "Some college / in college",
+    "householdIncome": "$30k-$75k",
+    "region": "South",
+    "community": "urban",
+    "employment": "employed full-time",
+    "household": "partnered, no kids",
+    "politicalLean": "liberal",
+    "facebookVisitFrequency": "several times a day",
+    "age": 18
+   },
+   "attributes": {
+    "role": "young professional (media, tech, services)",
+    "currentSolution": "BuzzFeed, Reddit, Gawker-style sites",
+    "priceSensitivity": "very low attention: bounces fast",
+    "urgency": "constant scrolling, several times a day",
+    "skepticism": "high: actively dislikes clickbait",
+    "buyingStage": "clicks sometimes, rarely shares"
+   },
+   "voiceLexiconIds": [
+    "lex_26",
+    "lex_28",
+    "lex_22"
+   ]
+  },
+  {
+   "id": "cust_r1_10",
+   "segmentId": "s3",
+   "demographics": {
+    "gender": "woman",
+    "ageBand": "30-49",
+    "raceEthnicity": "White non-Hispanic",
+    "education": "Bachelor's or higher",
+    "householdIncome": "$30k-$75k",
+    "region": "Northeast",
+    "community": "urban",
+    "employment": "employed full-time",
+    "household": "single, no kids (incl. roommates)",
+    "politicalLean": "liberal",
+    "facebookVisitFrequency": "several times a day",
+    "age": 49
+   },
+   "attributes": {
+    "role": "college student",
+    "currentSolution": "Facebook and Twitter feeds",
+    "priceSensitivity": "very low attention: bounces fast",
+    "urgency": "constant scrolling, several times a day",
+    "skepticism": "high: actively dislikes clickbait",
+    "buyingStage": "clicks sometimes, rarely shares"
+   },
+   "voiceLexiconIds": [
+    "lex_25",
+    "lex_26",
+    "lex_30",
+    "lex_23"
+   ]
+  }
+ ]
+}

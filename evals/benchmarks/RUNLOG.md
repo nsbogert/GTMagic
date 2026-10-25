@@ -211,3 +211,71 @@ Then reply "done".
 ## 2026-10-25 ~15:35 · main's gtm-message-test scoring on the Upworthy crowd (code only, no model calls)
 
 `python3 scripts/upworthy_message_test_verdicts.py` runs main's `evaluate.py` unchanged on pipeline-v1's val answers (adapter choices in the script). Its `winner` check (top beats runner-up in ≥97.5% of reshuffles) passed on 78/231 tests, but the crowd's winner was the real winner in only 24.4% of those (chance 22.4%). A statistically clear simulated winner was not more likely to be right. Output: `upworthy/message-test-verdicts.md`.
+
+## 2026-10-25 ~15:50 · Upworthy pairs (CTR benchmark): "Here are two advertisements I made. Which one would be better?"
+
+Data: `upworthy-pairs/` (Yanjo/headlines-ctr holdout = Upworthy archive, CC BY 4.0). 100 pairs, one per article, same image, two headlines, |z| > 1.96, ≥1,000 impressions each; A/B order randomized (A wins 51/100). Built by `python3 pairs.py prep` (seed 20261025). Truth: `truth.json` (impressions, clicks, CTR per headline).
+
+From this run on, **every subagent is called with `reasoning_effort: high`** (task tool parameter). Earlier runs used the harness default (not recorded).
+
+| Arm | Model / effort | Prompt | Output |
+|---|---|---|---|
+| vanilla-opus | `claude-opus-5.5`, high, 2 agents × 2 batches of 25 | `prompts/vanilla-v1.md` | `predictions/vanilla-opus/pairs-1..4.json` |
+| vanilla-opus-icp | `claude-opus-5.5`, high, 2 agents × 2 batches | `prompts/vanilla-icp-v1.md` (adds one line: the Upworthy 2013–15 Facebook audience) | `predictions/vanilla-opus-icp/pairs-1..4.json` |
+
+Wrapper (verbatim; `PROMPT` = vanilla-v1 / vanilla-icp-v1, `ARM` = vanilla-opus / vanilla-opus-icp, `X/Y` = 1/2, 3/4):
+```
+Strict rules: read ONLY the files named below. Do not open any other file in the repository, do not list directories, do not search the web, do not run code, do not start sub-agents or delegate, and do not try to look up these headlines anywhere. Use only your own judgment.
+
+Instructions file: /home/sean/Documents/claude-hacathon/GTMagic/evals/benchmarks/upworthy-pairs/prompts/PROMPT.md — follow the prompt in it exactly.
+
+Do it separately for each of these files:
+1. …/upworthy-pairs/batches/pairs-X.json → write the JSON object to …/upworthy-pairs/predictions/ARM/pairs-X.json
+2. …/upworthy-pairs/batches/pairs-Y.json → write the JSON object to …/upworthy-pairs/predictions/ARM/pairs-Y.json
+
+Each output must contain only the JSON object, with every pair id of its file. Create each with the create tool. Then reply "done".
+```
+
+**Result:** vanilla-opus picked the higher-CTR headline in 68/100 [58, 77]; vanilla-opus-icp 63/100 [53, 72]; paired difference −5.0 pts [−12, +1] (not significant). Chance 50%. `upworthy-pairs/RESULTS.md`.
+
+## 2026-10-25 ~15:45 · Refactor images · vanilla-opus-icp (told "aimed at GLP-1 users")
+
+`claude-opus-5.5`, harness-default effort, 1 agent per test; prompt `refactor-ads/prompts/vanilla-icp-v1.md` (rendered `runs/vanilla-icp-v1-refactor-{1,2}.md`); output `predictions/vanilla-opus-icp/refactor-{1,2}.json`. Same wrapper as the Refactor vanilla run.
+
+## 2026-10-25 · ICP research workflow for the simulated crowds (Opus 5.5 + web)
+
+1. **Refactor segments + quotes:** `prompts/research-icp-v1.md` → `sim/icp-v2/research.json` (4 segments, 43 verbatim quotes from 4 pages: Shotsy and MeAgain App Store reviews, medino.com; Reddit blocked), log `research-log.txt`. Harness-default effort.
+2. **Design review (Sean):** an LLM must not "randomly" pick people; code samples. But the first cards had no demographics, and the segment/attribute weights were the agent's guesses. Fix: the ICP generator must output **sourced demographic distributions** (survey / census / audience study / counted threads, URL + verbatim evidence, or marked `inferred`), and code draws the 30 people from them with **quota sampling** (exact gender and age-band counts per segment; other dimensions independent seeded draws) in `benchmarks/demographics.py`. Quotes cut to 3–5 per person (CONTRACTS.md), so cards in a segment aren't near-clones.
+3. **Refactor demographics:** `prompts/demographics-icp-v1.md` (rendered `sim/icp-v2/demographics-prompt.rendered.md`) → `sim/icp-v2/demographics.json`, log `demographics-log.txt`. `claude-opus-5.5`, high.
+4. **Upworthy audience:** `upworthy-pairs/prompts/research-icp-v2.md` (segments + quotes + sourced demographics) → `upworthy-pairs/sim/research.json`, log `research-log.txt`. `claude-opus-5.5`, high. (The v1 attempt was cancelled before finishing.)
+
+Simulated customers will run on **`claude-sonnet-5.5`, high** (changed from Haiku at Sean's request), with the richer `sim-rank-v2` / `sim-pair-v2` prompts (situation, base rates, realistic click behavior).
+
+## 2026-10-25 ~16:10 · Simulated-customer crowds v2 (research ICP + sourced demographics, 10 people each, Sonnet high)
+
+- **Sampling (code only):** `benchmarks/demographics.py` (quota on gender and ageBand per segment, largest remainder; other dimensions independent seeded draws; employment redrawn if it contradicts age), segments allocated by `sampleShare`, 3–5 real quotes per person. N = 10 per crowd (reduced from 30 for time, at Sean's request). Seeds: Refactor `icp_v2.py` SEED 20261025 (+7 for demographics); Upworthy `pairs.py` SEED+1 / SEED+7.
+- **Distributions:** Refactor `sim/icp-v2/demographics.json` (Opus high + web: gender Gallup 2025, age KFF Nov 2025, race and income KFF May 2024, insurance and reason for use KFF 2025; education, region, community, employment, household inferred). Upworthy `upworthy-pairs/sim/research.json` (gender, age, Facebook frequency from Pew 2013–14 Facebook-user surveys; the rest inferred).
+- **Samples:** `refactor-ads/sim/icp-v2/audience-sample.json` (6 women / 4 men; segments 3/3/2/2), `upworthy-pairs/sim/audience-sample.json` (6/4; segments 4/4/2).
+- **Simulated customers:** `claude-sonnet-5.5`, `reasoning_effort: high`, 1 subagent per person.
+  - Refactor: prompt `refactor-ads/sim/icp-v2/agent-KK/prompt.md` (template `prompts/sim-rank-v2.md`; per-agent shuffled image links `oN`, map `map-agent-KK.json`) → `agent-KK/out.json`.
+  - Upworthy pairs: prompt `upworthy-pairs/sim/agent-KK/prompt.md` (template `prompts/sim-pair-v2.md`) + per-agent pairs file with its own A/B order `agent-KK/pairs.json` (swap map `swap-agent-KK.json`) → `agent-KK/out.json`.
+- **Wrappers (verbatim, `KK` = 01–10):**
+```
+[Refactor] Strict rules: read ONLY your prompt file and the image files it lists. Do not open any other file, do not list directories, do not search the web, do not run code, do not start sub-agents or delegate, and do not try to look anything up. Answer only as the person described in your prompt.
+
+Read /home/sean/Documents/claude-hacathon/GTMagic/evals/benchmarks/refactor-ads/sim/icp-v2/agent-KK/prompt.md, open every image it lists, and do exactly what it says. Write only the JSON object to this new file with the create tool:
+/home/sean/Documents/claude-hacathon/GTMagic/evals/benchmarks/refactor-ads/sim/icp-v2/agent-KK/out.json
+Then reply "done".
+
+[Upworthy] Strict rules: read ONLY the two files named below. Do not open any other file, do not list directories, do not search the web, do not run code, do not start sub-agents or delegate, and do not try to look up these headlines anywhere. Answer only as the person described in your prompt.
+
+Read your prompt /home/sean/Documents/claude-hacathon/GTMagic/evals/benchmarks/upworthy-pairs/sim/agent-KK/prompt.md and your pairs file /home/sean/Documents/claude-hacathon/GTMagic/evals/benchmarks/upworthy-pairs/sim/agent-KK/pairs.json (read all 100 pairs, in ranges if needed), and do exactly what the prompt says. Write only the JSON object, with all 100 pair ids, to this new file with the create tool:
+/home/sean/Documents/claude-hacathon/GTMagic/evals/benchmarks/upworthy-pairs/sim/agent-KK/out.json
+Then reply "done".
+```
+- **Combining (code):** Refactor = Borda count over the 10 rankings (`python3 icp_v2.py combine`); Upworthy pairs = majority vote per pair, mapped back through each agent's swap (`python3 pairs.py score`).
+
+### Results: crowds v2 (10 Sonnet-high simulated customers each)
+
+- **Upworthy pairs (100 real A/B pairs, CTR truth):** crowd majority picked the higher-CTR headline in **51/100** [41.5, 61.0] (chance 50%), against vanilla Opus **68/100** [58, 77]. Paired difference −17.0 pts [−27.5, −7.0], significant (crowd worse). The crowd agreed ≥70% on 87 pairs and was right on 53% of those: confident, not accurate. All 10 agents answered all 100 pairs, with balanced A/B choices (41–60% A) and "would click" on 17–44 of 100. `upworthy-pairs/RESULTS.md`.
+- **Refactor images (truth pending from Sean):** crowd Borda #1 = image-2 (09_weight_down_strength_intact) in test 1 (4 of 10 first-place votes; segments disagree: new starters prefer image-5, self-trackers image-6), and image-2 (c2610d GLP-1 split) in test 2 (10/10). Vanilla Opus with and without the ICP line pick the same #1 in both tests. `refactor-ads/RESULTS-icp-v2.md`.
