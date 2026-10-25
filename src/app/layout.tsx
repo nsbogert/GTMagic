@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import type { ReactNode } from "react";
+import { SvgDefs } from "@/components/figures";
 import "./styles/base.css";
 import "./styles/thread.css";
 import "./styles/cards.css";
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={jost.variable}>
-      <body>{children}</body>
+      <body><SvgDefs />{children}</body>
     </html>
   );
 }

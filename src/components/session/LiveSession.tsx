@@ -1,0 +1,109 @@
+"use client";
+/* A live gtm-web session: renders the transcript and cards, and sends the owner's answers.
+   Re-fetches the session whenever the server-sent stream reports a change. */
+import { useCallback, useEffect, useState } from "react";
+import { z } from "zod";
+import { IntakeBriefSchema } from "@/app/_intake/schema";
+import { TranscriptEventSchema } from "@/app/_session/events";
+import { buildThread, isDisconnected } from "@/app/_session/thread";
+import { Plate } from "../plates/Plate";
+import { Composer } from "../shell/Composer";
+import { Legend } from "../shell/Legend";
+import { Rail } from "../shell/Rail";
+import { Steps } from "../shell/Steps";
+import { AskTurn } from "../turns/AskTurn";
+import { BotTurn } from "../turns/BotTurn";
+import { Notice } from "../turns/Notice";
+import { OwnerTurn } from "../turns/OwnerTurn";
+import { Typing } from "../turns/Typing";
+
+const SessionResponse = z.object({
+  id: z.string(),
+  business: z.string().nullable(),
+  events: z.array(TranscriptEventSchema),
+  lastEventAt: z.string().nullable(),
+  brief: IntakeBriefSchema.nullable(),
+  briefUpdatedAt: z.string().nullable(),
+  briefIssues: z.array(z.string()),
+});
+type Session = z.infer<typeof SessionResponse>;
+
+export function LiveSession({ id, hideLinks }: { id: string; hideLinks: boolean }) {
+  const [s, setS] = useState<Session | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [now, setNow] = useState(() => new Date());
+
+  const load = useCallback(async () => {
+    try {
+      const r = await fetch(`/api/sessions/${id}`, { cache: "no-store" });
+      const parsed = SessionResponse.safeParse(await r.json());
+      if (!parsed.success) throw new Error("unexpected response");
+      setS(parsed.data);
+      setLoadError(null);
+    } catch {
+      setLoadError("Can't reach the GTMagic app. Is it still running?");
+    }
+  }, [id]);
+
+  // The stream sends an "update" as soon as it connects, which triggers the first load.
+  useEffect(() => {
+    const es = new EventSource(`/api/sessions/${id}/stream`);
+    es.addEventListener("update", () => void load());
+    const clock = setInterval(() => setNow(new Date()), 5000);
+    return () => { es.close(); clearInterval(clock); };
+  }, [id, load]);
+
+  const t = buildThread(s?.events ?? [], s?.briefUpdatedAt ?? null);
+  const quiet = isDisconnected(s?.lastEventAt ?? null, now, t.openAsk !== null) && !t.finished;
+  const canAnswer = t.openAsk !== null && t.mode === "live";
+
+  async function answer(text: string, files: File[]) {
+    if (!t.openAsk) return;
+    const form = new FormData();
+    form.set("askId", t.openAsk.askId);
+    form.set("text", text);
+    for (const f of files) form.append("files", f);
+    const r = await fetch(`/api/sessions/${id}/answer`, { method: "POST", body: form });
+    const body = (await r.json().catch(() => ({}))) as { error?: string };
+    setSendError(r.ok ? null : body.error ?? "That didn't send. Try again.");
+    await load();
+  }
+
+  return (
+    <div className="app">
+      <Rail badge={t.mode === "scripted" || s?.brief?.mode === "demo" ? "Example · fictional data" : undefined}>
+        <Steps steps={t.steps} />
+        <Legend segments={s?.brief?.segments ?? []} />
+      </Rail>
+      <main className="main">
+        <div className="thread" aria-live="polite">
+          {loadError ? <Notice title={loadError} tone="error" /> : null}
+          {!s && !loadError ? <Typing /> : null}
+          {s && t.items.length === 0 ? <BotTurn text="Connected. Claude Code will start the interview here in a moment." /> : null}
+          {t.items.map((it) => {
+            switch (it.kind) {
+              case "bot": return <BotTurn key={it.id} text={it.text} />;
+              case "ask": return <AskTurn key={it.id} questions={it.questions} state={it.state} />;
+              case "owner": return <OwnerTurn key={it.id} text={it.text} from={it.from} files={it.files} />;
+              case "notice": return <Notice key={it.id} title={it.text} tone={it.tone} />;
+              case "plate": return s?.brief
+                ? <Plate key={it.id} plate={it.plate} brief={s.brief} updated={it.updated} hideLinks={hideLinks} downloadHref={s.business ? `/api/businesses/${s.business}/intake.json` : undefined} />
+                : <BotTurn key={it.id} text="This card appears once the save file exists." />;
+            }
+          })}
+          {s?.briefIssues.length ? <Notice title="The save file can't be read yet." tone="error"><ul className="open">{s.briefIssues.map((i) => <li key={i}>{i}</li>)}</ul></Notice> : null}
+          {canAnswer && t.openAsk?.chips.length ? (
+            <div className="turn bot"><div className="chips">{t.openAsk.chips.map((c) => <button key={c} type="button" className="chip" onClick={() => void answer(c, [])}>{c}</button>)}</div></div>
+          ) : null}
+          {s && !t.openAsk && !t.finished && !quiet ? <Typing /> : null}
+          {quiet ? <Notice title="Claude Code hasn't sent anything for a while." tone="error">Check the terminal where it&apos;s running.</Notice> : null}
+          {sendError ? <Notice title={sendError} tone="error" /> : null}
+          {t.finished ? <BotTurn text="That's the end of this session. Your save file is in gtm-workspace." /> : null}
+        </div>
+        <Composer disabled={!canAnswer} onSubmit={answer}
+          placeholder={t.mode === "scripted" ? "The demo owner answers on their own" : canAnswer ? "Your answer" : "Waiting for the next question"} />
+      </main>
+    </div>
+  );
+}
