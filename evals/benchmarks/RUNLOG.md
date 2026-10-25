@@ -279,3 +279,11 @@ Then reply "done".
 
 - **Upworthy pairs (100 real A/B pairs, CTR truth):** crowd majority picked the higher-CTR headline in **51/100** [41.5, 61.0] (chance 50%), against vanilla Opus **68/100** [58, 77]. Paired difference −17.0 pts [−27.5, −7.0], significant (crowd worse). The crowd agreed ≥70% on 87 pairs and was right on 53% of those: confident, not accurate. All 10 agents answered all 100 pairs, with balanced A/B choices (41–60% A) and "would click" on 17–44 of 100. `upworthy-pairs/RESULTS.md`.
 - **Refactor images (truth pending from Sean):** crowd Borda #1 = image-2 (09_weight_down_strength_intact) in test 1 (4 of 10 first-place votes; segments disagree: new starters prefer image-5, self-trackers image-6), and image-2 (c2610d GLP-1 split) in test 2 (10/10). Vanilla Opus with and without the ICP line pick the same #1 in both tests. `refactor-ads/RESULTS-icp-v2.md`.
+
+## 2026-10-25 ~16:20 · Upworthy pairs · why the crowd failed, and Opus synthesis of the panel
+
+**Diagnosis (code only):** each of the 10 simulated readers alone was right on 44–58% of pairs (chance 50%), and they agree with each other on 74% (shared bias). Other ways to combine the same answers (only readers who'd click; per segment) score 45–55%. On the 32 pairs where crowd majority and vanilla Opus disagree, the crowd is right 8 times and Opus 24. No position or length bias (~50%). Conclusion: no aggregation rule can fix it, because the votes carry no signal.
+
+**opus-synthesis (S6 = Opus reads the panel):** `claude-opus-5.5`, high, 2 agents × 2 files. Prompt `upworthy-pairs/prompts/opus-synthesis-v1.md` (the vanilla-icp prompt plus each pair's 10 panel votes and the panelists' profiles, labeled as simulated). Inputs `upworthy-pairs/synth/pairs-1..4.json` (built by code from `sim/agent-KK/out.json` + swaps). Output `predictions/opus-synthesis/pairs-1..4.json`. Wrapper identical to the pairs vanilla wrapper, with the instructions file `opus-synthesis-v1.md` and input files `synth/pairs-X.json`.
+
+**Result:** opus-synthesis 55/100 [45, 65], against vanilla Opus 68/100: −13 pts [−22, −4], significant (worse). Synthesis agreed with the crowd majority on 90/100 pairs and with plain Opus on 75/100. On the 25 pairs where reading the panel changed Opus's answer, it went from 19 right to 6 right. The simulated panel pulled Opus toward its own (wrong) consensus.
