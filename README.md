@@ -47,103 +47,245 @@ Synthetic customers produce **hypotheses to test**, not proof. Every result is l
 
 ## Getting started
 
-From a fresh clone to running the skills in about 15 minutes. The web app (`npm run dev`) isn't scaffolded yet; these steps set up the Claude Code skills in `.claude/skills/`. The key scripts are built for macOS, where keys live in your Keychain. On Linux or WSL, see [Not on a Mac?](#not-on-a-mac).
+This guide assumes you've never used a terminal or GitHub. It takes about 30 minutes, most of it waiting for downloads. You need:
 
-### 1. Install the prerequisites and clone
+- **A Mac.** (On Windows or Linux, see [docs/KEYS.md](docs/KEYS.md#not-on-a-mac).)
+- **A paid Claude plan** (Pro or higher). The free plan doesn't include Claude Code, the app that runs GTMagic.
+- **A card for OpenRouter credits**, only if you'll make draft ads (step 5). A few dollars is plenty.
 
-| You need | Why | Check |
-|---|---|---|
-| git | Clone the repo, open PRs | `git --version` |
-| Python 3.9 or newer | The skills' helper scripts (standard library only, nothing to `pip install`) | `python3 --version` |
-| [Claude Code](https://claude.com/claude-code), signed in (CLI or desktop app) | Runs the skills | `claude --version`, or the desktop app opens |
+There are two ways to set up. In **Option A**, Claude does most of the work and tells you when it needs you. In **Option B**, you do every step yourself. Both end in the same place.
 
-On a Mac, `xcode-select --install` provides git and Python 3 if either check fails. Node isn't needed for the skills; `evals/` has its own setup in [evals/README.md](evals/README.md).
+### Option A: let Claude set it up for you
+
+1. **Install the Claude app.** Download it for Mac from [claude.com/download](https://claude.com/download), open the downloaded file, and drag **Claude** into **Applications**. Open it (if your Mac warns that it came from the internet, click **Open**) and sign in with the account that has your paid plan.
+2. **Start a Code session in your home folder.**
+   1. Click **Code** at the top of the sidebar.
+   2. Under the message box, click the first control (the environment) and choose the top entry under **Local**.
+   3. Click the folder control next to it, choose **Open folder…**, press **⌘ + Shift + H** to jump to your home folder (the one with your name), and click **Open**.
+3. **Send Claude the setup request.** Copy this whole message, paste it into the message box, and send it:
+
+```text
+Please set up GTMagic on this Mac for me. I'm not technical, so explain each step in plain words and tell me exactly what to click whenever you need me.
+
+1. Check that git works by running `git --version`. If it doesn't, run `xcode-select --install`. Tell me to click Install (not "Get Xcode") and then Agree in the window that pops up, and wait until I say Apple's window shows the install finished.
+2. Download GTMagic by running `git clone https://github.com/nsbogert/GTMagic.git ~/GTMagic`. If that folder already exists, run `git pull` inside it instead.
+3. Read the "Getting started" section of ~/GTMagic/README.md. Using its "Get a Tavily key" step, tell me how to get a Tavily API key, one step at a time, and have me leave that browser tab open. Skip the OpenRouter key unless I say I need draft ads.
+4. Have me save the key myself. Tell me to open the Terminal app and run `cd ~/GTMagic && scripts/setup-keys.sh` first. Then, when it shows "Paste your Tavily API key", I switch to my browser, copy the key, switch back to Terminal and paste it. Explain that the paste stays invisible, and that if it asks "Replace it? [y/N]" I type y, not the key. Wait until I say I'm done.
+5. Run `scripts/check-keys.sh` in ~/GTMagic and explain the result. If any line says [fail], help me fix it using the README's "If something goes wrong" table.
+6. Finally, tell me how to start a new Local Code session with ~/GTMagic as its folder (GTMagic only works from there), and how to start my first GTMagic run.
+
+Rules:
+- Only work in ~/GTMagic. Don't open or change anything else in my home folder.
+- Never ask me to paste an API key into this chat, and never look at a key yourself. scripts/check-keys.sh is the only way to test one, and it never shows it.
+- Only I open websites, in my own browser. Don't use a built-in browser, take screenshots, or watch a terminal you can read while I handle keys.
+- If I paste a key into this chat by mistake, tell me to delete that key on the provider's website and make a new one.
+- Never sign up, sign in or pay for anything for me.
+```
+
+Claude stops and hands things back to you whenever only you should do them:
+
+- **Approving commands.** Claude asks before it runs each command. Click **Allow** for commands about GTMagic setup (like `git`, `xcode-select` or `scripts/check-keys.sh`), and **Deny** anything else.
+- **Clicking Install** in Apple's developer-tools window.
+- **Signing up on Tavily** in your own browser.
+- **Pasting your key into Terminal**, never into the chat.
+
+If your Mac asks whether Claude may access Documents, Desktop or another folder, click **Don't Allow**; setup doesn't need them. If you get stuck, switch to Option B: developer tools are step 2, downloading is step 3, keys are steps 4–6, and running GTMagic is step 8.
+
+### Option B: set it up by hand
+
+#### 1. Open Terminal
+
+Terminal is a Mac app where you type commands instead of clicking. It's already on your Mac.
+
+1. Press **Command (⌘) + Space** to open Spotlight search.
+2. Type `Terminal` and press **Return**.
+
+A window opens with a line ending in `%`. That's the prompt: Terminal is waiting for a command. To run any command in this guide:
+
+1. Hover over the grey box with the command and click the **copy** button in its top-right corner.
+2. Click in the Terminal window and press **⌘ + V** to paste.
+3. Press **Return**, then wait until a new line ending in `%` appears before running the next command.
+
+Good to know:
+
+- When Terminal asks for a password or a key with `Paste…`, **nothing shows up as you type or paste**. That's on purpose, and the key is still there.
+- Questions ending in `[y/N]` are not hidden. Answer them by typing `y` (yes) or `n` (no), then pressing **Return**. Never paste a key at a `[y/N]` question.
+- Press **Control + C** to stop a command that's stuck.
+
+#### 2. Install Apple's free developer tools
+
+GTMagic needs two free tools that Apple provides: **git** (downloads GTMagic and keeps it up to date) and **Python** (runs GTMagic's small helper programs). Run:
+
+```bash
+xcode-select --install
+```
+
+- **If a window pops up:** click **Install** (not "Get Xcode"), then **Agree**. Terminal shows the `%` prompt again right away; ignore it. Wait until Apple's window says the software was installed (5–15 minutes), then click **Done**.
+- **If Terminal says the tools are already installed:** you're done with this step.
+
+To confirm it worked, run this. It should print a line starting with `git version`:
+
+```bash
+git --version
+```
+
+#### 3. Download GTMagic
+
+GTMagic's files live on GitHub, a website where teams share code. Making your own copy is called **cloning**. Your copy stays linked to the shared one, so you can get updates later (step 9). You don't need a GitHub account for this. Run these three commands, one at a time:
+
+```bash
+cd ~
+```
 
 ```bash
 git clone https://github.com/nsbogert/GTMagic.git
+```
+
+```bash
 cd GTMagic
 ```
 
-To push branches, ask Nick for Write access to the repo.
+What they do:
 
-### 2. Get a Tavily key (market research)
+- `cd ~` moves Terminal to your **home folder** (the one with your name on it in Finder).
+- `git clone …` downloads GTMagic into a new folder there called **GTMagic**.
+- `cd GTMagic` moves Terminal into that folder.
 
-The research step searches the web through Tavily.
+To see the folder in Finder, click **Finder** in the Dock, then choose **Go → Home** from the menu bar.
 
-1. Sign up at [app.tavily.com](https://app.tavily.com). The free plan includes a monthly allowance of search credits.
-2. On the dashboard, under **API Keys**, copy your key. It starts with `tvly-`.
+#### 4. Get a Tavily key (for web research)
 
-Paste it only into the setup prompt in step 4: never into chat, a file or a commit.
+GTMagic researches your market by searching the web through a service called Tavily. An **API key** is like a password that lets GTMagic use your Tavily account.
 
-### 3. Get an OpenRouter key (draft creatives, optional)
+1. Go to [app.tavily.com](https://app.tavily.com) and sign up. The free plan includes a monthly allowance of searches.
+2. On the main page, find **API Keys**. Your key starts with `tvly-`.
+3. **Leave this browser tab open.** You'll copy the key from it in step 6.
 
-The `gtm-creatives` skill (in progress; it lands in its own PR) writes draft ads with GPT Sol through OpenRouter. Skip this step if you won't run it: press Return at the OpenRouter prompt in step 4, and the check notes the key as optional instead of failing. Run `scripts/setup-keys.sh tavily` to skip the prompt entirely.
+**Never paste a key into a chat (including Claude), an email, Slack or a document.** Step 6 is the only place it goes.
 
-1. Sign up at [openrouter.ai](https://openrouter.ai).
-2. Add credits at [Settings → Credits](https://openrouter.ai/settings/credits). GPT Sol is a paid model, so a key on an account with no credits fails. A few dollars is enough to start.
-3. Create a key at [Settings → API Keys](https://openrouter.ai/settings/keys). Name it `gtmagic` and set a **credit limit**, so a runaway loop can't drain your balance. Copy the key (it starts with `sk-or-`); OpenRouter shows it only once.
+#### 5. Optional: get an OpenRouter key (only for draft ads)
 
-### 4. Save the keys
+Skip this step unless you'll use `gtm-creatives`, which writes draft ads with an AI model from OpenAI through a service called OpenRouter. That part of GTMagic is still being built.
+
+<details>
+<summary>Show the OpenRouter steps</summary>
+
+1. Go to [openrouter.ai](https://openrouter.ai) and sign up.
+2. Open [Settings → Credits](https://openrouter.ai/settings/credits) and add a few dollars. Without credits, the key doesn't work.
+3. Open [Settings → API Keys](https://openrouter.ai/settings/keys) and click **Create Key**. Name it `gtmagic` and set a **credit limit** (for example, 5) so it can never spend more than that.
+4. OpenRouter shows the key (it starts with `sk-or-`) only once. **Leave that window open** until you finish step 6.
+
+</details>
+
+#### 6. Save your keys
+
+This stores your keys in the **Keychain**, the same secure place your Mac keeps your passwords. If you closed Terminal, open it again (step 1). Then run these two commands:
+
+```bash
+cd ~/GTMagic
+```
 
 ```bash
 scripts/setup-keys.sh
 ```
 
-For each key, it asks you to paste it at a hidden prompt, saves it in your macOS Keychain, then runs the check from step 5. Nothing is shown on screen or written to the repo, and the key never appears on a command line. To add or replace one key, name it: `scripts/setup-keys.sh tavily` or `scripts/setup-keys.sh openrouter`. It exits 1 if a key wasn't saved or doesn't pass the check.
+It asks for each key in turn. Your clipboard now holds the command you just copied, so copy each key only when its prompt appears:
 
-The skills look for each key in this order:
+1. At `Paste your Tavily API key`:
+   1. Switch to your browser with **⌘ + Tab**.
+   2. Click the **copy** button next to your Tavily key.
+   3. Click back in Terminal, press **⌘ + V**, then press **Return**. Nothing appears when you paste; that's normal.
+2. At `Paste your OpenRouter API key`, do the same with your OpenRouter key. If you skipped step 5, just press **Return**.
+3. It then tests each key and prints one line per key:
+   - `[ok]` means the key works.
+   - `[warn]` means read the message. A skipped OpenRouter key shows as `[warn]`, and that's fine.
+   - `[fail]` means something needs fixing. See [If something goes wrong](#if-something-goes-wrong).
 
-| Key | 1. Environment variable | 2. Keychain item (account: your macOS user) |
-|---|---|---|
-| Tavily | `TAVILY_API_KEY` | `gtmagic-tavily` |
-| OpenRouter | `GTMAGIC_OPENROUTER_API_KEY` | `gtmagic-openrouter` |
+You're done when the last line says `All set…` or `Usable, with 1 warning(s) above`.
 
-The environment variable wins, so an old one in your shell profile hides a fresh Keychain key. The check flags that case. The OpenRouter variable has a `GTMAGIC_` prefix so an OpenRouter key you set for another project is never billed for GTMagic.
+To redo one key later, run the line for that key. If it asks `Replace it? [y/N]`, type `y` and press **Return**, then paste the new key at the hidden prompt.
 
-**Known extra, not scripted yet:** the `gtm-evaluate` skill calls the Claude API with its own key, billed to your Anthropic API account (a Claude subscription doesn't cover it). It reads the key from `GTMAGIC_ANTHROPIC_API_KEY` or the Keychain item `gtmagic-anthropic`. If you need it before the scripts cover it, run `security add-generic-password -U -s gtmagic-anthropic -a "$USER" -w` and paste the key at the hidden prompt (it asks twice).
+```bash
+scripts/setup-keys.sh tavily
+```
 
-### 5. Check the keys
+```bash
+scripts/setup-keys.sh openrouter
+```
+
+#### 7. Install the Claude app
+
+Claude Code is the part of the Claude app that runs GTMagic.
+
+1. Download the Claude app for Mac from [claude.com/download](https://claude.com/download).
+2. Open the downloaded file and drag **Claude** into **Applications**.
+3. Open Claude from Applications. If your Mac warns that it was downloaded from the internet, click **Open**.
+4. Sign in with the Claude account that has your paid plan.
+
+<details>
+<summary>Prefer Terminal? Install the command-line version instead</summary>
+
+Run this. It shows no progress for a minute or two while it downloads, so don't stop it.
+
+```bash
+curl -fsSL https://claude.ai/install.sh | bash
+```
+
+When it finishes, close Terminal, open a new window, and run `claude --version` to check that it installed. To start GTMagic later, run `cd ~/GTMagic` and then `claude`. The first time, a browser window opens so you can sign in with your Claude account. If it asks whether you trust this folder, choose **Yes**. Anthropic's [install help](https://code.claude.com/docs/en/troubleshoot-install) covers problems.
+
+</details>
+
+#### 8. Run GTMagic
+
+1. In the Claude app, click **Code** at the top of the sidebar.
+2. Under the message box, click the first control (the environment) and choose the top entry under **Local**. (Cloud sessions can't use your saved keys.)
+3. Click the folder control next to it and choose **Open folder…**. Press **⌘ + Shift + H** to jump to your home folder, select **GTMagic**, and click **Open**.
+4. Describe your business in plain words, for example: *"Who should I target? I run a mobile dog-grooming van."*
+
+GTMagic interviews you, researches your market, and writes up the results. Claude may ask before running a command. Allow the ones that start with `python3`: those are GTMagic's own helper programs. If Claude ever asks you to paste a key into the chat, say no and run `scripts/check-keys.sh` in Terminal instead.
+
+Your results are saved in the `gtm-workspace` folder inside GTMagic, on your computer only. What you type is sent to Claude, and search terms are sent to Tavily, to do the research.
+
+One feature, ranking ads you already run (`gtm-evaluate`), needs a separate paid Anthropic API key. Skip it unless the team gives you one; [docs/KEYS.md](docs/KEYS.md#how-the-keys-are-found) shows how to save it.
+
+#### 9. Later: get updates and recheck keys
+
+To get the newest version of GTMagic, run these in Terminal:
+
+```bash
+cd ~/GTMagic
+```
+
+```bash
+git pull
+```
+
+To test your keys at any time (it never shows them and uses no credits):
 
 ```bash
 scripts/check-keys.sh
 ```
 
-It confirms each key is present and accepted, and shows the credits left.
+### If something goes wrong
 
-- It never prints a key. It calls each provider's free account endpoint, so it spends no credits.
-- It exits 0 when every key it checks was accepted (warnings, such as a skipped OpenRouter key, are allowed), and 1 otherwise. Name a key to check only that one; `scripts/check-keys.sh openrouter` also makes that key required.
-- For OpenRouter it sees only the key's own credit limit, not your account balance; that's on [Settings → Credits](https://openrouter.ai/settings/credits).
-
-Example output:
-
-```text
-Checking GTMagic API keys (the keys themselves are never shown):
-  [ok]   Tavily      1,500 plan credits left this billing cycle (key from Keychain item 'gtmagic-tavily')
-  [ok]   OpenRouter  $5.00 left under this key's credit limit (key from Keychain item 'gtmagic-openrouter')
-All set: every key was accepted, and none is known to be out of credits.
-```
-
-| If it says | Do this |
+| What you see | What to do |
 |---|---|
-| `no key found` | Run `scripts/setup-keys.sh tavily` (or `openrouter`) |
-| `was rejected (HTTP 401)` | Copy the key again from the provider's dashboard and rerun the setup script. If the key came from an environment variable, fix or unset that variable |
-| `no credits bought on this account yet` | Add OpenRouter credits (step 3) |
-| `credit limit is used up` or `plan credits are used up` | Raise the key's limit, add credits, or turn on Tavily pay-as-you-go on the provider's dashboard |
-| `credit details couldn't be read` | The key works; check your credits on the provider's dashboard |
-| `optional, only gtm-creatives needs it` | Nothing, unless you'll run `gtm-creatives` (then do step 3) |
-| `couldn't reach …` or `was cut off` | A network, VPN or proxy problem; try again |
+| `command not found: git`, or `xcrun: error` | The developer tools aren't installed yet. Do step 2 |
+| `no such file or directory: scripts/…` | Terminal isn't in the GTMagic folder. Run `cd ~/GTMagic` and try again |
+| `destination path 'GTMagic' already exists` | You already downloaded it. Run `cd ~/GTMagic`, then `git pull` |
+| `command not found: claude` | Use the Claude app (step 7), or close Terminal, open a new window and try again |
+| `has spaces or symbols an API key doesn't contain` | Something other than the key was pasted. Copy the key again from the website, then rerun step 6 |
+| `keys usually start with … Save it anyway? [y/N]` | You probably copied the wrong thing. Type `n`, press Return, and rerun step 6 |
+| `[fail] … no key found` | Run step 6 again and paste the key when asked |
+| `[fail] … was rejected (HTTP 401)` (or 403) | The key was mistyped or deleted. Copy it again from the website and rerun step 6 |
+| `no credits bought on this account yet` | Add credits on OpenRouter (step 5) |
+| `credit limit is used up` or `plan credits are used up` | Raise the key's limit or add credits on the provider's website |
+| `is rate-limiting (HTTP 429)` | Wait a minute and run `scripts/check-keys.sh` again |
+| `couldn't reach …` or `was cut off` | An internet or VPN problem. Check your connection and try again |
+| `[warn] … credit details couldn't be read` | The key works. You can check your credits on the provider's website |
 
-### 6. Run the skills
+Stuck? Ask in the team chat, and include what you ran and what Terminal printed. Never include your keys.
 
-Start Claude Code in the repo folder (`claude` in a terminal, or open the folder in the desktop app) and describe your business, for example: "Who should I target? I run a mobile dog-grooming van." The `gtm-intake` skill starts the interview and writes its files to `gtm-workspace/<your-business>/`, which is gitignored and stays on your machine. Each skill's `SKILL.md` in `.claude/skills/` says what it does and when it runs.
+### Not on a Mac, or a developer?
 
-### Not on a Mac?
-
-`setup-keys.sh` needs the macOS Keychain. On Linux or WSL, add the keys to your shell profile (`~/.bashrc` or `~/.zshrc`) with an editor. Don't type `export` at the prompt, which saves the key in your shell history.
-
-```bash
-export TAVILY_API_KEY="tvly-..."
-export GTMAGIC_OPENROUTER_API_KEY="sk-or-..."
-```
-
-Open a new terminal, then run `scripts/check-keys.sh`; it works anywhere with bash and curl. There's no `.env.local` option because the skills read keys only from the environment or the Keychain, so a key file in the repo would be invisible to them.
+Linux and Windows setup, and how the key scripts work, are in [docs/KEYS.md](docs/KEYS.md).

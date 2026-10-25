@@ -22,7 +22,7 @@ for provider in "$@"; do provider_info "$provider" || exit 1; done
 if ! has_keychain; then
   cat >&2 <<'EOF'
 This script saves keys in the macOS Keychain, so it only runs on a Mac.
-On Linux or WSL, put the keys in your shell profile instead (README → "Not on a Mac?"):
+On Linux or WSL, put the keys in your shell profile instead (see docs/KEYS.md):
   export TAVILY_API_KEY=...   export GTMAGIC_OPENROUTER_API_KEY=...
 then open a new terminal and run: scripts/check-keys.sh
 EOF
