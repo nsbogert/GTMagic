@@ -100,7 +100,7 @@ The skills look for each key in this order:
 
 The environment variable wins, so an old one in your shell profile hides a fresh Keychain key. The check flags that case. The OpenRouter variable has a `GTMAGIC_` prefix so an OpenRouter key you set for another project is never billed for GTMagic.
 
-**Known extra, not scripted yet:** the in-progress `gtm-evaluate` skill reads an Anthropic API key from `GTMAGIC_ANTHROPIC_API_KEY` or the Keychain item `gtmagic-anthropic`. If you need it before the scripts cover it, run `security add-generic-password -U -s gtmagic-anthropic -a "$USER" -w` and paste the key at the hidden prompt (it asks twice).
+**Known extra, not scripted yet:** the `gtm-evaluate` skill calls the Claude API with its own key, billed to your Anthropic API account (a Claude subscription doesn't cover it). It reads the key from `GTMAGIC_ANTHROPIC_API_KEY` or the Keychain item `gtmagic-anthropic`. If you need it before the scripts cover it, run `security add-generic-password -U -s gtmagic-anthropic -a "$USER" -w` and paste the key at the hidden prompt (it asks twice).
 
 ### 5. Check the keys
 
