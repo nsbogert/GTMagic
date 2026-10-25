@@ -37,13 +37,22 @@ def allocate(segments: list[dict]) -> list[str]:
     return [sid for sid, _ in raw for _ in range(counts[sid])]
 
 
-def card(seg: dict, attrs: dict, quotes: list[str], demo: dict) -> str:
+def pick_pains(seg: dict, rng: random.Random) -> dict:
+    """Each person cares about 1-2 of the segment's needs and 1-2 of its barriers (seeded draw), one marked #1."""
+    needs, bars = list(seg.get("needs", [])), list(seg.get("barriers", []))
+    n = rng.sample(needs, min(len(needs), rng.randint(1, 2))) if needs else []
+    b = rng.sample(bars, min(len(bars), rng.randint(1, 2))) if bars else []
+    return {"top": (n or b or ["(none)"])[0], "needs": n, "barriers": b}
+
+
+def card(seg: dict, attrs: dict, quotes: list[str], demo: dict, picks: dict) -> str:
     lines = ["Your profile (from research on real customers):",
              *demographics.render(demo),
              f"- Customer group: {seg['name']}: {seg['description']}",
              *[f"- {LABEL[a]}: {attrs[a]}" for a in ATTRS if a in attrs],
-             f"- What you need: {'; '.join(seg.get('needs', []))}",
-             f"- What holds you back: {'; '.join(seg.get('barriers', []))}",
+             f"- Your #1 concern right now: {picks['top']}",
+             f"- What you need: {'; '.join(picks['needs'])}",
+             f"- What holds you back: {'; '.join(picks['barriers'])}",
              "- How you talk (real things people like you have said):",
              *[f'  "{q}"' for q in quotes]]
     return "\n".join(lines)
@@ -92,7 +101,7 @@ def sample() -> None:
                 rows.append(f"- o{j}: {link}")
             blocks.append(f"Test {t['id']}:\n" + "\n".join(rows))
         json.dump(mapping, open(os.path.join(SIM, f"map-agent-{k:02d}.json"), "w"))
-        prompt = tpl.replace("{{CARD}}", card(seg, attrs, [e["quote"] for e in voice], demos[k - 1])).replace("{{TESTS}}", "\n\n".join(blocks))
+        prompt = tpl.replace("{{CARD}}", card(seg, attrs, [e["quote"] for e in voice], demos[k - 1], pick_pains(seg, rng))).replace("{{TESTS}}", "\n\n".join(blocks))
         open(os.path.join(a_dir, "prompt.md"), "w").write(prompt)
     json.dump({"schemaVersion": 1, "config": {"sampleSize": N, "seed": SEED, "strategy": "representative"},
                "samplerVersion": "icp-v2-1", "customers": customers}, open(os.path.join(SIM, "audience-sample.json"), "w"), indent=1)

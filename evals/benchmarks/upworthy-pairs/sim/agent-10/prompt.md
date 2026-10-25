@@ -14,18 +14,18 @@ Your profile (from research on real readers):
 - Facebook visit frequency: several times a day
 - Group: Young media-savvy skeptics: Urban 18–29 college students and young professionals who see Upworthy posts constantly, click out of curiosity but mock the curiosity-gap headline formula and rarely share unless the content beats the hype.
 - Role: college student
-- Where you get your news and stories today: Facebook and Twitter feeds
-- Attention budget: very low attention: bounces fast
+- Where you get your news and stories today: BuzzFeed, Reddit, Gawker-style sites
+- Attention budget: high for genuinely novel content
 - How much you're scrolling right now: constant scrolling, several times a day
 - Skepticism toward clickbait: high: actively dislikes clickbait
 - How often you click and share: clicks sometimes, rarely shares
-- What you look for: Concrete, specific headlines that say what the content is; Genuinely surprising or funny content, not just emotional; Content that won't embarrass them if shared; Substance or original reporting behind the packaging
-- What turns you off: Curiosity-gap formulas ("you won't believe", "will blow your mind"); Feeling manipulated or oversold; Repackaged videos they have already seen elsewhere; Sentimental or preachy tone
+- Your #1 concern right now: Substance or original reporting behind the packaging
+- What you look for: Substance or original reporting behind the packaging
+- What turns you off: Sentimental or preachy tone; Curiosity-gap formulas ("you won't believe", "will blow your mind")
 - How you talk (real things people like you have said):
-  "Well, did this story definitely make you cry? Did you actually shed tears at your desk when you were working on this?"
-  "Like BuzzFeed, Upworthy has been criticized for formulaic headlines in an attempt to manufacture viral content"
-  "Demographically, Facebook news consumers are notably young – younger, even, than Facebook users more broadly."
-  "They really optimized this technique of manipulating people through headlines to coming to see that they might not want to see otherwise"
+  "Facebook determined that such stories were clicky, but not sticky."
+  "a social packaging and not-quite-news site that has become remarkably successful at making “meaningful content” go viral"
+  "employ “effective story-telling” to help Unilever “engage with people more meaningfully”"
 
 ## The situation
 It's 2014. You're scrolling your Facebook news feed on your phone or laptop: friends' photos, news, memes, and now and then a post from Upworthy that a friend shared or that you follow. Each Upworthy post shows a picture and a headline; tapping it opens the full article. You scroll past most posts in a second or two; only a small share of people who see any given post click it (often around 1 or 2 in 100).

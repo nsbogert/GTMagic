@@ -56,18 +56,19 @@
     "age": 25
    },
    "attributes": {
-    "role": "graduate or college student",
+    "role": "working professional / nonprofit or education worker",
     "currentSolution": "Facebook feed from friends and liked pages",
-    "priceSensitivity": "moderate attention: will watch a 3\u20135 minute video if the cause matters",
-    "urgency": "checks Facebook several times a day",
+    "priceSensitivity": "high attention for issue content",
+    "urgency": "daily",
     "skepticism": "low: forgives curiosity-gap headlines when the cause is good",
     "buyingStage": "frequent sharer (shares several posts a week)"
    },
    "voiceLexiconIds": [
-    "lex_31",
+    "lex_6",
     "lex_7",
-    "lex_9",
-    "lex_11"
+    "lex_31",
+    "lex_3",
+    "lex_5"
    ]
   },
   {
@@ -89,16 +90,17 @@
    },
    "attributes": {
     "role": "parent of young kids",
-    "currentSolution": "public radio / cable news",
-    "priceSensitivity": "high attention for issue content",
+    "currentSolution": "Facebook feed from friends and liked pages",
+    "priceSensitivity": "moderate attention: will watch a 3\u20135 minute video if the cause matters",
     "urgency": "checks Facebook several times a day",
-    "skepticism": "moderate",
-    "buyingStage": "frequent sharer (shares several posts a week)"
+    "skepticism": "low: forgives curiosity-gap headlines when the cause is good",
+    "buyingStage": "regular clicker, occasional sharer"
    },
    "voiceLexiconIds": [
-    "lex_10",
-    "lex_7",
-    "lex_4"
+    "lex_4",
+    "lex_8",
+    "lex_5",
+    "lex_2"
    ]
   },
   {
@@ -119,17 +121,18 @@
     "age": 32
    },
    "attributes": {
-    "role": "working professional / nonprofit or education worker",
-    "currentSolution": "Facebook feed from friends and liked pages",
-    "priceSensitivity": "low attention, skim only",
-    "urgency": "daily",
-    "skepticism": "high",
-    "buyingStage": "rare clicker"
+    "role": "activist / organizer",
+    "currentSolution": "progressive outlets and email lists (MoveOn, Upworthy email)",
+    "priceSensitivity": "moderate attention: will watch a 3\u20135 minute video if the cause matters",
+    "urgency": "checks Facebook several times a day",
+    "skepticism": "moderate",
+    "buyingStage": "frequent sharer (shares several posts a week)"
    },
    "voiceLexiconIds": [
-    "lex_1",
-    "lex_4",
-    "lex_5"
+    "lex_10",
+    "lex_2",
+    "lex_31",
+    "lex_8"
    ]
   },
   {
@@ -150,17 +153,17 @@
     "age": 19
    },
    "attributes": {
-    "role": "student",
-    "currentSolution": "local TV news",
-    "priceSensitivity": "low attention to spare: quick taps between other activities",
-    "urgency": "occasional",
+    "role": "retiree / grandparent",
+    "currentSolution": "Facebook feed (friends' shares)",
+    "priceSensitivity": "moderate: will watch a short video",
+    "urgency": "daily",
     "skepticism": "low",
     "buyingStage": "occasional clicker, rare sharer"
    },
    "voiceLexiconIds": [
-    "lex_19",
-    "lex_20",
-    "lex_13"
+    "lex_17",
+    "lex_14",
+    "lex_16"
    ]
   },
   {
@@ -181,17 +184,18 @@
     "age": 50
    },
    "attributes": {
-    "role": "working adult",
-    "currentSolution": "Facebook feed (friends' shares)",
+    "role": "parent / caregiver",
+    "currentSolution": "morning shows / print newspaper",
     "priceSensitivity": "low attention to spare: quick taps between other activities",
     "urgency": "daily",
     "skepticism": "moderate",
-    "buyingStage": "occasional clicker, rare sharer"
+    "buyingStage": "clicks and shares uplifting posts"
    },
    "voiceLexiconIds": [
+    "lex_19",
     "lex_13",
-    "lex_20",
-    "lex_9"
+    "lex_11",
+    "lex_10"
    ]
   },
   {
@@ -212,19 +216,19 @@
     "age": 44
    },
    "attributes": {
-    "role": "working adult",
-    "currentSolution": "YouTube",
-    "priceSensitivity": "high",
-    "urgency": "checks Facebook several times a day",
+    "role": "parent / caregiver",
+    "currentSolution": "morning shows / print newspaper",
+    "priceSensitivity": "low attention to spare: quick taps between other activities",
+    "urgency": "daily",
     "skepticism": "low",
-    "buyingStage": "occasional clicker, rare sharer"
+    "buyingStage": "clicks and shares uplifting posts"
    },
    "voiceLexiconIds": [
-    "lex_13",
+    "lex_18",
+    "lex_14",
     "lex_10",
-    "lex_19",
-    "lex_11",
-    "lex_16"
+    "lex_15",
+    "lex_20"
    ]
   },
   {
@@ -245,19 +249,17 @@
     "age": 35
    },
    "attributes": {
-    "role": "working adult",
-    "currentSolution": "morning shows / print newspaper",
+    "role": "parent / caregiver",
+    "currentSolution": "YouTube",
     "priceSensitivity": "moderate: will watch a short video",
     "urgency": "daily",
-    "skepticism": "moderate",
-    "buyingStage": "rarely clicks"
+    "skepticism": "low",
+    "buyingStage": "occasional clicker, rare sharer"
    },
    "voiceLexiconIds": [
-    "lex_10",
     "lex_12",
-    "lex_16",
-    "lex_19",
-    "lex_17"
+    "lex_18",
+    "lex_10"
    ]
   },
   {
@@ -279,16 +281,18 @@
    },
    "attributes": {
     "role": "young professional (media, tech, services)",
-    "currentSolution": "BuzzFeed, Reddit, Gawker-style sites",
+    "currentSolution": "Facebook and Twitter feeds",
     "priceSensitivity": "very low attention: bounces fast",
     "urgency": "constant scrolling, several times a day",
-    "skepticism": "high: actively dislikes clickbait",
+    "skepticism": "moderate",
     "buyingStage": "clicks sometimes, rarely shares"
    },
    "voiceLexiconIds": [
-    "lex_26",
-    "lex_28",
-    "lex_22"
+    "lex_30",
+    "lex_25",
+    "lex_23",
+    "lex_20",
+    "lex_21"
    ]
   },
   {
@@ -310,17 +314,16 @@
    },
    "attributes": {
     "role": "college student",
-    "currentSolution": "Facebook and Twitter feeds",
-    "priceSensitivity": "very low attention: bounces fast",
+    "currentSolution": "BuzzFeed, Reddit, Gawker-style sites",
+    "priceSensitivity": "high for genuinely novel content",
     "urgency": "constant scrolling, several times a day",
     "skepticism": "high: actively dislikes clickbait",
     "buyingStage": "clicks sometimes, rarely shares"
    },
    "voiceLexiconIds": [
-    "lex_25",
-    "lex_26",
-    "lex_30",
-    "lex_23"
+    "lex_20",
+    "lex_28",
+    "lex_29"
    ]
   }
  ]

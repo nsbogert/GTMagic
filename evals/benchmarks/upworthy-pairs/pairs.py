@@ -83,11 +83,20 @@ def prep() -> None:
     print(f"{len(ok)} eligible pairs; sampled {len(picked)} (one per article); A wins {wins}/{len(picked)}")
 
 
-def card(seg: dict, attrs: dict, quotes: list[str], demo: dict) -> str:
+def pick_pains(seg: dict, rng: random.Random) -> dict:
+    """Each person cares about 1-2 of the segment's needs and 1-2 of its barriers (seeded draw), one marked #1."""
+    needs, bars = list(seg.get("needs", [])), list(seg.get("barriers", []))
+    n = rng.sample(needs, min(len(needs), rng.randint(1, 2))) if needs else []
+    b = rng.sample(bars, min(len(bars), rng.randint(1, 2))) if bars else []
+    return {"top": (n or b or ["(none)"])[0], "needs": n, "barriers": b}
+
+
+def card(seg: dict, attrs: dict, quotes: list[str], demo: dict, picks: dict) -> str:
     return "\n".join(["Your profile (from research on real readers):", *demographics.render(demo), f"- Group: {seg['name']}: {seg['description']}",
                       *[f"- {LABEL[a]}: {attrs[a]}" for a in ATTRS if a in attrs],
-                      f"- What you look for: {'; '.join(seg.get('needs', []))}",
-                      f"- What turns you off: {'; '.join(seg.get('barriers', []))}",
+                      f"- Your #1 concern right now: {picks['top']}",
+             f"- What you look for: {'; '.join(picks['needs'])}",
+                      f"- What turns you off: {'; '.join(picks['barriers'])}",
                       "- How you talk (real things people like you have said):", *[f'  "{q}"' for q in quotes]])
 
 
@@ -121,7 +130,7 @@ def sample() -> None:
         os.makedirs(a_dir, exist_ok=True)
         json.dump(shown, open(os.path.join(a_dir, "pairs.json"), "w"), indent=1)
         json.dump(swap, open(os.path.join(HERE, "sim", f"swap-agent-{k:02d}.json"), "w"))
-        open(os.path.join(a_dir, "prompt.md"), "w").write(tpl.replace("{{CARD}}", card(seg, attrs, [e["quote"] for e in voice], demos[k - 1])))
+        open(os.path.join(a_dir, "prompt.md"), "w").write(tpl.replace("{{CARD}}", card(seg, attrs, [e["quote"] for e in voice], demos[k - 1], pick_pains(seg, rng))))
         customers.append({"id": f"cust_r1_{k}", "segmentId": sid, "demographics": demos[k - 1], "attributes": attrs, "voiceLexiconIds": [e["id"] for e in voice]})
     json.dump({"schemaVersion": 1, "config": {"sampleSize": N_AGENTS, "seed": SEED + 1, "strategy": "representative"},
                "customers": customers}, open(os.path.join(HERE, "sim", "audience-sample.json"), "w"), indent=1)
@@ -161,7 +170,7 @@ def score() -> None:
             real = ({"A": "B", "B": "A"}[c]) if swap[pid] else c
             votes[pid][real == "B"] += 1
     if used:
-        arms["icp-crowd (10 Sonnet, majority)"] = {pid: ("A" if v[0] > v[1] else "B" if v[1] > v[0] else "-") for pid, v in votes.items()}
+        arms["icp-crowd v3 (10 Sonnet, own pain points, majority)"] = {pid: ("A" if v[0] > v[1] else "B" if v[1] > v[0] else "-") for pid, v in votes.items()}
         json.dump({pid: {"A": v[0], "B": v[1]} for pid, v in votes.items()}, open(os.path.join(HERE, "predictions", "crowd-votes.json"), "w"), indent=1)
     lines = [f"## Upworthy pairs: {len(ids)} real A/B pairs (same image, two headlines, significant CTR difference)", "",
              "| Arm | Picked the higher-CTR ad | 95% CI | Avg CTR of picked ad | Missing |", "|---|---|---|---|---|",
@@ -184,7 +193,7 @@ def score() -> None:
                 lines.append(f"- {arm}: {100 * sum(d) / len(d):+.1f} [{100 * lo:+.1f}, {100 * hi:+.1f}]{' (significant)' if lo > 0 or hi < 0 else ''}")
     if used:
         strong = [pid for pid in ids if max(votes[pid]) >= 0.7 * sum(votes[pid])]
-        acc = sum(arms["icp-crowd (10 Sonnet, majority)"][pid] == truth[pid]["winner"] for pid in strong) / max(1, len(strong))
+        acc = sum(arms["icp-crowd v3 (10 Sonnet, own pain points, majority)"][pid] == truth[pid]["winner"] for pid in strong) / max(1, len(strong))
         lines += ["", f"Crowd: {used}/{N_AGENTS} agents; {len(issues)} invalid answers. When ≥70% of the crowd agreed ({len(strong)} pairs), it was right {acc:.0%}."]
     text = "\n".join(lines)
     print(text)

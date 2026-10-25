@@ -13,20 +13,19 @@ Your profile (from research on real readers):
 - Political lean: moderate
 - Facebook visit frequency: several times a day
 - Group: Feel-good incidental scrollers: Mainstream Facebook users, many of them parents and older adults, who meet Upworthy posts incidentally in their feed via friends' shares and click on heartwarming, inspiring or surprising stories rather than politics.
-- Role: working adult
-- Where you get your news and stories today: morning shows / print newspaper
+- Role: parent / caregiver
+- Where you get your news and stories today: YouTube
 - Attention budget: moderate: will watch a short video
 - How much you're scrolling right now: daily
-- Skepticism toward clickbait: moderate
-- How often you click and share: rarely clicks
-- What you look for: An uplifting, emotional story (kindness, kids, families, underdogs); Something entertaining or that improves their day; A story a friend already shared or liked; Clear, simple language with an obvious emotional payoff
-- What turns you off: Overtly political or preachy framing; Headline that is vague about what the post is; Long or heavy content when they are just checking in on friends; Content that feels like an ad or a fundraising pitch
+- Skepticism toward clickbait: low
+- How often you click and share: occasional clicker, rare sharer
+- Your #1 concern right now: A story a friend already shared or liked
+- What you look for: A story a friend already shared or liked
+- What turns you off: Long or heavy content when they are just checking in on friends; Headline that is vague about what the post is
 - How you talk (real things people like you have said):
-  "seeking out content that generates a significant emotional response from both the reader and the writer"
   "Many (60%) also say they follow the news for entertainment or because it improves their lives (54%)"
-  "Despite all the criticism, most Upworthy content is actually pretty positive. And that's by design."
-  "Usage among seniors continues to increase."
-  "You’re not going to do it by speaking formally to people who are there to have fun."
+  "78% of Americans on Facebook have either Liked Upworthy or have a friend who has."
+  "seeking out content that generates a significant emotional response from both the reader and the writer"
 
 ## The situation
 It's 2014. You're scrolling your Facebook news feed on your phone or laptop: friends' photos, news, memes, and now and then a post from Upworthy that a friend shared or that you follow. Each Upworthy post shows a picture and a headline; tapping it opens the full article. You scroll past most posts in a second or two; only a small share of people who see any given post click it (often around 1 or 2 in 100).

@@ -287,3 +287,25 @@ Then reply "done".
 **opus-synthesis (S6 = Opus reads the panel):** `claude-opus-5.5`, high, 2 agents × 2 files. Prompt `upworthy-pairs/prompts/opus-synthesis-v1.md` (the vanilla-icp prompt plus each pair's 10 panel votes and the panelists' profiles, labeled as simulated). Inputs `upworthy-pairs/synth/pairs-1..4.json` (built by code from `sim/agent-KK/out.json` + swaps). Output `predictions/opus-synthesis/pairs-1..4.json`. Wrapper identical to the pairs vanilla wrapper, with the instructions file `opus-synthesis-v1.md` and input files `synth/pairs-X.json`.
 
 **Result:** opus-synthesis 55/100 [45, 65], against vanilla Opus 68/100: −13 pts [−22, −4], significant (worse). Synthesis agreed with the crowd majority on 90/100 pairs and with plain Opus on 75/100. On the 25 pairs where reading the panel changed Opus's answer, it went from 19 right to 6 right. The simulated panel pulled Opus toward its own (wrong) consensus.
+
+## 2026-10-25 ~16:35 · Is the ICP modeling the right things? (Mega-Study, real people)
+
+**Variance decomposition (code, 300 real people × 18 cards):** person's general sharing level 54%, card appeal shared by everyone 8%, **person-specific taste 39%**. Each demographic explains 0.5–2.6% of that taste, about 1–2× what random grouping gives (ideology highest). Demographics barely predict real message preference.
+
+**Profile-richness test (val, 60 real people, same Twin-paper prompt template `prompts/vanilla-twin-v1.md`):** `claude-sonnet-5.5`, high, 6 agents × 10 people per arm. Rendered prompts `megastudy/runs/persona-{demo,traits,full}/<id>.md`. Outputs `predictions/sonnet-persona-{demo,traits,full}/val-1..6.json`. Arms: demographics section only; demographics + Big 5, need for cognition, agentic/communal values, empathy, need for uniqueness, self-monitoring, individualism/collectivism; full 36-section persona summary. Wrapper identical to the earlier Haiku-twin wrapper (ids val-pNNN, "Each file describes a different person …"), with the folder `persona-<arm>` and output `sonnet-persona-<arm>/val-N.json`.
+
+| Arm | MAE | within-person r | taste r (person-specific) |
+|---|---|---|---|
+| Sonnet: demographics only | 1.52 | 0.43 | 0.12 |
+| Sonnet: + key traits | 1.55 | 0.46 | 0.18 |
+| Sonnet: full profile | 1.56 | 0.42 | 0.15 |
+| Haiku: full profile (earlier) | 1.89 | 0.15 | 0.10 |
+| Published GPT-4.1 persona summary | 1.59 | 0.32 | 0.16 |
+| Published Gemini 3 Pro full | 1.56 | 0.41 | 0.18 |
+| Same average for everyone | 1.52 | 0.48 | 0 |
+
+**Pain points on crowd cards:** found that every card in a segment listed the segment's full needs/barriers (identical within a segment). Fixed in `icp_v2.py` and `pairs.py` (`pick_pains`: each person gets 1–2 needs and 1–2 barriers by seeded draw, one marked "#1 concern"). Upworthy crowd v2 archived to `upworthy-pairs/archive/crowd-v2/`; crowd v3 (10 Sonnet high, same wrapper, new cards) launched into `upworthy-pairs/sim/`.
+
+**Results (16:40):**
+- Profile-richness taste r, 95% bootstrap CI over people: demographics only 0.12 [0.04, 0.20]; + key traits 0.18 [0.09, 0.27]; full 0.15 [0.06, 0.24]. Traits minus demographics +0.06 [−0.03, +0.16], not significant. No profile beat "same average for everyone" on within-person r (0.48) or MAE (1.52).
+- Upworthy crowd v3 (own pain points): 53/100 [43.5, 62.5], against crowd v2 51/100 and vanilla Opus 68/100 (−15 pts [−25, −5], significant). Readers still agree with each other 74% (v2: 74%); each reader alone 45–60% right.

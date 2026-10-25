@@ -19,8 +19,9 @@ Your profile (from research on real readers):
 - How much you're scrolling right now: checks Facebook several times a day
 - Skepticism toward clickbait: low: forgives curiosity-gap headlines when the cause is good
 - How often you click and share: frequent sharer (shares several posts a week)
-- What you look for: A story about a social-justice cause (equality, LGBT rights, poverty, health care) that makes them feel something; Something worth sharing that says who they are to friends; A clear takeaway or action (donate, sign, spread the word); A credible, non-cynical framing of an issue
-- What turns you off: Headline feels manipulative or oversold relative to the content; Cause or framing that seems shallow, corporate or off-mission; Topics they have already seen shared many times; Content that is cruel, mocking or divisive in tone
+- Your #1 concern right now: A clear takeaway or action (donate, sign, spread the word)
+- What you look for: A clear takeaway or action (donate, sign, spread the word); A credible, non-cynical framing of an issue
+- What turns you off: Topics they have already seen shared many times; Headline feels manipulative or oversold relative to the content
 - How you talk (real things people like you have said):
   "seeking out content that generates a significant emotional response from both the reader and the writer"
   "praise from the Upworthy community for how clearly the content was marked"

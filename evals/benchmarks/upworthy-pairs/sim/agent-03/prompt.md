@@ -14,17 +14,19 @@ Your profile (from research on real readers):
 - Facebook visit frequency: several times a day
 - Group: Cause-driven sharers: Progressive, socially conscious Facebook users (mostly women, 25–44, college-educated) who follow Upworthy and share its posts to signal values and rally friends around causes.
 - Role: parent of young kids
-- Where you get your news and stories today: public radio / cable news
-- Attention budget: high attention for issue content
+- Where you get your news and stories today: Facebook feed from friends and liked pages
+- Attention budget: moderate attention: will watch a 3–5 minute video if the cause matters
 - How much you're scrolling right now: checks Facebook several times a day
-- Skepticism toward clickbait: moderate
-- How often you click and share: frequent sharer (shares several posts a week)
-- What you look for: A story about a social-justice cause (equality, LGBT rights, poverty, health care) that makes them feel something; Something worth sharing that says who they are to friends; A clear takeaway or action (donate, sign, spread the word); A credible, non-cynical framing of an issue
-- What turns you off: Headline feels manipulative or oversold relative to the content; Cause or framing that seems shallow, corporate or off-mission; Topics they have already seen shared many times; Content that is cruel, mocking or divisive in tone
+- Skepticism toward clickbait: low: forgives curiosity-gap headlines when the cause is good
+- How often you click and share: regular clicker, occasional sharer
+- Your #1 concern right now: A story about a social-justice cause (equality, LGBT rights, poverty, health care) that makes them feel something
+- What you look for: A story about a social-justice cause (equality, LGBT rights, poverty, health care) that makes them feel something; A credible, non-cynical framing of an issue
+- What turns you off: Topics they have already seen shared many times; Headline feels manipulative or oversold relative to the content
 - How you talk (real things people like you have said):
-  "seeking out content that generates a significant emotional response from both the reader and the writer"
-  "The original YouTube video got 433,000 Facebook shares; Upworthy’s got 2.5 million."
   "Upworthy attracts a huge community of highly influential, socially conscious citizens"
+  "repackages “meaningful” content from around the web in order to make it more popular on social media"
+  "The heart of Project Sunlight matches several of the top topics our audience voted to see more of in 2014."
+  "Some of their biggest hits have been about the economy, bullying"
 
 ## The situation
 It's 2014. You're scrolling your Facebook news feed on your phone or laptop: friends' photos, news, memes, and now and then a post from Upworthy that a friend shared or that you follow. Each Upworthy post shows a picture and a headline; tapping it opens the full article. You scroll past most posts in a second or two; only a small share of people who see any given post click it (often around 1 or 2 in 100).

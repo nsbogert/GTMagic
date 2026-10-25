@@ -20,6 +20,9 @@ Twin-2K-500 Mega-Study `infotainment` (300 US adults rated 18 news-post cards, 1
 | ref-gpt41-full-persona | twins | 100% <sub>[100%, 100%]</sub> | 0.64 | 0.57 <sub>[0.52, 0.62]</sub> | 0.61 <sub>[0.57, 0.66]</sub> | 0.61 <sub>[0.54, 0.69]</sub> | 100% | 0.68 | 0.73 | 0 |
 | ref-gpt41-persona-summary | twins | 100% <sub>[100%, 100%]</sub> | 0.71 | 0.71 <sub>[0.69, 0.73]</sub> | 0.72 <sub>[0.69, 0.76]</sub> | 0.54 <sub>[0.48, 0.61]</sub> | 100% | 0.48 | 1.15 | 0 |
 | ref-gpt5-full-persona | twins | 100% <sub>[100%, 100%]</sub> | 0.32 | 0.40 <sub>[0.37, 0.42]</sub> | 0.35 <sub>[0.30, 0.40]</sub> | 1.26 <sub>[1.18, 1.37]</sub> | 100% | -0.14 | 0.26 | 0 |
+| sonnet-persona-demo | twins | 100% <sub>[100%, 100%]</sub> | 0.80 | 0.89 <sub>[0.88, 0.91]</sub> | 0.80 <sub>[0.76, 0.84]</sub> | 0.33 <sub>[0.27, 0.39]</sub> | 100% | -0.04 | 0.45 | 0 |
+| sonnet-persona-full | twins | 100% <sub>[100%, 100%]</sub> | 0.81 | 0.87 <sub>[0.86, 0.89]</sub> | 0.80 <sub>[0.76, 0.83]</sub> | 0.37 <sub>[0.30, 0.44]</sub> | 100% | -0.28 | 0.31 | 0 |
+| sonnet-persona-traits | twins | 100% <sub>[100%, 100%]</sub> | 0.82 | 0.89 <sub>[0.88, 0.90]</sub> | 0.78 <sub>[0.74, 0.82]</sub> | 0.34 <sub>[0.28, 0.40]</sub> | 100% | 0.13 | 0.56 | 0 |
 | vanilla-opus | segment | 100% <sub>[100%, 100%]</sub> | 0.78 | 0.79 <sub>[0.76, 0.82]</sub> | 0.75 <sub>[0.73, 0.76]</sub> | 0.53 <sub>[0.46, 0.60]</sub> | 100% | 0.27 | 0.35 | 0 |
 
 Chance winner accuracy: 25%.
@@ -41,6 +44,9 @@ Chance winner accuracy: 25%.
 | ref-gpt41-full-persona | +0.41 |
 | ref-gpt41-persona-summary | +0.66 |
 | ref-gpt5-full-persona | +0.15 |
+| sonnet-persona-demo | +0.25 |
+| sonnet-persona-full | +0.18 |
+| sonnet-persona-traits | +0.32 |
 | vanilla-opus | +0.20 |
 
 ### Individual level (twin task)
@@ -57,6 +63,9 @@ Chance winner accuracy: 25%.
 | ref-gpt41-full-persona | 1.59 <sub>[1.45, 1.73]</sub> | 0.27 <sub>[0.20, 0.34]</sub> (n=50) | 0.25 | 0.57 |
 | ref-gpt41-persona-summary | 1.59 <sub>[1.45, 1.73]</sub> | 0.32 <sub>[0.24, 0.39]</sub> (n=50) | 0.25 | 0.62 |
 | ref-gpt5-full-persona | 1.98 <sub>[1.82, 2.13]</sub> | 0.22 <sub>[0.14, 0.29]</sub> (n=50) | 0.20 | 0.80 |
+| sonnet-persona-demo | 1.52 <sub>[1.38, 1.68]</sub> | 0.43 <sub>[0.35, 0.50]</sub> (n=50) | 0.21 | 0.54 |
+| sonnet-persona-full | 1.56 <sub>[1.38, 1.75]</sub> | 0.42 <sub>[0.34, 0.50]</sub> (n=50) | 0.21 | 0.55 |
+| sonnet-persona-traits | 1.55 <sub>[1.37, 1.74]</sub> | 0.46 <sub>[0.38, 0.54]</sub> (n=50) | 0.23 | 0.59 |
 
 ## test: 120 people, 18 segments with n ≥ 25, 22 real winners (0 differ from the overall winner), 2 real segment gaps
 

@@ -13,18 +13,19 @@ Your profile (from research on real readers):
 - Political lean: liberal
 - Facebook visit frequency: several times a day
 - Group: Feel-good incidental scrollers: Mainstream Facebook users, many of them parents and older adults, who meet Upworthy posts incidentally in their feed via friends' shares and click on heartwarming, inspiring or surprising stories rather than politics.
-- Role: student
-- Where you get your news and stories today: local TV news
-- Attention budget: low attention to spare: quick taps between other activities
-- How much you're scrolling right now: occasional
+- Role: retiree / grandparent
+- Where you get your news and stories today: Facebook feed (friends' shares)
+- Attention budget: moderate: will watch a short video
+- How much you're scrolling right now: daily
 - Skepticism toward clickbait: low
 - How often you click and share: occasional clicker, rare sharer
-- What you look for: An uplifting, emotional story (kindness, kids, families, underdogs); Something entertaining or that improves their day; A story a friend already shared or liked; Clear, simple language with an obvious emotional payoff
-- What turns you off: Overtly political or preachy framing; Headline that is vague about what the post is; Long or heavy content when they are just checking in on friends; Content that feels like an ad or a fundraising pitch
+- Your #1 concern right now: Something entertaining or that improves their day
+- What you look for: Something entertaining or that improves their day; Clear, simple language with an obvious emotional payoff
+- What turns you off: Headline that is vague about what the post is; Long or heavy content when they are just checking in on friends
 - How you talk (real things people like you have said):
-  "Usage among seniors continues to increase."
-  "Facebook determined that such stories were clicky, but not sticky."
-  "keeping up with friends and family is the biggest single driver to the site for both groups"
+  "You’re not going to do it by speaking formally to people who are there to have fun."
+  "About two-thirds (65%) of those who get news on Facebook say they visit the site several times a day"
+  "Despite all the criticism, most Upworthy content is actually pretty positive. And that's by design."
 
 ## The situation
 It's 2014. You're scrolling your Facebook news feed on your phone or laptop: friends' photos, news, memes, and now and then a post from Upworthy that a friend shared or that you follow. Each Upworthy post shows a picture and a headline; tapping it opens the full article. You scroll past most posts in a second or two; only a small share of people who see any given post click it (often around 1 or 2 in 100).
