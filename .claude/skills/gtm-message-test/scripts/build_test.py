@@ -225,9 +225,9 @@ def build(intake: dict, drafts: dict, args: argparse.Namespace) -> tuple[dict, d
         "repeatCustomerIds": pick_repeats(args.audience, rng, warnings, {str(s) for s in ctx["seg_ids"]}),
         "protocol": {"version": PROTOCOL_VERSION, "instructions": INSTRUCTIONS, "dimensionDefinitions": DIMENSIONS},
     }
-    # Ids repeat across rebuilds (exp_1, hyp_1…), so this is what tells answers to an older build apart.
-    request["fingerprint"] = hashlib.sha256(json.dumps([request["stimuli"], request["orderings"], request["repeatCustomerIds"]],
-                                                       sort_keys=True).encode()).hexdigest()[:12]
+    # Ids repeat across rebuilds (exp_1, hyp_1…), so this is what tells answers to an older build apart: a hash of
+    # everything customers are shown or asked. Opaque to readers, who only compare it for equality.
+    request["fingerprint"] = hashlib.sha256(json.dumps(request, sort_keys=True).encode()).hexdigest()[:12]
     return {"schemaVersion": 1, "round": 1, "hypotheses": hypotheses, "warnings": warnings}, request, errors, warnings
 
 

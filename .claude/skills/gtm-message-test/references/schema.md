@@ -39,7 +39,7 @@ interface PositioningSet {
 
 ## experiment-request.json (`build_test.py`)
 
-CONTRACTS.md `ExperimentRequest`: `schemaVersion: 1`, `id: "exp_1"`, `round: 1`, `scenario { context, decision, channel }`, `stimuli [{ label, candidateId, text }]`, `orderings` (a Williams Latin square of labels: see "For the simulation skill"), `repeatCustomerIds`, `protocol { version, instructions, dimensionDefinitions }`, plus `fingerprint` (Addition, optional): 12 hex characters computed by code from the stimuli, orderings and repeat customers. IDs repeat when the test is rebuilt, so this is what tells answers to an older build apart.
+CONTRACTS.md `ExperimentRequest`: `schemaVersion: 1`, `id: "exp_1"`, `round: 1`, `scenario { context, decision, channel }`, `stimuli [{ label, candidateId, text }]`, `orderings` (a Williams Latin square of labels: see "For the simulation skill"), `repeatCustomerIds`, `protocol { version, instructions, dimensionDefinitions }`, plus `fingerprint` (Addition, optional): 12 hex characters computed by code from everything else in the request (scenario, stimuli, orderings, repeat customers, protocol). It's opaque: compare it for equality, never recompute it. Skill files have no artifact envelope and IDs repeat when the test is rebuilt, so this is what tells answers to an older build apart.
 
 ## For the simulation skill
 
