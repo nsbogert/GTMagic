@@ -32,3 +32,8 @@ npm-debug.log*
 # Local Claude Code settings and agent worktrees
 .claude/settings.local.json
 .claude/worktrees/
+
+# Local tooling output
+.playwright-mcp/
+.impeccable/review/
+.superpowers/
