@@ -33,7 +33,14 @@ describe("plates", () => {
 
   it("never shows owner-voice phrases as customer quotes", () => {
     const b = { ...brief, lexicon: brief.lexicon.map((l) => ({ ...l, voice: "owner" as const })) };
-    expect(html("research", b)).not.toContain("<q");
+    expect(html("research", b)).not.toContain("<mark>");
+  });
+
+  it("shows each group's other forum and review quotes, not only the phrase-linked ones", () => {
+    const h = html("research");
+    const phraseLinked = brief.segments.reduce((n, s) => n + Math.min(2, brief.lexicon.filter((l) => l.segmentIds.includes(s.id)).length), 0);
+    expect((h.match(/<q>/g) ?? []).length).toBeGreaterThan(phraseLinked);
+    expect(h).toContain("https://www.mumsnet.com/talk/");
   });
 
   it("marks a card that changed after it was shown", () => {

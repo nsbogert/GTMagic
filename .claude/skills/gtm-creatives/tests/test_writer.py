@@ -47,7 +47,7 @@ class WriterTest(unittest.TestCase):
         return result
 
     def seg1(self, n: int) -> list:
-        return [option(headline=f"Lose the fat, not the muscle, option {w}") for w in "abcdefgh"[:n]]
+        return [option(headline=f"Lose the fat, not the muscle mass, option {w}") for w in "abcdefgh"[:n]]
 
     def test_principles_section_only(self) -> None:
         self.assertNotIn("Higher total wins", self.p["system"])
@@ -62,10 +62,10 @@ class WriterTest(unittest.TestCase):
         self.assertIn("4 for seg_2", result.sent[1]["messages"][1]["content"])
 
     def test_call_2_withholds_copied_quotes_whatever_dropped_them(self) -> None:
-        quote = "Terrified I'm losing muscle, not just fat, is the best fear to have"   # copied, and a superlative
+        quote = "Lost muscle mass though and feel quite frail, the best"   # copied, and a superlative
         result = self.run_with([reply([option(headline=quote)]), reply([])])
         self.assertIn("withheld", result.sent[1]["messages"][1]["content"])
-        self.assertNotIn("Terrified", result.sent[1]["messages"][1]["content"])
+        self.assertNotIn("feel quite frail", result.sent[1]["messages"][1]["content"])
 
     def test_failed_call_2_keeps_call_1(self) -> None:
         result = self.run_with([reply(self.seg1(3)), orc.CallFailed("HTTP 500: boom")])

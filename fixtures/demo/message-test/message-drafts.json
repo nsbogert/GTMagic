@@ -9,12 +9,10 @@
         "seg_1"
       ],
       "lexiconIds": [
-        "lex_5",
-        "lex_2"
+        "lex_3"
       ],
       "evidenceIds": [
-        "ev_19",
-        "ev_2"
+        "ev_5"
       ],
       "valueProposition": "Protect muscle and strength during weight loss with short sessions and simple protein targets.",
       "differentiator": "Built for strength during weight loss, not for eating less.",
@@ -25,7 +23,7 @@
     },
     {
       "angle": "Habits that last",
-      "headline": "Build habits that actually last",
+      "headline": "Habits that keep the weight off",
       "subheadline": "A strength routine you can keep long after the weight is gone.",
       "targetSegmentIds": [
         "seg_1",
@@ -46,7 +44,7 @@
     },
     {
       "angle": "Tell me what to do",
-      "headline": "A plan that tells you exactly what to do",
+      "headline": "Gain the confidence to use the free weights",
       "subheadline": "Twenty-minute strength sessions laid out day by day, for people new to the weight room.",
       "targetSegmentIds": [
         "seg_2"
@@ -88,8 +86,8 @@
     },
     {
       "angle": "Strength over the scale",
-      "headline": "Muscle is the plan",
-      "subheadline": "For adults who care more about staying strong than the number on the scale.",
+      "headline": "The plan for not losing too much muscle",
+      "subheadline": "For adults who care more about not losing too much muscle than the number on the scale.",
       "targetSegmentIds": [
         "seg_1"
       ],
