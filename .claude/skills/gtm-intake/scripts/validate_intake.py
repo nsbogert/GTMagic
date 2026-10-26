@@ -22,6 +22,7 @@ from provenance import check_evidence, check_lexicon, load_log, norm  # noqa: E4
 from economics import compute_ads, num, size_math  # noqa: E402
 from creatives import check_creatives  # noqa: E402
 from structure import check_structure  # noqa: E402
+from safe_paths import readable, writable  # noqa: E402
 
 CORE_ATTRIBUTES = ["role", "currentSolution", "priceSensitivity", "urgency", "skepticism", "buyingStage"]
 TODAY_DIMENSIONS = ("geography", "age", "price", "channel", "regulatory", "interest")
@@ -184,6 +185,9 @@ def main() -> int:
     ap.add_argument("--log", help="research-log.jsonl; when given, web evidence must appear in it")
     ap.add_argument("--write", action="store_true", help="write computed fields back to the file")
     args = ap.parse_args()
+    (writable if args.write else readable)(args.intake)
+    if args.log:
+        readable(args.log)
     with open(args.intake, encoding="utf-8") as f:
         brief = json.load(f)
     if not isinstance(brief, dict):

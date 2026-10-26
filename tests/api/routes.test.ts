@@ -8,6 +8,8 @@ import { GET as business } from "@/app/api/businesses/[slug]/route";
 import { GET as download } from "@/app/api/businesses/[slug]/intake.json/route";
 import { GET as session } from "@/app/api/sessions/[id]/route";
 import { POST as answer } from "@/app/api/sessions/[id]/answer/route";
+import { MAX_ANSWER_BYTES } from "@/app/_session/store";
+import nextConfig from "../../next.config";
 
 const demo = readFileSync("fixtures/demo/intake.json", "utf8");
 const SID = "abcd1234ef";
@@ -88,6 +90,23 @@ describe("API routes", () => {
     const big = new File([new Uint8Array(11 * 1024 * 1024)], "big.csv");
     expect((await post(form("ev-1", "x", [big]))).status).toBe(413);
     expect((await post(form("ev-1", "x", [new File(["x"], "run.exe")]))).status).toBe(415);
+  });
+
+  it("refuses an answer whose files are too big together, before reading it", async () => {
+    const r = await answer(new Request("http://x", { method: "POST", body: "x", headers: { "content-length": String(MAX_ANSWER_BYTES + 1) } }), params({ id: SID }));
+    expect(r.status).toBe(413);
+  });
+
+  it("explains a cut-off upload instead of crashing", async () => {
+    const cut = "--b\r\ncontent-disposition: form-data; name=\"files\"; filename=\"a.csv\"\r\n\r\na,b"; // no closing boundary
+    const r = await answer(new Request("http://x", { method: "POST", body: cut, headers: { "content-type": "multipart/form-data; boundary=b" } }), params({ id: SID }));
+    expect(r.status).toBe(400);
+    expect((await r.json()).error).toMatch(/Couldn't read that upload/);
+  });
+
+  it("keeps the proxy's body buffer above the answer limit, so uploads aren't cut off", () => {
+    const limit = /^(\d+)mb$/.exec(String(nextConfig.experimental?.proxyClientMaxBodySize))?.[1];
+    expect(Number(limit) * 1024 * 1024).toBeGreaterThan(MAX_ANSWER_BYTES);
   });
 
   it("returns 404 for an unknown session", async () => {

@@ -19,6 +19,7 @@ from brief_sections import (CHANNELS, FINDING_KINDS, READINESS, SEGMENT_VERDICTS
                             SKEPTIC_RESULTS, SOURCE_TYPES, Json, best_guess, count, currency_of,
                             customer_worth, made, money, must_be_true, not_done, verdict_text)
 from guardrails import DRUG_NAMES  # noqa: E402  (drug names only: generic words like "medication" stay)
+from safe_paths import readable, writable  # noqa: E402
 
 QUOTE_SOURCES = {"forum-post", "review"}  # first-hand customer words, not stats
 NO_GROUP = "We didn't find a group we can stand behind yet."
@@ -248,6 +249,9 @@ def main() -> int:
     parser.add_argument("--no-links", action="store_true", help="hide source links (e.g. for video)")
     parser.add_argument("--public", action="store_true", help="no links, and mask medication names in the baseline")
     args = parser.parse_args()
+    readable(args.intake)
+    if args.output:
+        writable(args.output)
     try:
         with open(args.intake, encoding="utf-8") as fh:
             brief = json.load(fh)

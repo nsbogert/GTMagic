@@ -32,6 +32,7 @@ from urllib.parse import urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # works under python -I too
 from provenance import PERSONAL_DETAILS  # noqa: E402
+from safe_paths import readable, writable  # noqa: E402
 
 API = "https://api.tavily.com"
 RESEARCH_CAP = 15            # SKILL.md: at most 15 searches and fetches today
@@ -225,6 +226,9 @@ def main() -> int:
         p.add_argument("--cap", type=int, default=RESEARCH_CAP, help="lower the cap (tests); it can't go above 15")
         p.add_argument("--replay", help="use a saved Tavily response instead of calling the API (tests, offline demo)")
     args = ap.parse_args()
+    writable(args.log)
+    if getattr(args, "replay", None):
+        readable(args.replay)
 
     log = read_log(args.log)
     if args.command == "budget":

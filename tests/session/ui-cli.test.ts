@@ -1,5 +1,5 @@
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
-import { appendFileSync, mkdtempSync, readFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -87,5 +87,57 @@ describe("ui CLI", () => {
   it("rejects unsafe business names", () => {
     const id = startSession();
     expect(run("link", id, "../x").status).toBe(2);
+  });
+
+  it("keeps an upload in the business's sources/, never overwriting an earlier one", () => {
+    const id = startSession();
+    const uploads = join(root, "gtm-workspace", ".sessions", id, "uploads");
+    writeFileSync(join(uploads, "spring-ad.png"), "first");
+    const first = run("keep", id, "uploads/spring-ad.png", "keepstrong");
+    expect(first.status).toBe(0);
+    expect(first.stdout).toBe("KEPT sources/spring-ad.png\n");
+    writeFileSync(join(uploads, "spring-ad.png"), "second");
+    expect(run("keep", id, "spring-ad.png", "keepstrong").stdout).toBe("KEPT sources/spring-ad-1.png\n");
+    const sources = join(root, "gtm-workspace", "keepstrong", "sources");
+    expect(readFileSync(join(sources, "spring-ad.png"), "utf8")).toBe("first");
+    expect(readFileSync(join(sources, "spring-ad-1.png"), "utf8")).toBe("second");
+  });
+
+  it("keeps only real uploads from this session, into a safe business folder", () => {
+    const id = startSession();
+    const uploads = join(root, "gtm-workspace", ".sessions", id, "uploads");
+    writeFileSync(join(root, "secret.txt"), "x");
+    symlinkSync(join(root, "secret.txt"), join(uploads, "link.txt"));
+    for (const args of [
+      ["uploads/../../../../secret.txt", "keepstrong"],
+      ["/etc/hosts", "keepstrong"],
+      ["link.txt", "keepstrong"],
+      ["missing.png", "keepstrong"],
+      ["link.txt", "../x"],
+    ]) expect(run("keep", id, ...args).status, args.join(" ")).toBe(2);
+    expect(existsSync(join(root, "gtm-workspace", "keepstrong"))).toBe(false);
+  });
+
+  it("accepts the upload's full workspace path too", () => {
+    const id = startSession();
+    writeFileSync(join(root, "gtm-workspace", ".sessions", id, "uploads", "ads.csv"), "a,b");
+    expect(run("keep", id, `gtm-workspace/.sessions/${id}/uploads/ads.csv`, "keepstrong").stdout).toBe("KEPT sources/ads.csv\n");
+  });
+
+  it("won't follow a symlinked folder out of the workspace, on either side", () => {
+    const id = startSession();
+    const outside = mkdtempSync(join(tmpdir(), "gtm-outside-"));
+    writeFileSync(join(outside, "secret.txt"), "x");
+    // Source side: the uploads folder itself points outside.
+    const uploads = join(root, "gtm-workspace", ".sessions", id, "uploads");
+    rmSync(uploads, { recursive: true });
+    symlinkSync(outside, uploads);
+    expect(run("keep", id, "secret.txt", "keepstrong").status).toBe(2);
+    // Destination side: the business folder points outside.
+    const id2 = startSession();
+    writeFileSync(join(root, "gtm-workspace", ".sessions", id2, "uploads", "ad.png"), "png");
+    symlinkSync(outside, join(root, "gtm-workspace", "acme"));
+    expect(run("keep", id2, "ad.png", "acme").status).toBe(2);
+    expect(readdirSync(outside)).toEqual(["secret.txt"]);
   });
 });

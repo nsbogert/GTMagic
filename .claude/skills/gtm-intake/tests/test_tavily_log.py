@@ -33,7 +33,8 @@ EXTRACT = {"results": [{"url": "https://example.com/keepstrong", "title": "KeepS
 class TavilyLog(unittest.TestCase):
     def setUp(self):
         self.dir = tempfile.TemporaryDirectory()
-        self.ws = Path(self.dir.name)
+        self.ws = Path(self.dir.name) / "gtm-workspace" / "keepstrong"  # scripts only touch files under GTM_ROOT/gtm-workspace
+        self.ws.mkdir(parents=True)
         self.log = self.ws / "research-log.jsonl"
         for name, data in (("search.json", SEARCH), ("extract.json", EXTRACT)):
             (self.ws / name).write_text(json.dumps(data))
@@ -45,6 +46,7 @@ class TavilyLog(unittest.TestCase):
         env = {k: v for k, v in os.environ.items() if k != "TAVILY_API_KEY"}
         env["TAVILY_NO_KEYCHAIN"] = "1"  # never pick up a real key from this machine's Keychain
         env["TAVILY_LOG_REPLAY"] = "1"   # these tests replay saved responses
+        env["GTM_ROOT"] = self.dir.name
         if key:
             env["TAVILY_API_KEY"] = "tvly-test"
         return subprocess.run([sys.executable, "-I", str(SCRIPTS / "tavily_log.py"), *args, "--log", str(self.log)],
