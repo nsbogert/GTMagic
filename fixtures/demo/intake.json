@@ -923,7 +923,7 @@
     {
       "angle": "Strength over the scale",
       "headline": "Muscle is the plan",
-      "subheadline": "For adults who care more about staying strong than the number on the scale.",
+      "subheadline": "For adults who care more about not losing too much muscle than the number on the scale.",
       "segmentId": "seg_1",
       "lexiconIds": [
         "lex_4"
@@ -943,7 +943,7 @@
   "lexicon": [
     {
       "id": "lex_1",
-      "phrase": "losing muscle, not just fat",
+      "phrase": "definitely lost muscle mass",
       "segmentIds": [
         "seg_1"
       ],
@@ -952,7 +952,7 @@
     },
     {
       "id": "lex_2",
-      "phrase": "hitting 100g feels impossible",
+      "phrase": "protein to work out/not lose muscle",
       "segmentIds": [
         "seg_1"
       ],
@@ -961,7 +961,7 @@
     },
     {
       "id": "lex_3",
-      "phrase": "habits that actually last",
+      "phrase": "keep all this weight off",
       "segmentIds": [
         "seg_1"
       ],
@@ -970,7 +970,7 @@
     },
     {
       "id": "lex_4",
-      "phrase": "Muscle is my retirement plan",
+      "phrase": "not losing too much muscle",
       "segmentIds": [
         "seg_1"
       ],
@@ -979,7 +979,7 @@
     },
     {
       "id": "lex_5",
-      "phrase": "keeping my strength while the weight comes off",
+      "phrase": "I want to feel stronger",
       "segmentIds": [
         "seg_1"
       ],
@@ -988,7 +988,7 @@
     },
     {
       "id": "lex_6",
-      "phrase": "I'm barely eating as it is",
+      "phrase": "days I just drink protein shakes",
       "segmentIds": [
         "seg_1"
       ],
@@ -997,7 +997,7 @@
     },
     {
       "id": "lex_7",
-      "phrase": "tell me exactly what to do",
+      "phrase": "lack the confidence to use them",
       "segmentIds": [
         "seg_2"
       ],
@@ -1010,8 +1010,8 @@
       "id": "ev_1",
       "origin": "web",
       "sourceType": "forum-post",
-      "url": "https://example.com/demo/forum/101",
-      "excerpt": "I've lost 40 lbs on my shot but my arms look deflated. Terrified I'm losing muscle, not just fat.",
+      "url": "https://www.mumsnet.com/talk/weight-loss-injections/5326000-mounjaro-and-exercise",
+      "excerpt": "I have definitely lost muscle mass though and feel quite frail.",
       "segmentIds": [
         "seg_1"
       ],
@@ -1019,15 +1019,16 @@
         "con_muscle"
       ],
       "confidence": "low",
-      "limitations": "Fictional demo data",
-      "retrievedAt": "2026-10-25T13:00:00-07:00"
+      "limitations": "Real public forum post (short excerpt, username removed); the business in this demo is fictional",
+      "retrievedAt": "2026-10-25T17:00:00-07:00",
+      "title": "Mumsnet: Mounjaro and exercise (30 Apr 2025)"
     },
     {
       "id": "ev_2",
       "origin": "web",
       "sourceType": "forum-post",
-      "url": "https://example.com/demo/forum/102",
-      "excerpt": "Protein is the hardest part. I'm never hungry anymore, so hitting 100g feels impossible most days.",
+      "url": "https://www.mumsnet.com/talk/weight-loss-injections/5266826-mounjaro-and-working-out",
+      "excerpt": "I am wondering how I can possibly eat enough protein to work out/not lose muscle",
       "segmentIds": [
         "seg_1"
       ],
@@ -1035,8 +1036,9 @@
         "con_appetite"
       ],
       "confidence": "low",
-      "limitations": "Fictional demo data",
-      "retrievedAt": "2026-10-25T13:00:00-07:00"
+      "limitations": "Real public forum post (short excerpt, username removed); the business in this demo is fictional; the poster had just started the medication and felt less hungry",
+      "retrievedAt": "2026-10-25T17:00:00-07:00",
+      "title": "Mumsnet: Mounjaro and working out (3 Feb 2025)"
     },
     {
       "id": "ev_3",
@@ -1076,8 +1078,8 @@
       "id": "ev_5",
       "origin": "web",
       "sourceType": "forum-post",
-      "url": "https://example.com/demo/forum/105",
-      "excerpt": "Scared of gaining it all back when I come off the meds. I want habits that actually last.",
+      "url": "https://community.myfitnesspal.com/en/discussion/10949926/first-week-of-zepbound",
+      "excerpt": "I don't see how I can keep all this weight off forever (without glp help), but I'm trying not to stress about that right now.",
       "segmentIds": [
         "seg_1"
       ],
@@ -1085,8 +1087,9 @@
         "con_rebound"
       ],
       "confidence": "low",
-      "limitations": "Fictional demo data",
-      "retrievedAt": "2026-10-25T13:00:00-07:00"
+      "limitations": "Real public forum post (short excerpt, username removed); the business in this demo is fictional",
+      "retrievedAt": "2026-10-25T17:00:00-07:00",
+      "title": "MyFitnessPal Community: First week of Zepbound (23 Oct 2025)"
     },
     {
       "id": "ev_6",
@@ -1110,8 +1113,8 @@
       "id": "ev_7",
       "origin": "web",
       "sourceType": "forum-post",
-      "url": "https://example.com/demo/forum/107",
-      "excerpt": "I quit my old app because it kept telling me to eat less. I'm barely eating as it is.",
+      "url": "https://www.mumsnet.com/talk/weight-loss-injections/5311085-6-weeks-into-mounjaro-suddenly-cant-eat",
+      "excerpt": "On really bad days I just drink protein shakes.",
       "segmentIds": [
         "seg_1"
       ],
@@ -1119,15 +1122,16 @@
         "con_appetite"
       ],
       "confidence": "low",
-      "limitations": "Fictional demo data",
-      "retrievedAt": "2026-10-25T13:00:00-07:00"
+      "limitations": "Real public forum post (short excerpt, username removed); the business in this demo is fictional",
+      "retrievedAt": "2026-10-25T17:00:00-07:00",
+      "title": "Mumsnet: 6 weeks into mounjaro, suddenly can’t eat (9 Apr 2025)"
     },
     {
       "id": "ev_8",
       "origin": "web",
       "sourceType": "forum-post",
-      "url": "https://example.com/demo/forum/108",
-      "excerpt": "At 52 I care more about staying strong than the number on the scale. Muscle is my retirement plan.",
+      "url": "https://www.mumsnet.com/talk/weight-loss-injections/5378966-mounjaro-menopause-and-me",
+      "excerpt": "particularly aware of not losing too much muscle/bone density so I do weights at home",
       "segmentIds": [
         "seg_1"
       ],
@@ -1135,8 +1139,9 @@
         "con_muscle"
       ],
       "confidence": "low",
-      "limitations": "Fictional demo data",
-      "retrievedAt": "2026-10-25T13:00:00-07:00"
+      "limitations": "Real public forum post (short excerpt, username removed); the business in this demo is fictional",
+      "retrievedAt": "2026-10-25T17:00:00-07:00",
+      "title": "Mumsnet: Mounjaro, menopause and me. (23 Jul 2025)"
     },
     {
       "id": "ev_9",
@@ -1178,8 +1183,8 @@
       "id": "ev_11",
       "origin": "web",
       "sourceType": "forum-post",
-      "url": "https://example.com/demo/forum/111",
-      "excerpt": "Walking into the weight room still makes me anxious. I need someone to tell me exactly what to do.",
+      "url": "https://www.mumsnet.com/talk/weight-loss-injections/5392594-fitness-advice",
+      "excerpt": "Yes, my gym has free weights. I just lack the confidence to use them to be honest with you.",
       "segmentIds": [
         "seg_2"
       ],
@@ -1187,8 +1192,9 @@
         "con_intimidation"
       ],
       "confidence": "low",
-      "limitations": "Fictional demo data",
-      "retrievedAt": "2026-10-25T13:00:00-07:00"
+      "limitations": "Real public forum post (short excerpt, username removed); the business in this demo is fictional",
+      "retrievedAt": "2026-10-25T17:00:00-07:00",
+      "title": "Mumsnet: Fitness advice (15 Aug 2025)"
     },
     {
       "id": "ev_12",
@@ -1211,8 +1217,8 @@
       "id": "ev_13",
       "origin": "web",
       "sourceType": "forum-post",
-      "url": "https://www.mumsnet.com/talk/weight-loss-injections/5311085-6-weeks-into-mounjaro-suddenly-cant-eat",
-      "excerpt": "On really bad days I just drink protein shakes.",
+      "url": "https://www.mumsnet.com/talk/weight-loss-injections/5381286-mounjaro-best-tips-from-regular-users",
+      "excerpt": "i struggle with enough protein and find chicken sausages helpful",
       "segmentIds": [
         "seg_1"
       ],
@@ -1222,7 +1228,7 @@
       "confidence": "low",
       "limitations": "Real public forum post (short excerpt, username removed); the business in this demo is fictional",
       "retrievedAt": "2026-10-25T17:00:00-07:00",
-      "title": "Mumsnet: 6 weeks into mounjaro, suddenly can’t eat (9 Apr 2025)"
+      "title": "Mumsnet: Mounjaro - Best tips from regular users (28 Jul 2025)"
     },
     {
       "id": "ev_14",
@@ -1307,8 +1313,8 @@
       "id": "ev_19",
       "origin": "web",
       "sourceType": "forum-post",
-      "url": "https://example.com/demo/forum/119",
-      "excerpt": "I don't need another calorie counter. I need help keeping my strength while the weight comes off.",
+      "url": "https://www.mumsnet.com/talk/weight_loss_chat/5083729-i-need-help-from-someone-anyone-but-who",
+      "excerpt": "I don't want to just rely on injections and diet. I want to move more. I want to feel stronger.",
       "segmentIds": [
         "seg_1"
       ],
@@ -1316,8 +1322,9 @@
         "con_muscle"
       ],
       "confidence": "low",
-      "limitations": "Fictional demo data",
-      "retrievedAt": "2026-10-25T13:00:00-07:00"
+      "limitations": "Real public forum post (short excerpt, username removed); the business in this demo is fictional; the poster was about to start the medication",
+      "retrievedAt": "2026-10-25T17:00:00-07:00",
+      "title": "Mumsnet: I need help from someone, anyone, but who? (27 May 2024)"
     },
     {
       "id": "ev_20",
@@ -1413,6 +1420,7 @@
       "derivation": "Script count of concern tags across this group's excerpts (see concernBundles).",
       "evidenceIds": [
         "ev_1",
+        "ev_4",
         "ev_8",
         "ev_10",
         "ev_19"
@@ -1572,7 +1580,7 @@
     ]
   },
   "openQuestions": [
-    "DEMO FIXTURE: the business, owner, ads and numbers are fictional. Eight forum quotes (ev_3, ev_6, ev_9, ev_10, ev_13, ev_17, ev_18, ev_25) are real public posts, linked; the rest of the evidence is fictional.",
+    "DEMO FIXTURE: the business, owner, ads, reviews of the fictional competitor and numbers are fictional. Every forum-post quote is a real public post, linked.",
     "Not asked yet: should ads target women, men or both? The one muscle ad that worked ran to women 35-54 only (ev_16), so men are untested."
   ]
 }

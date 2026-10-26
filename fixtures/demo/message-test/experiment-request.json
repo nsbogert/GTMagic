@@ -10,8 +10,8 @@
   "stimuli": [
     {
       "label": "A",
-      "candidateId": "hyp_5",
-      "text": "Lose weight without losing muscle."
+      "candidateId": "hyp_3",
+      "text": "Gain the confidence to use the free weights."
     },
     {
       "label": "B",
@@ -20,8 +20,8 @@
     },
     {
       "label": "C",
-      "candidateId": "hyp_3",
-      "text": "A plan that tells you exactly what to do."
+      "candidateId": "hyp_4",
+      "text": "Protein help for the days you're not hungry."
     },
     {
       "label": "D",
@@ -30,13 +30,13 @@
     },
     {
       "label": "E",
-      "candidateId": "hyp_4",
-      "text": "Muscle is the plan."
+      "candidateId": "hyp_5",
+      "text": "Lose weight without losing muscle."
     },
     {
       "label": "F",
       "candidateId": "hyp_2",
-      "text": "Build habits that actually last."
+      "text": "Habits that keep the weight off."
     }
   ],
   "orderings": [
@@ -101,5 +101,5 @@
       "actionIntent": "How likely you'd be to click or sign up after seeing it."
     }
   },
-  "fingerprint": "7297346dabae"
+  "fingerprint": "ee35906c2582"
 }

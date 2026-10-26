@@ -72,9 +72,9 @@ class ChecksTest(unittest.TestCase):
 
     def test_drops(self) -> None:
         cases = {
-            "quotation": {"headline": "“Muscle is your retirement plan” starts today", "lexiconIds": ["lex_4"]},
+            "quotation": {"headline": "“Not losing too much muscle” starts today", "lexiconIds": ["lex_4"]},
             "speaks as a customer": {"headline": "I kept my muscle, not just fat, at last"},
-            "verbatim first person": {"headline": "Keeping my strength while the weight comes off", "lexiconIds": ["lex_5"]},
+            "verbatim first person": {"headline": "I want to feel stronger", "lexiconIds": ["lex_5"]},
             "made-up person": {"headline": "She lost the fat, not the muscle she built"},
             "body result": {"subheadline": "Sessions that boost your metabolism so you keep muscle, not just lose fat."},
             "for good": {"subheadline": "Keep the muscle, not just lose the fat, and keep the weight off for good."},
@@ -91,7 +91,7 @@ class ChecksTest(unittest.TestCase):
                                        "lexiconIds": ["lex_1", "lex_2"]},
             "doesn't really use": {"headline": "Strength sessions for busy weeks"},
             "no real customer phrase": {"lexiconIds": []},
-            "copies a quote": {"subheadline": "For adults who care more about staying strong than the scale."},
+            "copies a quote": {"subheadline": "Short sessions so I do weights at home, simply."},
             "same headline": {"headline": "Lose weight without losing muscle"},
             "over 10 words": {"headline": "Lose the fat, not the muscle you worked so hard for, ever"},
             "button too long": {"callToAction": "Start your very first strength session today"},
@@ -103,11 +103,11 @@ class ChecksTest(unittest.TestCase):
 
     def test_allowed(self) -> None:
         # A customer phrase turned into second person still counts, and its own 6-word runs aren't "copying".
-        self.assertEqual(self.reason(headline="Keep your strength while the weight comes off, simply",
+        self.assertEqual(self.reason(headline="When you want to feel stronger, start small",
                                      lexiconIds=["lex_5"]), "")
-        self.assertEqual(self.reason(headline="When hitting 100g feels impossible, start smaller", lexiconIds=["lex_2"]), "")
+        self.assertEqual(self.reason(headline="Enough protein to work out and not lose muscle", lexiconIds=["lex_2"]), "")
         self.assertEqual(self.reason(subheadline="Strength sessions for people losing weight, at $14.99 a month."), "")
-        self.assertEqual(self.reason(headline="Lose the fat, not the muscle you’ve worked for"), "")  # ’ apostrophe
+        self.assertEqual(self.reason(headline="Lose the fat, not the muscle mass you’ve worked for"), "")  # ’ apostrophe
 
     def test_offers_and_number_words_are_cautions(self) -> None:
         c = check_option(option(subheadline="Three short strength sessions a week, free to try, for people losing weight."),
@@ -126,8 +126,8 @@ class ChecksTest(unittest.TestCase):
     def test_duplicates_and_interleave(self) -> None:
         self.assertTrue(check_option(option(), self.ctx).kept)
         self.assertFalse(check_option(option(angle="Other"), self.ctx).kept)
-        kept = [check_option(option(headline=f"Lose the fat, not the muscle {w}"), self.ctx) for w in ("now", "today")]
-        kept.append(check_option(option(headline="New to lifting? We tell you exactly what to do",
+        kept = [check_option(option(headline=f"Lose the fat, not the muscle mass {w}"), self.ctx) for w in ("now", "today")]
+        kept.append(check_option(option(headline="Lack the confidence to use free weights? Start here",
                                         targetSegmentId="seg_2", lexiconIds=["lex_7"]), self.ctx))
         self.assertEqual([c.option["targetSegmentId"] for c in interleave(kept, ["seg_1", "seg_2"])],
                          ["seg_1", "seg_2", "seg_1"])

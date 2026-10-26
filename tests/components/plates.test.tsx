@@ -38,7 +38,8 @@ describe("plates", () => {
 
   it("shows each group's other forum and review quotes, not only the phrase-linked ones", () => {
     const h = html("research");
-    expect(h).toContain("I just feel exhausted the whole time.");
+    const phraseLinked = brief.segments.reduce((n, s) => n + Math.min(2, brief.lexicon.filter((l) => l.segmentIds.includes(s.id)).length), 0);
+    expect((h.match(/<q>/g) ?? []).length).toBeGreaterThan(phraseLinked);
     expect(h).toContain("https://www.mumsnet.com/talk/");
   });
 

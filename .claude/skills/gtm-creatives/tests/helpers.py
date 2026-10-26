@@ -29,7 +29,7 @@ def demo() -> dict:
 
 def option(**over: object) -> dict:
     base = {"angle": "Strength over the scale", "targetSegmentId": "seg_1",
-            "headline": "Lose the fat, not the muscle you worked for",
+            "headline": "Lose the fat, not the muscle mass you worked for",
             "subheadline": "Short strength sessions and protein help for people who want to stay strong.",
             "callToAction": "Start your first session", "lexiconIds": ["lex_1"], "principlesUsed": [1],
             "valueProposition": "Strength kept.", "differentiator": "Muscle first.", "whyItMightWork": "Names the fear.",
