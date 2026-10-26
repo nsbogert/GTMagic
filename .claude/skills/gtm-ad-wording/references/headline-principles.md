@@ -1,4 +1,4 @@
-<!-- Learned by claude-opus-5.5 from 223 Upworthy headline A/B tests (exploratory split, Upworthy Research Archive, CC BY 4.0, https://osf.io/jd64p/), 2026-10-25. Prompt: learn-principles-v1. Benchmarked on 400 held-out tests: no significant edge over plain Claude Opus (see SKILL.md). Copied verbatim from evals/benchmarks/upworthy/principles-v1.md. -->
+<!-- Learned by claude-opus-5.5 from 223 Upworthy headline A/B tests (exploratory split, Upworthy Research Archive, CC BY 4.0, https://osf.io/jd64p/), 2026-10-25. Prompt: learn-principles-v1. -->
 
 # Principles for predicting the winning headline (within one article)
 
