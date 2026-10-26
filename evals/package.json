@@ -4,11 +4,8 @@
   "type": "module",
   "description": "Known-answer evals: score GTMagic and one-prompt baselines against a real founder's ground truth",
   "scripts": {
-    "eval": "tsx src/cli.ts",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/*.test.ts",
-    "upworthy": "tsx src/upworthy/cli.ts",
-    "hillstrom": "tsx src/hillstrom/cli.ts",
+    "test": "tsx --test src/megastudy.test.ts",
     "megastudy": "tsx src/megastudy/cli.ts"
   },
   "dependencies": {

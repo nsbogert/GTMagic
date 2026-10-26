@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { mulberry32, shuffle } from "../upworthy/rng";
+import { mulberry32, shuffle } from "../shared/rng";
 import { SEGMENTS } from "./segments";
 import { writeTruthSummary } from "./summary";
 import { computeTruth } from "./truth";

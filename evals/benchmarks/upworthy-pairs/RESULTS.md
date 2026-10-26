@@ -5,16 +5,6 @@
 | chance | 50.0% | | 1.29% | |
 | oracle | 100% | | 1.76% | |
 | vanilla-opus | 68.0% | [58.0%, 77.0%] | 1.47% | 0 |
-| vanilla-opus-icp | 63.0% | [53.0%, 72.0%] | 1.45% | 0 |
-| opus-synthesis | 55.0% | [45.0%, 65.0%] | 1.36% | 0 |
-| opus-final-v3 | 63.0% | [53.0%, 72.0%] | 1.42% | 0 |
-| icp-crowd v3 (10 Sonnet, own pain points, majority) | 53.0% | [43.5%, 62.5%] | 1.34% | 0 |
 
 **Paired difference vs vanilla-opus** (percentage points, 95% bootstrap CI)
 
-- vanilla-opus-icp: -5.0 [-12.0, +1.0]
-- opus-synthesis: -13.0 [-22.0, -4.0] (significant)
-- opus-final-v3: -5.0 [-13.0, +2.0]
-- icp-crowd v3 (10 Sonnet, own pain points, majority): -15.0 [-25.0, -5.0] (significant)
-
-Crowd: 10/10 agents; 0 invalid answers. When ≥70% of the crowd agreed (79 pairs), it was right 57%.

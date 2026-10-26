@@ -1,4 +1,4 @@
-import { mulberry32 } from "../upworthy/rng";
+import { mulberry32 } from "../shared/rng";
 import { choiceSets, quantities } from "./design";
 import { PAIRS, SEGMENTS } from "./segments";
 import { argmax, bh, bootP, bootstrap, dot, interval, mean } from "./stats";

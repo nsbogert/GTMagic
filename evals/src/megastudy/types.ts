@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { EVALS_DIR } from "../store";
+import { EVALS_DIR } from "../shared/paths";
 
 export const BENCH_DIR = join(EVALS_DIR, "benchmarks", "megastudy");
 export const PRED_DIR = join(BENCH_DIR, "predictions");

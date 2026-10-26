@@ -1,6 +1,6 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { mulberry32 } from "../upworthy/rng";
+import { mulberry32 } from "../shared/rng";
 import { loadSurvey } from "./design";
 import { loadTruth } from "./score";
 import { SEGMENTS } from "./segments";

@@ -1,4 +1,4 @@
-import { mulberry32 } from "../upworthy/rng";
+import { mulberry32 } from "../shared/rng";
 import type { Interval } from "./types";
 
 export const mean = (xs: readonly number[]): number => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : Number.NaN);
