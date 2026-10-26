@@ -1,6 +1,6 @@
 # GTMagic evals
 
-Benchmarks behind the claims in [RESULTS.md](RESULTS.md). Pipeline and benchmark diagram: [benchmarks/OVERVIEW.md](benchmarks/OVERVIEW.md). Every run, prompt, model and effort level: [benchmarks/RUNLOG.md](benchmarks/RUNLOG.md).
+Benchmarks behind the claims in [RESULTS.md](RESULTS.md). System and benchmark diagrams: [../docs/SYSTEM_DIAGRAMS.md](../docs/SYSTEM_DIAGRAMS.md). Every run, prompt, model and effort level: [benchmarks/RUNLOG.md](benchmarks/RUNLOG.md).
 
 | Folder | What |
 |---|---|
