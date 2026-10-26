@@ -1,9 +1,9 @@
-import { existsSync, mkdtempSync, readFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
 import { agentState, launchAgent, stopAgent } from "@/app/_session/launcher";
-import { createSession, readSession } from "@/app/_session/store";
+import { appendAnswer, createSession, readSession } from "@/app/_session/store";
 
 let root: string;
 const meta = (id: string) => JSON.parse(readFileSync(join(root, "gtm-workspace", ".sessions", id, "session.json"), "utf8"));
@@ -46,6 +46,16 @@ describe("one-click start", () => {
     expect(stopAgent(id)).toBe(true);
     const s = await readSession(id);
     expect(s?.events.at(-1)?.kind).toBe("done");
+  });
+
+  it("takes no answer to a question left open when the session was stopped", async () => {
+    const id = createSession();
+    const ask = { id: "ev-1-abcd", at: new Date().toISOString(), kind: "ask", questions: ["Price?"] };
+    appendFileSync(join(root, "gtm-workspace", ".sessions", id, "transcript.jsonl"), JSON.stringify(ask) + "\n");
+    expect((await readSession(id))?.openAsk).toBe(ask.id);
+    stopAgent(id);
+    expect((await readSession(id))?.openAsk).toBeNull();
+    expect(appendAnswer(id, ask.id, "$9", [])).toBe("closed");
   });
 
   it("has no agent for sessions started from the terminal", () => {

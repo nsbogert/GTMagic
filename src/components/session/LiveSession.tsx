@@ -6,7 +6,7 @@ import { z } from "zod";
 import { IntakeBriefSchema } from "@/app/_intake/schema";
 import { TranscriptEventSchema } from "@/app/_session/events";
 import { postAnswer } from "@/app/_session/post-answer";
-import { buildThread, isDisconnected } from "@/app/_session/thread";
+import { buildThread, composerPlaceholder, isDisconnected } from "@/app/_session/thread";
 import { Plate } from "../plates/Plate";
 import { Composer } from "../shell/Composer";
 import { Legend } from "../shell/Legend";
@@ -18,6 +18,7 @@ import { Notice } from "../turns/Notice";
 import { OwnerTurn } from "../turns/OwnerTurn";
 import { Typing } from "../turns/Typing";
 import { Icon } from "../figures";
+import { SessionEnded } from "./SessionEnded";
 
 const SessionResponse = z.object({
   id: z.string(),
@@ -60,7 +61,9 @@ export function LiveSession({ id, hideLinks }: { id: string; hideLinks: boolean 
 
   const t = buildThread(s?.events ?? [], s?.briefUpdatedAt ?? null);
   const quiet = isDisconnected(s?.lastEventAt ?? null, now, t.openAsk !== null) && !t.finished;
-  const canAnswer = t.openAsk !== null && t.mode === "live";
+  const agentGone = s?.agent === "stopped" && !t.finished;
+  // Nobody reads an answer once Claude Code has exited, so don't take one.
+  const canAnswer = t.openAsk !== null && t.mode === "live" && !agentGone;
 
   async function answer(text: string, files: File[]): Promise<boolean> {
     if (!t.openAsk) return false;
@@ -78,8 +81,6 @@ export function LiveSession({ id, hideLinks }: { id: string; hideLinks: boolean 
     await fetch(`/api/sessions/${id}/stop`, { method: "POST" });
     await load();
   }
-
-  const agentGone = s?.agent === "stopped" && !t.finished;
 
   return (
     <div className="app">
@@ -100,7 +101,7 @@ export function LiveSession({ id, hideLinks }: { id: string; hideLinks: boolean 
               case "owner": return <OwnerTurn key={it.id} text={it.text} from={it.from} files={it.files} />;
               case "notice": return <Notice key={it.id} title={it.text} tone={it.tone} />;
               case "plate": return s?.brief
-                ? <Plate key={it.id} plate={it.plate} brief={s.brief} updated={it.updated} hideLinks={hideLinks} downloadHref={s.business ? `/api/businesses/${s.business}/intake.json` : undefined} />
+                ? <Plate key={it.id} plate={it.plate} brief={s.brief} updated={it.updated} hideLinks={hideLinks} downloadHref={s.business ? `/api/businesses/${encodeURIComponent(s.business)}/intake.json` : undefined} />
                 : <BotTurn key={it.id} text="This card appears once the save file exists." />;
             }
           })}
@@ -112,11 +113,10 @@ export function LiveSession({ id, hideLinks }: { id: string; hideLinks: boolean 
           {agentGone ? <Notice title="Claude Code stopped before the session finished." tone="error">Its log is in gtm-workspace/.sessions/{id}/agent.log. Start a new session from the home page.</Notice> : null}
           {quiet ? <Notice title="Claude Code hasn't sent anything for a while." tone="error">Check the terminal where it&apos;s running.</Notice> : null}
           {sendError ? <Notice title={sendError} tone="error" /> : null}
-          {t.finished ? <BotTurn text="That's the end of this session. Your save file is in gtm-workspace." /> : null}
+          {t.finished ? <SessionEnded business={s?.business ?? null} brief={s?.brief ?? null} /> : null}
           <div ref={end} />
         </div>
-        <Composer disabled={!canAnswer} onSubmit={answer}
-          placeholder={t.mode === "scripted" ? "The demo owner answers on their own" : canAnswer ? "Your answer" : "Waiting for the next question"} />
+        <Composer disabled={!canAnswer} onSubmit={answer} placeholder={composerPlaceholder(t, canAnswer, agentGone)} />
       </main>
     </div>
   );
