@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TranscriptEvent } from "@/app/_session/events";
-import { buildThread, isDisconnected } from "@/app/_session/thread";
+import { buildThread, composerPlaceholder, isDisconnected } from "@/app/_session/thread";
 
 let n = 0;
 const at = (s: number) => new Date(Date.UTC(2026, 9, 25, 12, 0, s)).toISOString();
@@ -60,6 +60,13 @@ describe("buildThread", () => {
     expect(t.items[0]).toMatchObject({ kind: "notice", tone: "error", text: "Search timed out" });
     expect(t.finished).toBe(true);
   });
+
+  it("closes a question that was still open when the session ended", () => {
+    n = 0;
+    const t = buildThread([ev({ kind: "ask", questions: ["Price?"] }), ev({ kind: "done" })], null);
+    expect(t.items[0]).toMatchObject({ kind: "ask", state: "cancelled" });
+    expect(t.openAsk).toBeNull();
+  });
 });
 
 describe("isDisconnected", () => {
@@ -69,5 +76,20 @@ describe("isDisconnected", () => {
   });
   it("is false while a question is waiting for the owner", () => {
     expect(isDisconnected(at(0), now, true)).toBe(false);
+  });
+});
+
+describe("composerPlaceholder", () => {
+  it("says the session has ended instead of waiting for a question that won't come", () => {
+    expect(composerPlaceholder({ mode: "live", finished: true }, false, false)).toBe("This session has ended");
+    expect(composerPlaceholder({ mode: "scripted", finished: true }, false, false)).toBe("This session has ended");
+  });
+  it("says the session stopped when Claude Code is gone", () => {
+    expect(composerPlaceholder({ mode: "live", finished: false }, false, true)).toBe("This session stopped");
+  });
+  it("waits only while the session is still running", () => {
+    expect(composerPlaceholder({ mode: "live", finished: false }, true, false)).toBe("Your answer");
+    expect(composerPlaceholder({ mode: "live", finished: false }, false, false)).toBe("Waiting for the next question");
+    expect(composerPlaceholder({ mode: "scripted", finished: false }, false, false)).toBe("The demo owner answers on their own");
   });
 });

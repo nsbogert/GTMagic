@@ -4,7 +4,7 @@
 @keyframes turn-in { from { opacity: .4; transform: translateY(.25rem); } }
 
 .turn.bot > p { font-size: var(--step1); line-height: 1.45; max-width: 40rem; text-wrap: pretty; }
-.turn.bot > p + p { margin-top: .75rem; }
+.turn.bot > p + p, .turn.bot > p + .open { margin-top: .75rem; }
 .turn.bot > .lede { font-size: var(--step2); font-weight: 500; line-height: 1.3; letter-spacing: -.01em; text-wrap: balance; }
 .turn.bot .sub { font-size: var(--step0); color: var(--ink-2); }
 

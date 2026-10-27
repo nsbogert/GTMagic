@@ -71,6 +71,8 @@ export function buildThread(events: TranscriptEvent[], briefUpdatedAt: string | 
         break;
       case "done":
         finished = true;
+        // Stop session ends a run mid-question; that question is no longer waiting on the owner.
+        asks.forEach((a) => { if (a.item.state === "open") a.item.state = "cancelled"; });
         STEP_IDS.forEach((s) => { if (steps[s] === "running") steps[s] = "done"; });
         break;
     }
@@ -85,6 +87,14 @@ export function buildThread(events: TranscriptEvent[], briefUpdatedAt: string | 
     business,
     finished,
   };
+}
+
+/** What the chat box says. Once nothing more is coming, it says so instead of "waiting". */
+export function composerPlaceholder(t: Pick<ThreadView, "mode" | "finished">, canAnswer: boolean, agentGone: boolean): string {
+  if (t.finished) return "This session has ended";
+  if (agentGone) return "This session stopped";
+  if (t.mode === "scripted") return "The demo owner answers on their own";
+  return canAnswer ? "Your answer" : "Waiting for the next question";
 }
 
 /** True when Claude Code has gone quiet for a while and nobody is waiting on the owner. */

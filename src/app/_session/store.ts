@@ -72,6 +72,7 @@ function readEvents(dir: string): TranscriptEvent[] {
 }
 
 function openAskOf(events: TranscriptEvent[]): string | null {
+  if (events.some((e) => e.kind === "done")) return null; // an ended session takes no more answers
   const closed = new Set(events.flatMap((e) => (e.kind === "answer" || e.kind === "cancel" ? [e.askId] : [])));
   const open = events.filter((e) => e.kind === "ask" && !closed.has(e.id));
   return open.at(-1)?.id ?? null;
